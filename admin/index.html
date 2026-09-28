@@ -73,7 +73,7 @@ const esc=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;')
 const FONTS={'Clean sans':'system-ui,sans-serif','Serif':'Georgia,serif','Rounded':'"Trebuchet MS",sans-serif','Mono':'ui-monospace,monospace'};
 let cfg=JSON.parse(localStorage.getItem('cmsCfg')||'null'),cur=null;
 const msg=t=>{const m=$('#msg');m.textContent=t;m.style.display='block';clearTimeout(msg.t);msg.t=setTimeout(()=>m.style.display='none',4500)};
-const api=(p,o={})=>fetch('https://api.github.com/repos/'+cfg.owner+'/'+cfg.repo+p,{...o,headers:{Authorization:'Bearer '+cfg.token,Accept:'application/vnd.github+json','Content-Type':'application/json',...(o.headers||{})}}).then(async r=>{if(!r.ok){const e=new Error(r.status+' '+((await r.json().catch(()=>({}))).message||''));e.status=r.status;throw e}return r});
+const api=(p,o={})=>fetch('https://api.github.com/repos/'+cfg.owner+'/'+cfg.repo+p,{...o,cache:'no-store',headers:{Authorization:'Bearer '+cfg.token,Accept:'application/vnd.github+json','Content-Type':'application/json',...(o.headers||{})}}).then(async r=>{if(!r.ok){const e=new Error(r.status+' '+((await r.json().catch(()=>({}))).message||''));e.status=r.status;throw e}return r});
 const run=async f=>{try{await f();return true}catch(e){msg('Error: '+e.message);return false}};
 const ls=async d=>{try{return await(await api('/contents/'+d+'?ref='+cfg.branch)).json()}catch(e){if(e.status==404)return[];throw e}};
 const readText=async p=>(await api('/contents/'+p+'?ref='+cfg.branch,{headers:{Accept:'application/vnd.github.raw+json'}})).text();
