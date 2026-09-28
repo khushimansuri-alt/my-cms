@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex"><title>CMS Admin</title>
+<style>
+:root{--bg:#f4f5f7;--card:#fff;--tx:#1b2130;--mut:#667085;--pr:#2f6f5e;--bd:#dfe3e8;--err:#b3261e}
+@media(prefers-color-scheme:dark){:root{--bg:#12151b;--card:#1b1f27;--tx:#e8eaf0;--mut:#9aa3b2;--bd:#2c313d;--pr:#3d8f79}}
+*{box-sizing:border-box}body{margin:0;font:15px/1.5 system-ui,sans-serif;background:var(--bg);color:var(--tx)}
+header{display:flex;gap:.5rem;align-items:center;padding:.7rem 1rem;background:var(--card);border-bottom:1px solid var(--bd);position:sticky;top:0;z-index:5;flex-wrap:wrap}
+header b{margin-right:auto}main{max-width:860px;margin:1rem auto;padding:0 1rem}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:1rem;margin-bottom:1rem}
+label{display:block;font-weight:600;margin:.9rem 0 .25rem}
+input,textarea,select{width:100%;padding:.6rem;border:1px solid var(--bd);border-radius:8px;background:var(--bg);color:var(--tx);font:inherit}
+input[type=color]{height:42px;padding:2px}input[type=checkbox]{width:auto}textarea{min-height:90px}
+button{padding:.5rem .9rem;border:1px solid var(--bd);border-radius:8px;background:var(--card);color:var(--tx);cursor:pointer;font:inherit}
+button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:2px solid var(--pr);outline-offset:2px}
+button.p{background:var(--pr);border-color:var(--pr);color:#fff}button.d{color:var(--err)}
+.row{display:flex;gap:.6rem;align-items:center;flex-wrap:wrap;padding:.4rem 0}.row b{margin-right:auto}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:.6rem}
+.grid figure{margin:0;border:1px solid var(--bd);border-radius:8px;overflow:hidden;cursor:pointer;font-size:12px}
+.grid img{width:100%;height:90px;object-fit:cover;display:block;background:var(--bd)}
+.grid figcaption{padding:.3rem;word-break:break-all}
+#msg{position:fixed;bottom:1rem;left:50%;transform:translateX(-50%);background:var(--tx);color:var(--bg);padding:.6rem 1rem;border-radius:8px;display:none;z-index:20;max-width:90%}
+iframe{width:100%;height:420px;border:1px solid var(--bd);border-radius:8px;background:#fff;margin-top:.6rem}
+#pick{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:10;display:none;padding:1rem;overflow:auto}
+.hide{display:none}.mut{color:var(--mut);font-size:13px}
+</style></head><body>
+<header><b>CMS Admin</b><span id="nav" class="hide row"><button data-t="pages">Pages</button><button data-t="posts">Posts</button><button data-t="media">Media</button><button data-t="theme">Theme</button><button data-t="users">Users</button><button id="out">Log out</button></span></header>
+<main>
+<section id="login" class="card"><h2>Log in</h2>
+<p class="mut">Use a GitHub token for your site repo (Contents: Read and write; add Administration: Read and write to manage users). It stays only in this browser.</p>
+<label>GitHub username (repo owner)</label><input id="o">
+<label>Repository</label><input id="r">
+<label>Branch</label><input id="b" value="main">
+<label>Access token</label><input id="t" type="password" autocomplete="off">
+<p><button class="p" id="go">Log in</button></p></section>
+
+<div id="app" class="hide">
+<section id="pages"><div class="card"><h3>Pages</h3><div id="plist"></div></div>
+<div class="card"><h3>Add a page</h3><label>Page name (example: about)</label><input id="nslug">
+<label>Paste the page HTML</label><textarea id="nhtml" placeholder="&lt;!doctype html&gt;..."></textarea>
+<p class="mut">Mark editable parts with data-cms, data-cms-html or data-cms-image. Reusing a name replaces that page.</p><button class="p" id="newbtn">Save page</button></div></section>
+
+<section id="edit" class="hide"><div class="card"><div class="row"><b id="etitle"></b><button id="prev">Preview</button><button class="d" id="del">Delete</button></div>
+<div id="fields"></div><p><button class="p" id="save">Save changes</button> <button data-t="pages">Back</button></p><iframe id="frame" title="Preview"></iframe></div></section>
+
+<section id="posts" class="hide"><div class="card"><div class="row"><b>Posts</b><button class="p" id="pnew">New post</button></div><div id="polist"></div><p class="mut">Blog list: /blog/</p></div></section>
+<section id="pedit" class="hide"><div class="card"><h3>Post</h3>
+<label>Title</label><input id="pt"><label>Address name (letters, numbers, dashes)</label><input id="ps">
+<label>Date</label><input id="pd" type="date"><label>Short summary</label><input id="px">
+<label>Cover photo</label><input id="pi"><button id="pimg">Choose photo</button>
+<label>Content (blank line = new paragraph, or paste HTML)</label><textarea id="pc" style="min-height:220px"></textarea>
+<label><input type="checkbox" id="pdr"> Draft (hidden from the blog list)</label>
+<p><button class="p" id="psave">Save post</button> <button class="d" id="pdel">Delete</button> <button data-t="posts">Back</button></p></div></section>
+
+<section id="media" class="hide"><div class="card"><h3>Media library</h3><p class="mut">Photos are resized to 1600px. New photos appear after the site rebuilds. Tap a photo to copy its path.</p>
+<input id="up" type="file" accept="image/*" multiple><div id="mgrid" class="grid" style="margin-top:1rem"></div></div></section>
+
+<section id="theme" class="hide"><div class="card"><h3>Theme</h3><p class="mut">Pages and posts use these through CSS variables (--primary, --bg, --text, --font, --radius).</p>
+<label>Main color</label><input id="tc1" type="color"><label>Background</label><input id="tc2" type="color"><label>Text color</label><input id="tc3" type="color">
+<label>Font</label><select id="tf"></select><label>Corner roundness (px)</label><input id="tr" type="number" min="0" max="40">
+<p><button class="p" id="tsave">Save theme</button></p></div></section>
+
+<section id="users" class="hide"><div class="card"><h3>Users</h3><div id="ulist"></div></div>
+<div class="card"><h3>Invite a user</h3><label>GitHub username</label><input id="un">
+<label>Role</label><select id="ur"><option value="push">Editor (can edit content)</option><option value="pull">Viewer (read only)</option><option value="admin">Admin</option></select>
+<p class="mut">They get an email from GitHub and must accept. Editors can change any file in the repo.</p><button class="p" id="uadd">Send invite</button></div></section>
+</div></main>
+<div id="pick"><div class="card"><div class="row"><b>Choose a photo</b><button id="pclose">Close</button></div><div id="pgrid" class="grid"></div></div></div>
+<div id="msg" role="status"></div>
+
+<script>
+const $=s=>document.querySelector(s),IMG=/\.(jpe?g|png|webp|gif|svg)$/i,slug=s=>s.toLowerCase().replace(/[^a-z0-9-]+/g,'-').replace(/^-|-$/g,'');
+const esc=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
+const FONTS={'Clean sans':'system-ui,sans-serif','Serif':'Georgia,serif','Rounded':'"Trebuchet MS",sans-serif','Mono':'ui-monospace,monospace'};
+let cfg=JSON.parse(localStorage.getItem('cmsCfg')||'null'),cur=null;
+const msg=t=>{const m=$('#msg');m.textContent=t;m.style.display='block';clearTimeout(msg.t);msg.t=setTimeout(()=>m.style.display='none',4500)};
+const api=(p,o={})=>fetch('https://api.github.com/repos/'+cfg.owner+'/'+cfg.repo+p,{...o,headers:{Authorization:'Bearer '+cfg.token,Accept:'application/vnd.github+json','Content-Type':'application/json',...(o.headers||{})}}).then(async r=>{if(!r.ok){const e=new Error(r.status+' '+((await r.json().catch(()=>({}))).message||''));e.status=r.status;throw e}return r});
+const run=async f=>{try{await f();return true}catch(e){msg('Error: '+e.message);return false}};
+const ls=async d=>{try{return await(await api('/contents/'+d+'?ref='+cfg.branch)).json()}catch(e){if(e.status==404)return[];throw e}};
+const readText=async p=>(await api('/contents/'+p+'?ref='+cfg.branch,{headers:{Accept:'application/vnd.github.raw+json'}})).text();
+const readJson=async(p,d)=>{try{return JSON.parse(await readText(p))}catch(e){return d}};
+async function commit(files,message){
+ const head=(await(await api('/git/ref/heads/'+cfg.branch)).json()).object.sha,base=(await(await api('/git/commits/'+head)).json()).tree.sha,tree=[];
+ for(const f of files){if(f.del){tree.push({path:f.path,mode:'100644',type:'blob',sha:null});continue}
+  const b=await(await api('/git/blobs',{method:'POST',body:JSON.stringify(f.b64?{content:f.b64,encoding:'base64'}:{content:f.text,encoding:'utf-8'})})).json();
+  tree.push({path:f.path,mode:'100644',type:'blob',sha:b.sha})}
+ const t=await(await api('/git/trees',{method:'POST',body:JSON.stringify({base_tree:base,tree})})).json();
+ const n=await(await api('/git/commits',{method:'POST',body:JSON.stringify({message,tree:t.sha,parents:[head]})})).json();
+ await api('/git/refs/heads/'+cfg.branch,{method:'PATCH',body:JSON.stringify({sha:n.sha})})}
+
+const LOAD={pages:loadPages,posts:loadPosts,media:loadMedia,theme:loadTheme,users:loadUsers};
+function tab(n){['pages','edit','posts','pedit','media','theme','users'].forEach(x=>$('#'+x).classList.toggle('hide',x!=n));if(LOAD[n])run(LOAD[n])}
+function show(){['login'].forEach(x=>$('#'+x).classList.toggle('hide',!!cfg));$('#app').classList.toggle('hide',!cfg);$('#nav').classList.toggle('hide',!cfg);if(cfg)tab('pages')}
+document.addEventListener('click',e=>{const t=e.target.dataset&&e.target.dataset.t;if(t)tab(t)});
+$('#go').onclick=async()=>{cfg={owner:$('#o').value.trim(),repo:$('#r').value.trim(),branch:$('#b').value.trim()||'main',token:$('#t').value.trim()};
+ try{await api('');localStorage.setItem('cmsCfg',JSON.stringify(cfg));show()}catch(e){cfg=null;msg('Login failed: '+e.message)}};
+$('#out').onclick=()=>{localStorage.removeItem('cmsCfg');cfg=null;show()};
+const tf=$('#tf');Object.keys(FONTS).forEach(k=>tf.add(new Option(k,k)));
+
+/* PAGES */
+async function loadPages(){const box=$('#plist');box.textContent='Loading...';const d=(await ls('p')).filter(x=>x.type=='dir');box.innerHTML='';
+ if(!d.length)box.textContent='No pages yet. Add your first page below.';
+ d.forEach(x=>{const r=document.createElement('div');r.className='row';const b=document.createElement('b');b.textContent='/p/'+x.name+'/';
+  const v=document.createElement('a');v.href='/p/'+x.name+'/';v.target='_blank';v.textContent='View';
+  const e=document.createElement('button');e.textContent='Edit';e.onclick=()=>openPage(x.name);r.append(b,v,e);box.append(r)})}
+$('#newbtn').onclick=()=>{const s=slug($('#nslug').value.trim()),h=$('#nhtml').value;if(!s||!h.includes('<'))return msg('Enter a page name and paste the HTML.');
+ run(async()=>{await commit([{path:'p/'+s+'/index.html',text:h}],'Add page '+s);$('#nhtml').value='';$('#nslug').value='';msg('Page saved. Live in 1-2 minutes.');loadPages()})};
+function openPage(s){run(async()=>{cur={slug:s,doc:new DOMParser().parseFromString(await readText('p/'+s+'/index.html'),'text/html')};build();$('#etitle').textContent='/p/'+s+'/';$('#frame').srcdoc='';tab('edit')})}
+function build(){const d=cur.doc,f=$('#fields');f.innerHTML='';
+ const add=(label,val,kind,apply)=>{const w=document.createElement('div'),l=document.createElement('label');l.textContent=label;
+  const i=document.createElement(kind=='text'||kind=='html'?'textarea':'input');i.value=val;i.oninput=()=>apply(i.value);w.append(l,i);
+  if(kind=='image'){const b=document.createElement('button');b.textContent='Choose photo';b.onclick=()=>pick(p=>{i.value=p;apply(p)});w.append(b)}f.append(w)};
+ add('Page title',d.title,'line',v=>d.title=v);
+ const md=d.querySelector('meta[name=description]');
+ add('SEO description',md?md.content:'','line',v=>{let m=d.querySelector('meta[name=description]');if(!m){m=d.createElement('meta');m.name='description';d.head.append(m)}m.content=v});
+ const els=d.querySelectorAll('[data-cms],[data-cms-html],[data-cms-image]');
+ if(!els.length){const p=document.createElement('p');p.className='mut';p.textContent='No editable parts found. Add data-cms attributes to the HTML.';f.append(p)}
+ els.forEach(el=>{if(el.hasAttribute('data-cms-image'))add('Photo: '+el.dataset.cmsImage,el.getAttribute('src')||'','image',v=>el.setAttribute('src',v));
+  else if(el.hasAttribute('data-cms-html'))add('Rich text: '+el.dataset.cmsHtml,el.innerHTML.trim(),'html',v=>el.innerHTML=v);
+  else add('Text: '+el.dataset.cms,el.textContent.trim(),el.textContent.length>80?'text':'line',v=>el.textContent=v)})}
+const out=()=>'<!DOCTYPE html>\n'+cur.doc.documentElement.outerHTML;
+$('#prev').onclick=()=>{$('#frame').srcdoc=out()};
+$('#save').onclick=()=>run(async()=>{await commit([{path:'p/'+cur.slug+'/index.html',text:out()}],'Edit page '+cur.slug);msg('Saved. Live in 1-2 minutes.')});
+$('#del').onclick=()=>{if(confirm('Delete this page?'))run(async()=>{await commit([{path:'p/'+cur.slug+'/index.html',del:true}],'Delete page '+cur.slug);msg('Page deleted.');tab('pages')})};
+
+/* POSTS */
+async function loadPosts(){const l=await readJson('posts/index.json',[]),b=$('#polist');b.innerHTML='';if(!l.length)b.textContent='No posts yet.';
+ l.forEach(p=>{const r=document.createElement('div');r.className='row';const t=document.createElement('b');t.textContent=p.title+(p.draft?' (draft)':'');
+  const e=document.createElement('button');e.textContent='Edit';e.onclick=()=>editPost(p.slug);r.append(t,e);b.append(r)})}
+function editPost(s){run(async()=>{let d={title:'',date:new Date().toISOString().slice(0,10),excerpt:'',image:'',content:'',draft:true};
+ if(s)d=JSON.parse(await readText('posts/'+s+'/post.json'));
+ $('#pt').value=d.title;$('#ps').value=s||'';$('#ps').disabled=!!s;$('#pd').value=d.date;$('#px').value=d.excerpt;$('#pi').value=d.image;$('#pc').value=d.content;$('#pdr').checked=d.draft;tab('pedit')})}
+$('#pnew').onclick=()=>editPost();$('#pimg').onclick=()=>pick(p=>$('#pi').value=p);
+const body=t=>t.trim().startsWith('<')?t:t.split(/\n\s*\n/).filter(x=>x.trim()).map(x=>'<p>'+esc(x).replace(/\n/g,'<br>')+'</p>').join('\n');
+const postHtml=d=>'<!DOCTYPE html>\n<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>'+esc(d.title)+'</title><meta name="description" content="'+esc(d.excerpt)+'">'+(d.draft?'<meta name="robots" content="noindex">':'')+'<link rel="stylesheet" href="/theme.css"></head><body><article class="post"><p><a href="/blog/">Back to blog</a></p><h1>'+esc(d.title)+'</h1><p><small>'+esc(d.date)+'</small></p>'+(d.image?'<img src="'+esc(d.image)+'" alt="">':'')+'\n'+body(d.content)+'</article></body></html>';
+$('#psave').onclick=()=>run(async()=>{const d={title:$('#pt').value.trim(),date:$('#pd').value,excerpt:$('#px').value.trim(),image:$('#pi').value.trim(),content:$('#pc').value,draft:$('#pdr').checked};
+ const s=slug($('#ps').value.trim())||slug(d.title);if(!d.title||!s)throw new Error('Add a title first');
+ const l=await readJson('posts/index.json',[]),e={slug:s,title:d.title,date:d.date,excerpt:d.excerpt,image:d.image,draft:d.draft},i=l.findIndex(x=>x.slug==s);
+ if(i<0)l.push(e);else l[i]=e;l.sort((a,b)=>b.date.localeCompare(a.date));
+ await commit([{path:'posts/'+s+'/post.json',text:JSON.stringify(d)},{path:'posts/'+s+'/index.html',text:postHtml(d)},{path:'posts/index.json',text:JSON.stringify(l,null,1)}],'Save post '+s);
+ msg('Post saved. Live in 1-2 minutes.');tab('posts')});
+$('#pdel').onclick=()=>{const s=$('#ps').value;if(!$('#ps').disabled||!confirm('Delete this post?'))return;
+ run(async()=>{const l=(await readJson('posts/index.json',[])).filter(x=>x.slug!=s);
+ await commit([{path:'posts/'+s+'/post.json',del:true},{path:'posts/'+s+'/index.html',del:true},{path:'posts/index.json',text:JSON.stringify(l,null,1)}],'Delete post '+s);msg('Post deleted.');tab('posts')})};
+
+/* MEDIA */
+const photos=async()=>(await ls('img')).filter(x=>x.type=='file'&&IMG.test(x.name));
+function fill(g,l,cb){g.innerHTML='';if(!l.length)g.textContent='No photos yet.';
+ l.forEach(x=>{const f=document.createElement('figure'),im=document.createElement('img'),c=document.createElement('figcaption');im.loading='lazy';im.src='/img/'+x.name;c.textContent=x.name;f.append(im,c);f.onclick=()=>cb('/img/'+x.name);g.append(f)})}
+async function loadMedia(){fill($('#mgrid'),await photos(),p=>navigator.clipboard?navigator.clipboard.writeText(p).then(()=>msg('Copied '+p)):msg(p))}
+function pick(cb){$('#pick').style.display='block';run(async()=>fill($('#pgrid'),await photos(),p=>{$('#pick').style.display='none';cb(p)}))}
+$('#pclose').onclick=()=>$('#pick').style.display='none';
+const rd=(f,ext)=>new Promise(r=>{const x=new FileReader();x.onload=()=>r({b64:x.result.split(',')[1],ext});x.readAsDataURL(f)});
+const prep=f=>/svg|gif/.test(f.type)?rd(f,f.name.split('.').pop().toLowerCase()):new Promise(res=>{const im=new Image();im.onload=()=>{
+ const s=Math.min(1,1600/Math.max(im.width,im.height)),c=document.createElement('canvas'),png=f.type=='image/png';c.width=Math.round(im.width*s);c.height=Math.round(im.height*s);
+ c.getContext('2d').drawImage(im,0,0,c.width,c.height);res({b64:c.toDataURL(png?'image/png':'image/jpeg',.82).split(',')[1],ext:png?'png':'jpg'})};im.src=URL.createObjectURL(f)});
+$('#up').onchange=e=>{const fs=[...e.target.files];if(!fs.length)return;msg('Uploading...');
+ run(async()=>{const o=[];for(const f of fs){const p=await prep(f);o.push({path:'img/'+(slug(f.name.replace(/\.[^.]+$/,''))||'photo')+'.'+p.ext,b64:p.b64})}
+  await commit(o,'Upload '+o.length+' photo(s)');e.target.value='';msg('Uploaded. Photos show on the site in 1-2 minutes.');loadMedia()})};
+
+/* THEME */
+async function loadTheme(){const t={primary:'#2f6f5e',bg:'#ffffff',text:'#1b2130',font:'Clean sans',radius:12,...await readJson('theme.json',{})};
+ $('#tc1').value=t.primary;$('#tc2').value=t.bg;$('#tc3').value=t.text;$('#tf').value=t.font;$('#tr').value=t.radius}
+$('#tsave').onclick=()=>run(async()=>{const t={primary:$('#tc1').value,bg:$('#tc2').value,text:$('#tc3').value,font:$('#tf').value,radius:+$('#tr').value||0};
+ const css=':root{--primary:'+t.primary+';--bg:'+t.bg+';--text:'+t.text+';--font:'+FONTS[t.font]+';--radius:'+t.radius+'px}\nbody{margin:0;background:var(--bg);color:var(--text);font-family:var(--font);line-height:1.6}\na{color:var(--primary)}\n.post,.wrap{max-width:720px;margin:0 auto;padding:2rem 1rem}\n.post img{max-width:100%;border-radius:var(--radius)}\n.card{border:1px solid rgba(128,128,128,.3);border-radius:var(--radius);padding:1rem;margin:1rem 0}\n';
+ await commit([{path:'theme.json',text:JSON.stringify(t)},{path:'theme.css',text:css}],'Update theme');msg('Theme saved. Live in 1-2 minutes.')});
+
+/* USERS (GitHub collaborators) */
+const ROLE={admin:'Admin',maintain:'Admin',write:'Editor',triage:'Viewer',read:'Viewer'};
+async function loadUsers(){const b=$('#ulist');b.textContent='Loading...';const l=await(await api('/collaborators?per_page=100')).json();b.innerHTML='';
+ l.forEach(u=>{const r=document.createElement('div');r.className='row';const n=document.createElement('b');n.textContent=u.login+' - '+(ROLE[u.role_name]||u.role_name);r.append(n);
+  if(u.login!=cfg.owner){const x=document.createElement('button');x.className='d';x.textContent='Remove';
+   x.onclick=()=>confirm('Remove '+u.login+'?')&&run(async()=>{await api('/collaborators/'+u.login,{method:'DELETE'});msg('Removed');loadUsers()});r.append(x)}b.append(r)})}
+$('#uadd').onclick=()=>run(async()=>{const u=$('#un').value.trim();if(!u)throw new Error('Enter a GitHub username');
+ await api('/collaborators/'+encodeURIComponent(u),{method:'PUT',body:JSON.stringify({permission:$('#ur').value})});$('#un').value='';msg('Invite sent. They must accept it on GitHub.');loadUsers()});
+show();
+</script></body></html>
