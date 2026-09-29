@@ -67,7 +67,8 @@ code{background:var(--bg);padding:.1rem .3rem;border-radius:4px}
   <button data-t="media">🖼️ Media</button>
   <button data-t="theme">🎨 Theme</button>
   <button data-t="code">💻 Code</button>
-  <button data-t="users">👥 User</button>
+  <button data-t="trash">🗑️ Trash</button>
+  <button data-t="users">👥 Users</button>
   <button data-t="settings">⚙️ Settings</button>
   <button id="out">🚪 Log out</button>
 </nav>
@@ -110,8 +111,9 @@ code{background:var(--bg);padding:.1rem .3rem;border-radius:4px}
 <table><thead><tr><th>Page</th><th></th></tr></thead><tbody id="pgTable"></tbody></table></div>
 <div id="pgNew" class="card hide"><h3>Add a page</h3><label>Page name (example: about)</label><input id="nslug">
 <label>Paste the page HTML</label><textarea id="nhtml" style="min-height:220px" placeholder="&lt;!doctype html&gt;..."></textarea>
-<p class="mut">Mark editable parts with <code>data-cms</code>, <code>data-cms-html</code> or <code>data-cms-image</code>. Reusing a name replaces that page.</p>
-<button class="p" id="newbtn">Save page</button> <button id="pgNewCancel">Cancel</button></div></section>
+<p class="mut">Mark editable parts with <code>data-cms</code>, <code>data-cms-html</code> or <code>data-cms-image</code>. Mark a button/link's URL with <code>data-cms-link</code> to make it editable too. Reusing a name replaces that page.</p>
+<button class="p" id="newbtn">Save page</button> <button id="nprev">Preview</button> <button id="pgNewCancel">Cancel</button>
+<iframe id="nframe" title="Preview" class="hide"></iframe></div></section>
 
 <section id="v-edit" class="hide"><div class="card"><div class="row"><b id="etitle"></b><button id="prev">Preview</button><button class="d" id="del">Delete</button></div>
 <div id="fields"></div><p><button class="p" id="save">Save changes</button> <button data-t="pages">Back</button></p><iframe id="frame" title="Preview"></iframe></div></section>
@@ -147,6 +149,8 @@ code{background:var(--bg);padding:.1rem .3rem;border-radius:4px}
 <label>File content</label><textarea id="cdContent" style="min-height:320px;font-family:ui-monospace,monospace"></textarea>
 <p><button class="p" id="cdSave">Save file</button></p></div></section>
 
+<section id="v-trash" class="hide"><div class="card"><h3>Trash</h3><p class="mut">Deleted pages and posts stay here until you remove them for good.</p><div id="trList"></div></div></section>
+
 <section id="v-users" class="hide"><div class="card"><h3>Users</h3><div id="ulist"></div></div>
 <div class="card"><h3>Invite a user</h3><label>GitHub username</label><input id="un">
 <label>Role</label><select id="ur"><option value="push">Editor (can edit content)</option><option value="pull">Viewer (read only)</option><option value="admin">Admin</option></select>
@@ -155,6 +159,8 @@ code{background:var(--bg);padding:.1rem .3rem;border-radius:4px}
 <section id="v-settings" class="hide"><div class="card"><h3>Site settings</h3>
 <label>Site name</label><input id="stName"><label>Tagline</label><input id="stTag">
 <label>Site logo</label><input id="stLogo"><button id="stLogoPick">Choose photo</button>
+<label>Live site URL (example: https://my-cms.pages.dev or your custom domain)</label><input id="stUrl" placeholder="https://...">
+<p class="mut">Used to make the Preview button show real fonts, styles and photos.</p>
 <label>Default SEO description</label><textarea id="stDesc"></textarea>
 <p><button class="p" id="stSave">Save settings</button></p></div></section>
 
@@ -166,7 +172,7 @@ code{background:var(--bg);padding:.1rem .3rem;border-radius:4px}
 const $=s=>document.querySelector(s),IMG=/\.(jpe?g|png|webp|gif|svg)$/i,slug=s=>s.toLowerCase().replace(/[^a-z0-9-]+/g,'-').replace(/^-|-$/g,'');
 const esc=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
 const FONTS={'Clean sans':'system-ui,sans-serif','Serif':'Georgia,serif','Rounded':'"Trebuchet MS",sans-serif','Mono':'ui-monospace,monospace'};
-let cfg=JSON.parse(localStorage.getItem('cmsCfg')||'null'),cur=null,pickCb=null;
+let cfg=JSON.parse(localStorage.getItem('cmsCfg')||'null'),cur=null,pickCb=null,siteUrl='';
 const msg=t=>{const m=$('#msg');m.textContent=t;m.style.display='block';clearTimeout(msg.t);msg.t=setTimeout(()=>m.style.display='none',4500)};
 const api=(p,o={})=>fetch('https://api.github.com/repos/'+cfg.owner+'/'+cfg.repo+p,{...o,cache:'no-store',headers:{Authorization:'Bearer '+cfg.token,Accept:'application/vnd.github+json','Content-Type':'application/json',...(o.headers||{})}}).then(async r=>{if(!r.ok){const e=new Error(r.status+' '+((await r.json().catch(()=>({}))).message||''));e.status=r.status;throw e}return r});
 const run=async f=>{try{await f();return true}catch(e){msg('Error: '+e.message);return false}};
@@ -181,17 +187,19 @@ async function commit(files,message){
  const t=await(await api('/git/trees',{method:'POST',body:JSON.stringify({base_tree:base,tree})})).json();
  const n=await(await api('/git/commits',{method:'POST',body:JSON.stringify({message,tree:t.sha,parents:[head]})})).json();
  await api('/git/refs/heads/'+cfg.branch,{method:'PATCH',body:JSON.stringify({sha:n.sha})})}
+const trashId=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+const trashIndex=async()=>await readJson('trash/index.json',[]);
 
 /* NAV */
-const VIEWS=['dash','pages','edit','posts','pedit','media','theme','code','users','settings'];
-const LOAD={dash:loadDash,pages:loadPages,posts:loadPosts,media:loadMedia,theme:loadTheme,users:loadUsers,settings:loadSettings};
+const VIEWS=['dash','pages','edit','posts','pedit','media','theme','code','trash','users','settings'];
+const LOAD={dash:loadDash,pages:loadPages,posts:loadPosts,media:loadMedia,theme:loadTheme,trash:loadTrash,users:loadUsers,settings:loadSettings};
 function tab(n,opt){VIEWS.forEach(x=>$('#v-'+x).classList.toggle('hide',x!=n));
  document.querySelectorAll('#side button[data-t]').forEach(b=>b.classList.toggle('active',b.dataset.t==n));
  if(n=='pages'){$('#pgNew').classList.toggle('hide',opt!='new')}
  if(n=='posts'&&opt=='new')return editPost();
  if(LOAD[n])run(LOAD[n])}
 document.addEventListener('click',e=>{const b=e.target.closest('[data-t]');if(b)tab(b.dataset.t,b.dataset.go)});
-function showApp(){$('#login').classList.toggle('hide',!!cfg);$('#shell').classList.toggle('hide',!cfg);if(cfg)tab('dash')}
+function showApp(){$('#login').classList.toggle('hide',!!cfg);$('#shell').classList.toggle('hide',!cfg);if(cfg){tab('dash');readJson('settings.json',{}).then(s=>siteUrl=(s.siteUrl||'').replace(/\/+$/,''))}}
 $('#go').onclick=async()=>{cfg={owner:$('#o').value.trim(),repo:$('#r').value.trim(),branch:$('#b').value.trim()||'main',token:$('#t').value.trim()};
  try{await api('');localStorage.setItem('cmsCfg',JSON.stringify(cfg));showApp()}catch(e){cfg=null;msg('Login failed: '+e.message)}};
 $('#out').onclick=()=>{localStorage.removeItem('cmsCfg');cfg=null;showApp()};
@@ -236,15 +244,21 @@ function buildFields(){const d=cur.doc,f=$('#fields');f.innerHTML='';
  add('Page title',d.title,'line',v=>d.title=v);
  const md=d.querySelector('meta[name=description]');
  add('SEO description',md?md.content:'','line',v=>{let m=d.querySelector('meta[name=description]');if(!m){m=d.createElement('meta');m.name='description';d.head.append(m)}m.content=v});
- const els=d.querySelectorAll('[data-cms],[data-cms-html],[data-cms-image]');
+ const els=d.querySelectorAll('[data-cms],[data-cms-html],[data-cms-image],[data-cms-link]');
  if(!els.length){const p=document.createElement('p');p.className='mut';p.textContent='No editable parts found. Add data-cms attributes to the HTML.';f.append(p)}
  els.forEach(el=>{if(el.hasAttribute('data-cms-image'))add('Photo: '+el.dataset.cmsImage,el.getAttribute('src')||'','image',v=>el.setAttribute('src',v));
+  else if(el.hasAttribute('data-cms-link'))add('Link URL: '+el.dataset.cmsLink,el.getAttribute('href')||'','line',v=>el.setAttribute('href',v));
   else if(el.hasAttribute('data-cms-html'))add('Rich text: '+el.dataset.cmsHtml,el.innerHTML.trim(),'html',v=>el.innerHTML=v);
   else add('Text: '+el.dataset.cms,el.textContent.trim(),el.textContent.length>80?'text':'line',v=>el.textContent=v)})}
 const pageOut=()=>'<!DOCTYPE html>\n'+cur.doc.documentElement.outerHTML;
-$('#prev').onclick=()=>{$('#frame').srcdoc=pageOut()};
+const withBase=html=>siteUrl?html.replace(/<head[^>]*>/i,m=>m+'<base href="'+siteUrl+'/">'):html+'\n<!-- Preview note: add your live Site URL under Settings to see real fonts, styles and photos here. -->';
+$('#prev').onclick=()=>{$('#frame').srcdoc=withBase(pageOut())};
+$('#nprev').onclick=()=>{const h=$('#nhtml').value;if(!h.includes('<'))return msg('Paste the page HTML first.');$('#nframe').classList.remove('hide');$('#nframe').srcdoc=withBase(h)};
 $('#save').onclick=()=>run(async()=>{await commit([{path:'p/'+cur.slug+'/index.html',text:pageOut()}],'Edit page '+cur.slug);msg('Saved. Live in 1-2 minutes.')});
-$('#del').onclick=()=>{if(confirm('Delete this page?'))run(async()=>{await commit([{path:'p/'+cur.slug+'/index.html',del:true}],'Delete page '+cur.slug);msg('Page deleted.');tab('pages')})};
+$('#del').onclick=()=>{if(!confirm('Move this page to Trash? You can restore it later.'))return;
+ run(async()=>{const id=trashId(),idx=await trashIndex();idx.push({id,type:'page',slug:cur.slug,title:cur.doc.title||cur.slug,deletedAt:new Date().toISOString()});
+  await commit([{path:'trash/pages/'+id+'/index.html',text:pageOut()},{path:'trash/index.json',text:JSON.stringify(idx,null,1)},{path:'p/'+cur.slug+'/index.html',del:true}],'Move page '+cur.slug+' to trash');
+  msg('Page moved to Trash.');tab('pages')})};
 
 /* POSTS */
 async function loadPosts(){const l=await readJson('posts/index.json',[]),tb=$('#poTable');tb.innerHTML='';
@@ -264,9 +278,34 @@ $('#psave').onclick=()=>run(async()=>{const d={title:$('#pt').value.trim(),date:
  if(i<0)l.push(e);else l[i]=e;l.sort((a,b)=>b.date.localeCompare(a.date));
  await commit([{path:'posts/'+s+'/post.json',text:JSON.stringify(d)},{path:'posts/'+s+'/index.html',text:postHtml(d)},{path:'posts/index.json',text:JSON.stringify(l,null,1)}],'Save post '+s);
  msg('Post saved. Live in 1-2 minutes.');tab('posts')});
-$('#pdel').onclick=()=>{const s=$('#ps').value;if(!$('#ps').disabled||!confirm('Delete this post?'))return;
- run(async()=>{const l=(await readJson('posts/index.json',[])).filter(x=>x.slug!=s);
- await commit([{path:'posts/'+s+'/post.json',del:true},{path:'posts/'+s+'/index.html',del:true},{path:'posts/index.json',text:JSON.stringify(l,null,1)}],'Delete post '+s);msg('Post deleted.');tab('posts')})};
+$('#pdel').onclick=()=>{const s=$('#ps').value;if(!$('#ps').disabled||!confirm('Move this post to Trash? You can restore it later.'))return;
+ run(async()=>{const post=JSON.parse(await readText('posts/'+s+'/post.json')),html=await readText('posts/'+s+'/index.html');
+  const l=(await readJson('posts/index.json',[])).filter(x=>x.slug!=s),id=trashId(),idx=await trashIndex();
+  idx.push({id,type:'post',slug:s,title:post.title||s,deletedAt:new Date().toISOString()});
+  await commit([{path:'trash/posts/'+id+'/post.json',text:JSON.stringify(post)},{path:'trash/posts/'+id+'/index.html',text:html},{path:'trash/index.json',text:JSON.stringify(idx,null,1)},
+   {path:'posts/'+s+'/post.json',del:true},{path:'posts/'+s+'/index.html',del:true},{path:'posts/index.json',text:JSON.stringify(l,null,1)}],'Move post '+s+' to trash');
+  msg('Post moved to Trash.');tab('posts')})};
+
+/* TRASH */
+async function loadTrash(){const idx=await trashIndex(),box=$('#trList');box.innerHTML='';
+ if(!idx.length){box.innerHTML='<p class="mut">Trash is empty.</p>';return}
+ idx.slice().reverse().forEach(it=>{const row=document.createElement('div');row.className='row';
+  const b=document.createElement('b');b.textContent=(it.type=='page'?'📄 ':'📝 ')+it.title+' — deleted '+timeAgo(it.deletedAt);
+  const rs=document.createElement('button');rs.className='p';rs.textContent='Restore';
+  rs.onclick=()=>run(async()=>{await restoreItem(it);msg('Restored.');loadTrash()});
+  const de=document.createElement('button');de.className='d';de.textContent='Delete Forever';
+  de.onclick=()=>{if(confirm('Delete this permanently? This cannot be undone.'))run(async()=>{await purgeItem(it);msg('Deleted permanently.');loadTrash()})};
+  row.append(b,rs,de);box.append(row)})}
+async function restoreItem(it){const idx=(await trashIndex()).filter(x=>x.id!=it.id);
+ if(it.type=='page'){const html=await readText('trash/pages/'+it.id+'/index.html');
+  await commit([{path:'p/'+it.slug+'/index.html',text:html},{path:'trash/pages/'+it.id+'/index.html',del:true},{path:'trash/index.json',text:JSON.stringify(idx,null,1)}],'Restore page '+it.slug)}
+ else{const post=JSON.parse(await readText('trash/posts/'+it.id+'/post.json')),html=await readText('trash/posts/'+it.id+'/index.html');
+  const l=await readJson('posts/index.json',[]);l.push({slug:it.slug,title:post.title,date:post.date,excerpt:post.excerpt,image:post.image,draft:post.draft});l.sort((a,b)=>b.date.localeCompare(a.date));
+  await commit([{path:'posts/'+it.slug+'/post.json',text:JSON.stringify(post)},{path:'posts/'+it.slug+'/index.html',text:html},{path:'posts/index.json',text:JSON.stringify(l,null,1)},
+   {path:'trash/posts/'+it.id+'/post.json',del:true},{path:'trash/posts/'+it.id+'/index.html',del:true},{path:'trash/index.json',text:JSON.stringify(idx,null,1)}],'Restore post '+it.slug)}}
+async function purgeItem(it){const idx=(await trashIndex()).filter(x=>x.id!=it.id);
+ const files=it.type=='page'?[{path:'trash/pages/'+it.id+'/index.html',del:true}]:[{path:'trash/posts/'+it.id+'/post.json',del:true},{path:'trash/posts/'+it.id+'/index.html',del:true}];
+ files.push({path:'trash/index.json',text:JSON.stringify(idx,null,1)});await commit(files,'Permanently delete '+it.type+' '+it.slug)}
 
 /* MEDIA */
 const photos=async()=>(await ls('img')).filter(x=>x.type=='file'&&IMG.test(x.name));
@@ -333,10 +372,11 @@ $('#uadd').onclick=()=>run(async()=>{const u=$('#un').value.trim();if(!u)throw n
  await api('/collaborators/'+encodeURIComponent(u),{method:'PUT',body:JSON.stringify({permission:$('#ur').value})});$('#un').value='';msg('Invite sent. They must accept it on GitHub.');loadUsers()});
 
 /* SETTINGS */
-async function loadSettings(){const s={name:'',tagline:'',logo:'',description:'',...await readJson('settings.json',{})};
- $('#stName').value=s.name;$('#stTag').value=s.tagline;$('#stLogo').value=s.logo;$('#stDesc').value=s.description}
+async function loadSettings(){const s={name:'',tagline:'',logo:'',description:'',siteUrl:'',...await readJson('settings.json',{})};
+ $('#stName').value=s.name;$('#stTag').value=s.tagline;$('#stLogo').value=s.logo;$('#stDesc').value=s.description;$('#stUrl').value=s.siteUrl}
 $('#stLogoPick').onclick=()=>pick(p=>$('#stLogo').value=p);
-$('#stSave').onclick=()=>run(async()=>{const s={name:$('#stName').value.trim(),tagline:$('#stTag').value.trim(),logo:$('#stLogo').value.trim(),description:$('#stDesc').value.trim()};
+$('#stSave').onclick=()=>run(async()=>{const s={name:$('#stName').value.trim(),tagline:$('#stTag').value.trim(),logo:$('#stLogo').value.trim(),description:$('#stDesc').value.trim(),siteUrl:$('#stUrl').value.trim()};
+ siteUrl=s.siteUrl.replace(/\/+$/,'');
  await commit([{path:'settings.json',text:JSON.stringify(s,null,1)}],'Update settings');msg('Settings saved. Live in 1-2 minutes.')});
 
 showApp();
