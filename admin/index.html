@@ -1,19 +1,43 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex"><title>CMS Admin</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <style>
-:root{--bg:#f4f5f7;--card:#fff;--tx:#1b2130;--mut:#667085;--pr:#2f6f5e;--bd:#dfe3e8;--err:#b3261e}
-@media(prefers-color-scheme:dark){:root{--bg:#12151b;--card:#1b1f27;--tx:#e8eaf0;--mut:#9aa3b2;--bd:#2c313d;--pr:#3d8f79}}
+:root{--bg:#f3f5f9;--card:#fff;--tx:#1c2333;--mut:#7c8697;--pr:#3d5af1;--bd:#e7eaf1;--err:#e0393e;--side:#ffffff;--sidetx:#4b5468;--sideactive:#eef1ff}
 *{box-sizing:border-box}body{margin:0;font:15px/1.5 system-ui,sans-serif;background:var(--bg);color:var(--tx)}
-header{display:flex;gap:.5rem;align-items:center;padding:.7rem 1rem;background:var(--card);border-bottom:1px solid var(--bd);position:sticky;top:0;z-index:5;flex-wrap:wrap}
-header b{margin-right:auto}main{max-width:860px;margin:1rem auto;padding:0 1rem}
-.card{background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:1rem;margin-bottom:1rem}
-label{display:block;font-weight:600;margin:.9rem 0 .25rem}
+#shell{display:flex;min-height:100vh}
+#side{width:220px;flex:0 0 220px;background:var(--side);color:var(--sidetx);padding:1rem 0;position:sticky;top:0;height:100vh;overflow:auto;border-right:1px solid var(--bd)}
+#side .brand{font-weight:800;font-size:1.1rem;padding:0 1.1rem 1rem;color:var(--tx);margin-bottom:.5rem}
+#side button{display:flex;align-items:center;gap:.6rem;width:100%;text-align:left;padding:.6rem 1.1rem;background:none;border:0;color:var(--sidetx);cursor:pointer;font:inherit;border-radius:0;font-weight:500}
+#side button.active{background:var(--sideactive);color:var(--pr);font-weight:700;border-radius:0 20px 20px 0}
+#side button:hover:not(.active){background:#f6f7fb}
+#logout{margin-top:1rem;border-top:1px solid var(--bd);padding-top:1rem}
+main{flex:1;min-width:0;padding:1.4rem;max-width:1080px}
+@media(max-width:820px){#shell{flex-direction:column}#side{position:static;height:auto;width:100%;flex:none;display:flex;flex-wrap:wrap;padding:.6rem;border-right:0;border-bottom:1px solid var(--bd)}#side .brand{width:100%;padding:.2rem .4rem}#side button{width:auto;flex:1 1 auto;text-align:center;border-radius:8px;margin:2px}#side button.active{border-radius:8px}#logout{margin:2px;border:0;padding:0}}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:1.1rem;margin-bottom:1rem;box-shadow:0 1px 2px rgba(20,20,40,.03)}
+h2{margin-top:0}label{display:block;font-weight:600;margin:.9rem 0 .25rem}
 input,textarea,select{width:100%;padding:.6rem;border:1px solid var(--bd);border-radius:8px;background:var(--bg);color:var(--tx);font:inherit}
 input[type=color]{height:42px;padding:2px}input[type=checkbox]{width:auto}textarea{min-height:90px}
 button{padding:.5rem .9rem;border:1px solid var(--bd);border-radius:8px;background:var(--card);color:var(--tx);cursor:pointer;font:inherit}
 button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:2px solid var(--pr);outline-offset:2px}
 button.p{background:var(--pr);border-color:var(--pr);color:#fff}button.d{color:var(--err)}
 .row{display:flex;gap:.6rem;align-items:center;flex-wrap:wrap;padding:.4rem 0}.row b{margin-right:auto}
+table{width:100%;border-collapse:collapse}td,th{text-align:left;padding:.55rem .4rem;border-bottom:1px solid var(--bd);vertical-align:middle}
+th{color:var(--mut);font-size:13px;font-weight:600}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:.9rem}
+.stat{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:1rem;display:flex;align-items:center;gap:.8rem;box-shadow:0 1px 2px rgba(20,20,40,.03)}
+.stat .ic{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex:0 0 44px}
+.stat b{font-size:1.5rem;display:block;line-height:1.1}
+.stat span{color:var(--mut);font-size:13px}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+@media(max-width:700px){.two-col{grid-template-columns:1fr}}
+.qa{display:grid;grid-template-columns:1fr 1fr;gap:.6rem}
+.qa button{padding:.9rem;border-radius:10px;text-align:center;font-weight:600}
+.activity-row{display:flex;gap:.7rem;align-items:flex-start;padding:.6rem 0;border-bottom:1px solid var(--bd)}
+.activity-row:last-child{border-bottom:0}
+.activity-row .ic{width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex:0 0 34px;font-size:1rem}
+.info-row{display:flex;justify-content:space-between;padding:.5rem 0;border-bottom:1px solid var(--bd);font-size:14px}
+.info-row:last-child{border-bottom:0}
+.info-row span:first-child{color:var(--mut)}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:.6rem}
 .grid figure{margin:0;border:1px solid var(--bd);border-radius:8px;overflow:hidden;cursor:pointer;font-size:12px}
 .grid img{width:100%;height:90px;object-fit:cover;display:block;background:var(--bd)}
@@ -22,10 +46,11 @@ button.p{background:var(--pr);border-color:var(--pr);color:#fff}button.d{color:v
 iframe{width:100%;height:420px;border:1px solid var(--bd);border-radius:8px;background:#fff;margin-top:.6rem}
 #pick{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:10;display:none;padding:1rem;overflow:auto}
 .hide{display:none}.mut{color:var(--mut);font-size:13px}
+code{background:var(--bg);padding:.1rem .3rem;border-radius:4px}
 </style></head><body>
-<header><b>CMS Admin</b><span id="nav" class="hide row"><button data-t="pages">Pages</button><button data-t="posts">Posts</button><button data-t="media">Media</button><button data-t="theme">Theme</button><button data-t="users">Users</button><button id="out">Log out</button></span></header>
-<main>
-<section id="login" class="card"><h2>Log in</h2>
+
+<section id="login" class="card" style="max-width:420px;margin:3rem auto">
+<h2>Log in</h2>
 <p class="mut">Use a GitHub token for your site repo (Contents: Read and write; add Administration: Read and write to manage users). It stays only in this browser.</p>
 <label>GitHub username (repo owner)</label><input id="o">
 <label>Repository</label><input id="r">
@@ -33,17 +58,68 @@ iframe{width:100%;height:420px;border:1px solid var(--bd);border-radius:8px;back
 <label>Access token</label><input id="t" type="password" autocomplete="off">
 <p><button class="p" id="go">Log in</button></p></section>
 
-<div id="app" class="hide">
-<section id="pages"><div class="card"><h3>Pages</h3><div id="plist"></div></div>
-<div class="card"><h3>Add a page</h3><label>Page name (example: about)</label><input id="nslug">
-<label>Paste the page HTML</label><textarea id="nhtml" placeholder="&lt;!doctype html&gt;..."></textarea>
-<p class="mut">Mark editable parts with data-cms, data-cms-html or data-cms-image. Reusing a name replaces that page.</p><button class="p" id="newbtn">Save page</button></div></section>
+<div id="shell" class="hide">
+<nav id="side">
+  <div class="brand">📘 CMS Admin</div>
+  <button data-t="dash" class="active">🏠 Dashboard</button>
+  <button data-t="pages">📄 Pages</button>
+  <button data-t="posts">📝 Posts</button>
+  <button data-t="media">🖼️ Media</button>
+  <button data-t="theme">🎨 Theme</button>
+  <button data-t="code">💻 Code</button>
+  <button data-t="users">👥 Users</button>
+  <button data-t="settings">⚙️ Settings</button>
+  <button id="out">🚪 Log out</button>
+</nav>
+<main>
 
-<section id="edit" class="hide"><div class="card"><div class="row"><b id="etitle"></b><button id="prev">Preview</button><button class="d" id="del">Delete</button></div>
+<section id="v-dash"><h2>Dashboard</h2><p class="mut" style="margin-top:-.6rem">Here's an overview of your website.</p>
+<div class="stats" style="margin-bottom:1rem">
+  <div class="stat"><div class="ic" style="background:#e9edff">📝</div><div><b id="cPosts">–</b><span>Posts</span></div></div>
+  <div class="stat"><div class="ic" style="background:#e6f7ec">📄</div><div><b id="cPages">–</b><span>Pages</span></div></div>
+  <div class="stat"><div class="ic" style="background:#fdeaf0">🖼️</div><div><b id="cMedia">–</b><span>Media Files</span></div></div>
+  <div class="stat"><div class="ic" style="background:#fff3e0">👥</div><div><b id="cUsers">–</b><span>Users</span></div></div>
+</div>
+<div class="two-col">
+  <div class="card"><h3 style="margin-top:0">Recent Activity</h3><div id="activity">Loading...</div></div>
+  <div class="card"><h3 style="margin-top:0">Quick Actions</h3>
+   <div class="qa">
+    <button class="p" data-t="posts" data-go="new">📝 Add New Post</button>
+    <button class="p" data-t="pages" data-go="new" style="background:#1fae6b;border-color:#1fae6b">📄 Add New Page</button>
+    <button data-t="media" style="background:#fdeaf0">🖼️ Upload Media</button>
+    <button data-t="theme" style="background:#fff3e0">🎨 Customize Site</button>
+   </div>
+  </div>
+</div>
+<div class="two-col">
+  <div class="card"><h3 style="margin-top:0">At a Glance</h3>
+   <div class="info-row"><span>📝 Posts</span><span id="agPosts">–</span></div>
+   <div class="info-row"><span>📄 Pages</span><span id="agPages">–</span></div>
+   <div class="info-row"><span>🖼️ Media Files</span><span id="agMedia">–</span></div>
+  </div>
+  <div class="card"><h3 style="margin-top:0">Site Information</h3>
+   <div class="info-row"><span>Site name</span><span id="siName">–</span></div>
+   <div class="info-row"><span>Repository</span><span id="siRepo">–</span></div>
+   <div class="info-row"><span>Branch</span><span id="siBranch">–</span></div>
+   <div class="info-row"><span>Active theme</span><span>Custom theme.css</span></div>
+  </div>
+</div>
+</section>
+
+<section id="v-pages" class="hide"><div class="card"><div class="row"><b>Pages</b><button class="p" id="pgNewBtn">Add New</button></div>
+<table><thead><tr><th>Page</th><th></th></tr></thead><tbody id="pgTable"></tbody></table></div>
+<div id="pgNew" class="card hide"><h3>Add a page</h3><label>Page name (example: about)</label><input id="nslug">
+<label>Paste the page HTML</label><textarea id="nhtml" style="min-height:220px" placeholder="&lt;!doctype html&gt;..."></textarea>
+<p class="mut">Mark editable parts with <code>data-cms</code>, <code>data-cms-html</code> or <code>data-cms-image</code>. Reusing a name replaces that page.</p>
+<button class="p" id="newbtn">Save page</button> <button id="pgNewCancel">Cancel</button></div></section>
+
+<section id="v-edit" class="hide"><div class="card"><div class="row"><b id="etitle"></b><button id="prev">Preview</button><button class="d" id="del">Delete</button></div>
 <div id="fields"></div><p><button class="p" id="save">Save changes</button> <button data-t="pages">Back</button></p><iframe id="frame" title="Preview"></iframe></div></section>
 
-<section id="posts" class="hide"><div class="card"><div class="row"><b>Posts</b><button class="p" id="pnew">New post</button></div><div id="polist"></div><p class="mut">Blog list: /blog/</p></div></section>
-<section id="pedit" class="hide"><div class="card"><h3>Post</h3>
+<section id="v-posts" class="hide"><div class="card"><div class="row"><b>Posts</b><button class="p" id="pnew">Add New</button></div>
+<table><thead><tr><th>Title</th><th>Date</th><th>Status</th><th></th></tr></thead><tbody id="poTable"></tbody></table></div></section>
+
+<section id="v-pedit" class="hide"><div class="card"><h3>Post</h3>
 <label>Title</label><input id="pt"><label>Address name (letters, numbers, dashes)</label><input id="ps">
 <label>Date</label><input id="pd" type="date"><label>Short summary</label><input id="px">
 <label>Cover photo</label><input id="pi"><button id="pimg">Choose photo</button>
@@ -51,19 +127,38 @@ iframe{width:100%;height:420px;border:1px solid var(--bd);border-radius:8px;back
 <label><input type="checkbox" id="pdr"> Draft (hidden from the blog list)</label>
 <p><button class="p" id="psave">Save post</button> <button class="d" id="pdel">Delete</button> <button data-t="posts">Back</button></p></div></section>
 
-<section id="media" class="hide"><div class="card"><h3>Media library</h3><p class="mut">Photos are resized to 1600px. New photos appear after the site rebuilds. Tap a photo to copy its path.</p>
+<section id="v-media" class="hide"><div class="card"><h3>Media library</h3><p class="mut">Photos are resized to 1600px. New photos appear after the site rebuilds (1-2 min). Tap a photo to copy its path.</p>
 <input id="up" type="file" accept="image/*" multiple><div id="mgrid" class="grid" style="margin-top:1rem"></div></div></section>
 
-<section id="theme" class="hide"><div class="card"><h3>Theme</h3><p class="mut">Pages and posts use these through CSS variables (--primary, --bg, --text, --font, --radius).</p>
+<section id="v-theme" class="hide">
+<div class="card"><h3>Quick theme</h3><p class="mut">Used through CSS variables (--primary, --bg, --text, --font, --radius) in theme.css.</p>
 <label>Main color</label><input id="tc1" type="color"><label>Background</label><input id="tc2" type="color"><label>Text color</label><input id="tc3" type="color">
 <label>Font</label><select id="tf"></select><label>Corner roundness (px)</label><input id="tr" type="number" min="0" max="40">
-<p><button class="p" id="tsave">Save theme</button></p></div></section>
+<p><button class="p" id="tsave">Save theme</button></p></div>
+<div class="card"><h3>Upload a theme (.zip)</h3>
+<p class="mut">Upload a zip of HTML/CSS/JS/images. Files are added under <code>/theme-assets/</code>, keeping their folder structure. Nothing on your live site is replaced automatically — use the buttons below each extracted file to apply it.</p>
+<input id="zipfile" type="file" accept=".zip"><div id="zipStatus" class="mut" style="margin-top:.5rem"></div>
+<div id="zipList" style="margin-top:.8rem"></div></div></section>
 
-<section id="users" class="hide"><div class="card"><h3>Users</h3><div id="ulist"></div></div>
+<section id="v-code" class="hide"><div class="card"><h3>Code editor</h3>
+<p class="mut">Create or edit any file in the repo directly — a new stylesheet, script, or a full HTML page at a custom path.</p>
+<label>File path (example: css/extra.css, p/promo/index.html)</label><input id="cdPath" placeholder="folder/file.ext">
+<div class="row"><button id="cdLoad">Load existing file</button><span class="mut">Leave blank content and click Save to create a new file.</span></div>
+<label>File content</label><textarea id="cdContent" style="min-height:320px;font-family:ui-monospace,monospace"></textarea>
+<p><button class="p" id="cdSave">Save file</button></p></div></section>
+
+<section id="v-users" class="hide"><div class="card"><h3>Users</h3><div id="ulist"></div></div>
 <div class="card"><h3>Invite a user</h3><label>GitHub username</label><input id="un">
 <label>Role</label><select id="ur"><option value="push">Editor (can edit content)</option><option value="pull">Viewer (read only)</option><option value="admin">Admin</option></select>
-<p class="mut">They get an email from GitHub and must accept. Editors can change any file in the repo.</p><button class="p" id="uadd">Send invite</button></div></section>
-</div></main>
+<p class="mut">They get an email from GitHub and must accept. Editors can change any file in the repo — GitHub has no per-page permission.</p><button class="p" id="uadd">Send invite</button></div></section>
+
+<section id="v-settings" class="hide"><div class="card"><h3>Site settings</h3>
+<label>Site name</label><input id="stName"><label>Tagline</label><input id="stTag">
+<label>Site logo</label><input id="stLogo"><button id="stLogoPick">Choose photo</button>
+<label>Default SEO description</label><textarea id="stDesc"></textarea>
+<p><button class="p" id="stSave">Save settings</button></p></div></section>
+
+</main></div>
 <div id="pick"><div class="card"><div class="row"><b>Choose a photo</b><button id="pclose">Close</button></div><div id="pgrid" class="grid"></div></div></div>
 <div id="msg" role="status"></div>
 
@@ -71,7 +166,7 @@ iframe{width:100%;height:420px;border:1px solid var(--bd);border-radius:8px;back
 const $=s=>document.querySelector(s),IMG=/\.(jpe?g|png|webp|gif|svg)$/i,slug=s=>s.toLowerCase().replace(/[^a-z0-9-]+/g,'-').replace(/^-|-$/g,'');
 const esc=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
 const FONTS={'Clean sans':'system-ui,sans-serif','Serif':'Georgia,serif','Rounded':'"Trebuchet MS",sans-serif','Mono':'ui-monospace,monospace'};
-let cfg=JSON.parse(localStorage.getItem('cmsCfg')||'null'),cur=null;
+let cfg=JSON.parse(localStorage.getItem('cmsCfg')||'null'),cur=null,pickCb=null;
 const msg=t=>{const m=$('#msg');m.textContent=t;m.style.display='block';clearTimeout(msg.t);msg.t=setTimeout(()=>m.style.display='none',4500)};
 const api=(p,o={})=>fetch('https://api.github.com/repos/'+cfg.owner+'/'+cfg.repo+p,{...o,cache:'no-store',headers:{Authorization:'Bearer '+cfg.token,Accept:'application/vnd.github+json','Content-Type':'application/json',...(o.headers||{})}}).then(async r=>{if(!r.ok){const e=new Error(r.status+' '+((await r.json().catch(()=>({}))).message||''));e.status=r.status;throw e}return r});
 const run=async f=>{try{await f();return true}catch(e){msg('Error: '+e.message);return false}};
@@ -87,25 +182,54 @@ async function commit(files,message){
  const n=await(await api('/git/commits',{method:'POST',body:JSON.stringify({message,tree:t.sha,parents:[head]})})).json();
  await api('/git/refs/heads/'+cfg.branch,{method:'PATCH',body:JSON.stringify({sha:n.sha})})}
 
-const LOAD={pages:loadPages,posts:loadPosts,media:loadMedia,theme:loadTheme,users:loadUsers};
-function tab(n){['pages','edit','posts','pedit','media','theme','users'].forEach(x=>$('#'+x).classList.toggle('hide',x!=n));if(LOAD[n])run(LOAD[n])}
-function show(){['login'].forEach(x=>$('#'+x).classList.toggle('hide',!!cfg));$('#app').classList.toggle('hide',!cfg);$('#nav').classList.toggle('hide',!cfg);if(cfg)tab('pages')}
-document.addEventListener('click',e=>{const t=e.target.dataset&&e.target.dataset.t;if(t)tab(t)});
+/* NAV */
+const VIEWS=['dash','pages','edit','posts','pedit','media','theme','code','users','settings'];
+const LOAD={dash:loadDash,pages:loadPages,posts:loadPosts,media:loadMedia,theme:loadTheme,users:loadUsers,settings:loadSettings};
+function tab(n,opt){VIEWS.forEach(x=>$('#v-'+x).classList.toggle('hide',x!=n));
+ document.querySelectorAll('#side button[data-t]').forEach(b=>b.classList.toggle('active',b.dataset.t==n));
+ if(n=='pages'){$('#pgNew').classList.toggle('hide',opt!='new')}
+ if(n=='posts'&&opt=='new')return editPost();
+ if(LOAD[n])run(LOAD[n])}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-t]');if(b)tab(b.dataset.t,b.dataset.go)});
+function showApp(){$('#login').classList.toggle('hide',!!cfg);$('#shell').classList.toggle('hide',!cfg);if(cfg)tab('dash')}
 $('#go').onclick=async()=>{cfg={owner:$('#o').value.trim(),repo:$('#r').value.trim(),branch:$('#b').value.trim()||'main',token:$('#t').value.trim()};
- try{await api('');localStorage.setItem('cmsCfg',JSON.stringify(cfg));show()}catch(e){cfg=null;msg('Login failed: '+e.message)}};
-$('#out').onclick=()=>{localStorage.removeItem('cmsCfg');cfg=null;show()};
+ try{await api('');localStorage.setItem('cmsCfg',JSON.stringify(cfg));showApp()}catch(e){cfg=null;msg('Login failed: '+e.message)}};
+$('#out').onclick=()=>{localStorage.removeItem('cmsCfg');cfg=null;showApp()};
 const tf=$('#tf');Object.keys(FONTS).forEach(k=>tf.add(new Option(k,k)));
 
+/* DASHBOARD */
+const timeAgo=iso=>{const s=Math.max(1,Math.round((Date.now()-new Date(iso))/1000)),u=[[31536000,'y'],[2592000,'mo'],[86400,'d'],[3600,'h'],[60,'min']];
+ for(const [n,l] of u){if(s>=n)return Math.floor(s/n)+' '+l+' ago'}return 'just now'};
+async function loadDash(){
+ const [pg,po,ph,settings]=await Promise.all([ls('p'),readJson('posts/index.json',[]),photos(),readJson('settings.json',{})]);
+ let users=[];try{users=await(await api('/collaborators?per_page=100')).json()}catch(e){}
+ const npages=pg.filter(x=>x.type=='dir').length;
+ $('#cPages').textContent=npages;$('#cPosts').textContent=po.length;$('#cMedia').textContent=ph.length;$('#cUsers').textContent=users.length||'–';
+ $('#agPosts').textContent=po.length;$('#agPages').textContent=npages;$('#agMedia').textContent=ph.length;
+ $('#siName').textContent=settings.name||cfg.repo;$('#siRepo').textContent=cfg.owner+'/'+cfg.repo;$('#siBranch').textContent=cfg.branch;
+ const box=$('#activity');box.innerHTML='Loading...';
+ try{
+  const commits=await(await api('/commits?per_page=6')).json();
+  box.innerHTML='';
+  commits.forEach(c=>{const r=document.createElement('div');r.className='activity-row';
+   const icon=/delete/i.test(c.commit.message)?'🗑️':/theme|settings/i.test(c.commit.message)?'🎨':/post/i.test(c.commit.message)?'📝':/page/i.test(c.commit.message)?'📄':/photo|upload/i.test(c.commit.message)?'🖼️':'✏️';
+   r.innerHTML='<div class="ic" style="background:#eef1ff">'+icon+'</div><div><div>'+esc(c.commit.message.split('\n')[0])+'</div><div class="mut">'+timeAgo(c.commit.author.date)+'</div></div>';
+   box.append(r)});
+  if(!commits.length)box.textContent='No activity yet.';
+ }catch(e){box.textContent='Could not load recent activity.'}}
+
 /* PAGES */
-async function loadPages(){const box=$('#plist');box.textContent='Loading...';const d=(await ls('p')).filter(x=>x.type=='dir');box.innerHTML='';
- if(!d.length)box.textContent='No pages yet. Add your first page below.';
- d.forEach(x=>{const r=document.createElement('div');r.className='row';const b=document.createElement('b');b.textContent='/p/'+x.name+'/';
-  const v=document.createElement('a');v.href='/p/'+x.name+'/';v.target='_blank';v.textContent='View';
-  const e=document.createElement('button');e.textContent='Edit';e.onclick=()=>openPage(x.name);r.append(b,v,e);box.append(r)})}
+async function loadPages(){const tb=$('#pgTable');tb.innerHTML='<tr><td colspan=2>Loading...</td></tr>';const d=(await ls('p')).filter(x=>x.type=='dir');tb.innerHTML='';
+ if(!d.length)tb.innerHTML='<tr><td colspan=2 class="mut">No pages yet.</td></tr>';
+ d.forEach(x=>{const tr=document.createElement('tr');tr.innerHTML='<td><b>/p/'+x.name+'/</b></td><td style="text-align:right"></td>';
+  const td=tr.lastElementChild,v=document.createElement('a');v.href='/p/'+x.name+'/';v.target='_blank';v.textContent='View';v.style.marginRight='.6rem';
+  const e=document.createElement('button');e.textContent='Edit';e.onclick=()=>openPage(x.name);td.append(v,e);tb.append(tr)})}
+$('#pgNewBtn').onclick=()=>{$('#pgNew').classList.remove('hide')};
+$('#pgNewCancel').onclick=()=>{$('#pgNew').classList.add('hide')};
 $('#newbtn').onclick=()=>{const s=slug($('#nslug').value.trim()),h=$('#nhtml').value;if(!s||!h.includes('<'))return msg('Enter a page name and paste the HTML.');
- run(async()=>{await commit([{path:'p/'+s+'/index.html',text:h}],'Add page '+s);$('#nhtml').value='';$('#nslug').value='';msg('Page saved. Live in 1-2 minutes.');loadPages()})};
-function openPage(s){run(async()=>{cur={slug:s,doc:new DOMParser().parseFromString(await readText('p/'+s+'/index.html'),'text/html')};build();$('#etitle').textContent='/p/'+s+'/';$('#frame').srcdoc='';tab('edit')})}
-function build(){const d=cur.doc,f=$('#fields');f.innerHTML='';
+ run(async()=>{await commit([{path:'p/'+s+'/index.html',text:h}],'Add page '+s);$('#nhtml').value='';$('#nslug').value='';$('#pgNew').classList.add('hide');msg('Page saved. Live in 1-2 minutes.');loadPages()})};
+function openPage(s){run(async()=>{cur={slug:s,doc:new DOMParser().parseFromString(await readText('p/'+s+'/index.html'),'text/html')};buildFields();$('#etitle').textContent='/p/'+s+'/';$('#frame').srcdoc='';tab('edit')})}
+function buildFields(){const d=cur.doc,f=$('#fields');f.innerHTML='';
  const add=(label,val,kind,apply)=>{const w=document.createElement('div'),l=document.createElement('label');l.textContent=label;
   const i=document.createElement(kind=='text'||kind=='html'?'textarea':'input');i.value=val;i.oninput=()=>apply(i.value);w.append(l,i);
   if(kind=='image'){const b=document.createElement('button');b.textContent='Choose photo';b.onclick=()=>pick(p=>{i.value=p;apply(p)});w.append(b)}f.append(w)};
@@ -117,15 +241,17 @@ function build(){const d=cur.doc,f=$('#fields');f.innerHTML='';
  els.forEach(el=>{if(el.hasAttribute('data-cms-image'))add('Photo: '+el.dataset.cmsImage,el.getAttribute('src')||'','image',v=>el.setAttribute('src',v));
   else if(el.hasAttribute('data-cms-html'))add('Rich text: '+el.dataset.cmsHtml,el.innerHTML.trim(),'html',v=>el.innerHTML=v);
   else add('Text: '+el.dataset.cms,el.textContent.trim(),el.textContent.length>80?'text':'line',v=>el.textContent=v)})}
-const out=()=>'<!DOCTYPE html>\n'+cur.doc.documentElement.outerHTML;
-$('#prev').onclick=()=>{$('#frame').srcdoc=out()};
-$('#save').onclick=()=>run(async()=>{await commit([{path:'p/'+cur.slug+'/index.html',text:out()}],'Edit page '+cur.slug);msg('Saved. Live in 1-2 minutes.')});
+const pageOut=()=>'<!DOCTYPE html>\n'+cur.doc.documentElement.outerHTML;
+$('#prev').onclick=()=>{$('#frame').srcdoc=pageOut()};
+$('#save').onclick=()=>run(async()=>{await commit([{path:'p/'+cur.slug+'/index.html',text:pageOut()}],'Edit page '+cur.slug);msg('Saved. Live in 1-2 minutes.')});
 $('#del').onclick=()=>{if(confirm('Delete this page?'))run(async()=>{await commit([{path:'p/'+cur.slug+'/index.html',del:true}],'Delete page '+cur.slug);msg('Page deleted.');tab('pages')})};
 
 /* POSTS */
-async function loadPosts(){const l=await readJson('posts/index.json',[]),b=$('#polist');b.innerHTML='';if(!l.length)b.textContent='No posts yet.';
- l.forEach(p=>{const r=document.createElement('div');r.className='row';const t=document.createElement('b');t.textContent=p.title+(p.draft?' (draft)':'');
-  const e=document.createElement('button');e.textContent='Edit';e.onclick=()=>editPost(p.slug);r.append(t,e);b.append(r)})}
+async function loadPosts(){const l=await readJson('posts/index.json',[]),tb=$('#poTable');tb.innerHTML='';
+ if(!l.length)tb.innerHTML='<tr><td colspan=4 class="mut">No posts yet.</td></tr>';
+ l.forEach(p=>{const tr=document.createElement('tr');tr.innerHTML='<td><b></b></td><td></td><td></td><td style="text-align:right"></td>';
+  tr.children[0].firstChild.textContent=p.title;tr.children[1].textContent=p.date;tr.children[2].textContent=p.draft?'Draft':'Published';
+  const e=document.createElement('button');e.textContent='Edit';e.onclick=()=>editPost(p.slug);tr.children[3].append(e);tb.append(tr)})}
 function editPost(s){run(async()=>{let d={title:'',date:new Date().toISOString().slice(0,10),excerpt:'',image:'',content:'',draft:true};
  if(s)d=JSON.parse(await readText('posts/'+s+'/post.json'));
  $('#pt').value=d.title;$('#ps').value=s||'';$('#ps').disabled=!!s;$('#pd').value=d.date;$('#px').value=d.excerpt;$('#pi').value=d.image;$('#pc').value=d.content;$('#pdr').checked=d.draft;tab('pedit')})}
@@ -164,7 +290,40 @@ $('#tsave').onclick=()=>run(async()=>{const t={primary:$('#tc1').value,bg:$('#tc
  const css=':root{--primary:'+t.primary+';--bg:'+t.bg+';--text:'+t.text+';--font:'+FONTS[t.font]+';--radius:'+t.radius+'px}\nbody{margin:0;background:var(--bg);color:var(--text);font-family:var(--font);line-height:1.6}\na{color:var(--primary)}\n.post,.wrap{max-width:720px;margin:0 auto;padding:2rem 1rem}\n.post img{max-width:100%;border-radius:var(--radius)}\n.card{border:1px solid rgba(128,128,128,.3);border-radius:var(--radius);padding:1rem;margin:1rem 0}\n';
  await commit([{path:'theme.json',text:JSON.stringify(t)},{path:'theme.css',text:css}],'Update theme');msg('Theme saved. Live in 1-2 minutes.')});
 
-/* USERS (GitHub collaborators) */
+const b64ab=buf=>{let bin='';const bytes=new Uint8Array(buf);for(let i=0;i<bytes.length;i++)bin+=String.fromCharCode(bytes[i]);return btoa(bin)};
+const TEXTEXT=/\.(html?|css|js|json|svg|txt|md)$/i;
+$('#zipfile').onchange=async e=>{const f=e.target.files[0];if(!f)return;
+ $('#zipStatus').textContent='Reading zip...';$('#zipList').innerHTML='';
+ try{
+  const zip=await JSZip.loadAsync(f),entries=Object.values(zip.files).filter(z=>!z.dir);
+  $('#zipStatus').textContent='Uploading '+entries.length+' file(s)...';
+  const files=[];
+  for(const z of entries){
+   const path='theme-assets/'+z.name.replace(/^\/+/,'');
+   if(TEXTEXT.test(z.name)) files.push({path,text:await z.async('string')});
+   else files.push({path,b64:b64ab(await z.async('arraybuffer'))});
+  }
+  await commit(files,'Upload theme zip: '+f.name);
+  $('#zipStatus').textContent='Uploaded. Live in 1-2 minutes.';
+  const list=$('#zipList');list.innerHTML='';
+  files.forEach(ff=>{const row=document.createElement('div');row.className='row';
+   const b=document.createElement('b');b.textContent='/'+ff.path;row.append(b);
+   if(/\.css$/i.test(ff.path)){const btn=document.createElement('button');btn.textContent='Use as site stylesheet';
+    btn.onclick=()=>run(async()=>{await commit([{path:'theme.css',text:ff.text}],'Set theme.css from '+ff.path);msg('theme.css updated. Live in 1-2 minutes.')});row.append(btn)}
+   if(/\.html?$/i.test(ff.path)){const btn=document.createElement('button');btn.textContent='Use as a page';
+    btn.onclick=()=>{const s=slug(prompt('Page name for this file (example: promo):')||'');if(!s)return;
+     run(async()=>{await commit([{path:'p/'+s+'/index.html',text:ff.text}],'Add page '+s+' from zip');msg('Page /p/'+s+'/ created. Live in 1-2 minutes.')})};row.append(btn)}
+   list.append(row)})
+ }catch(err){$('#zipStatus').textContent='Error: '+err.message}
+ e.target.value=''};
+
+/* CODE EDITOR */
+$('#cdLoad').onclick=()=>run(async()=>{const p=$('#cdPath').value.trim();if(!p)throw new Error('Enter a file path first');
+ $('#cdContent').value=await readText(p);msg('Loaded '+p)});
+$('#cdSave').onclick=()=>run(async()=>{const p=$('#cdPath').value.trim();if(!p)throw new Error('Enter a file path first');
+ await commit([{path:p,text:$('#cdContent').value}],'Edit '+p+' via code editor');msg('Saved '+p+'. Live in 1-2 minutes.')});
+
+/* USERS */
 const ROLE={admin:'Admin',maintain:'Admin',write:'Editor',triage:'Viewer',read:'Viewer'};
 async function loadUsers(){const b=$('#ulist');b.textContent='Loading...';const l=await(await api('/collaborators?per_page=100')).json();b.innerHTML='';
  l.forEach(u=>{const r=document.createElement('div');r.className='row';const n=document.createElement('b');n.textContent=u.login+' - '+(ROLE[u.role_name]||u.role_name);r.append(n);
@@ -172,5 +331,13 @@ async function loadUsers(){const b=$('#ulist');b.textContent='Loading...';const 
    x.onclick=()=>confirm('Remove '+u.login+'?')&&run(async()=>{await api('/collaborators/'+u.login,{method:'DELETE'});msg('Removed');loadUsers()});r.append(x)}b.append(r)})}
 $('#uadd').onclick=()=>run(async()=>{const u=$('#un').value.trim();if(!u)throw new Error('Enter a GitHub username');
  await api('/collaborators/'+encodeURIComponent(u),{method:'PUT',body:JSON.stringify({permission:$('#ur').value})});$('#un').value='';msg('Invite sent. They must accept it on GitHub.');loadUsers()});
-show();
+
+/* SETTINGS */
+async function loadSettings(){const s={name:'',tagline:'',logo:'',description:'',...await readJson('settings.json',{})};
+ $('#stName').value=s.name;$('#stTag').value=s.tagline;$('#stLogo').value=s.logo;$('#stDesc').value=s.description}
+$('#stLogoPick').onclick=()=>pick(p=>$('#stLogo').value=p);
+$('#stSave').onclick=()=>run(async()=>{const s={name:$('#stName').value.trim(),tagline:$('#stTag').value.trim(),logo:$('#stLogo').value.trim(),description:$('#stDesc').value.trim()};
+ await commit([{path:'settings.json',text:JSON.stringify(s,null,1)}],'Update settings');msg('Settings saved. Live in 1-2 minutes.')});
+
+showApp();
 </script></body></html>
