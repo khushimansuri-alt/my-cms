@@ -63,6 +63,7 @@ code{background:var(--bg);padding:.1rem .3rem;border-radius:4px}
   <div class="brand">📘 CMS Admin</div>
   <button data-t="dash" class="active">🏠 Dashboard</button>
   <button data-t="pages">📄 Pages</button>
+  <button data-t="menu">🍔 Menu</button>
   <button data-t="posts">📝 Posts</button>
   <button data-t="media">🖼️ Media</button>
   <button data-t="theme">🎨 Theme</button>
@@ -118,6 +119,15 @@ code{background:var(--bg);padding:.1rem .3rem;border-radius:4px}
 
 <section id="v-edit" class="hide"><div class="card"><div class="row"><b id="etitle"></b><button id="prev">Preview</button><button class="d" id="del">Delete</button></div>
 <div id="fields"></div><p><button class="p" id="save">Save changes</button> <button data-t="pages">Back</button></p><iframe id="frame" title="Preview"></iframe></div></section>
+
+<section id="v-menu" class="hide">
+<div class="card"><h3>Homepage</h3><p class="mut">Choose which page opens first when someone visits your website (the main address).</p>
+<p id="hpCur" class="mut"></p><label>Select page</label><select id="hpSel"></select>
+<p><button class="p" id="hpSave">Set as Homepage</button></p></div>
+<div class="card"><h3>Website menu</h3><p class="mut">Pick which pages show in the menu on the front of your website. Change the order with the arrows, rename the labels, then click Save menu. The menu is shown automatically on every page, post and the homepage. (To hide it on a page, add <code>data-no-menu</code> anywhere in that page's HTML. To place it yourself, add <code>&lt;nav id="site-menu"&gt;&lt;/nav&gt;</code> where you want it.)</p>
+<div id="mnList"></div>
+<div class="row" style="margin-top:.8rem"><select id="mnPage" style="flex:1 1 180px;width:auto"></select><button id="mnAddPage">Add page</button><button id="mnAddHome">Add Home</button><button id="mnAddLink">Add custom link</button></div>
+<p><button class="p" id="mnSave">Save menu</button></p></div></section>
 
 <section id="v-posts" class="hide"><div class="card"><div class="row"><b>Posts</b><button class="p" id="pnew">Add New</button></div>
 <table><thead><tr><th>Title</th><th>Date</th><th>Status</th><th></th></tr></thead><tbody id="poTable"></tbody></table></div></section>
@@ -192,9 +202,11 @@ const run=async f=>{try{await f();return true}catch(e){msg('Error: '+e.message);
 const ls=async d=>{try{return await(await api('/contents/'+d+'?ref='+cfg.branch)).json()}catch(e){if(e.status==404)return[];throw e}};
 const readText=async p=>(await api('/contents/'+p+'?ref='+cfg.branch,{headers:{Accept:'application/vnd.github.raw+json'}})).text();
 const readJson=async(p,d)=>{try{return JSON.parse(await readText(p))}catch(e){return d}};
+function injectMenu(h){if(h.includes('menu.js')||h.includes('data-no-menu'))return h;const t='<script src="/menu.js" defer></'+'script>';return /<\/body>/i.test(h)?h.replace(/<\/body>/i,t+'</body>'):h+t}
 async function commit(files,message){
  const head=(await(await api('/git/ref/heads/'+cfg.branch)).json()).object.sha,base=(await(await api('/git/commits/'+head)).json()).tree.sha,tree=[];
  for(const f of files){if(f.del){tree.push({path:f.path,mode:'100644',type:'blob',sha:null});continue}
+  if(f.text&&/^(index\.html|p\/[^\/]+\/index\.html|posts\/[^\/]+\/index\.html)$/.test(f.path))f.text=injectMenu(f.text);
   const b=await(await api('/git/blobs',{method:'POST',body:JSON.stringify(f.b64?{content:f.b64,encoding:'base64'}:{content:f.text,encoding:'utf-8'})})).json();
   tree.push({path:f.path,mode:'100644',type:'blob',sha:b.sha})}
  const t=await(await api('/git/trees',{method:'POST',body:JSON.stringify({base_tree:base,tree})})).json();
@@ -267,7 +279,7 @@ const pageOut=()=>'<!DOCTYPE html>\n'+cur.doc.documentElement.outerHTML;
 const withBase=html=>siteUrl?html.replace(/<head[^>]*>/i,m=>m+'<base href="'+siteUrl+'/">'):html+'\n<!-- Preview note: add your live Site URL under Settings to see real fonts, styles and photos here. -->';
 $('#prev').onclick=()=>{$('#frame').srcdoc=withBase(pageOut())};
 $('#nprev').onclick=()=>{const h=$('#nhtml').value;if(!h.includes('<'))return msg('Paste the page HTML first.');$('#nframe').classList.remove('hide');$('#nframe').srcdoc=withBase(h)};
-$('#save').onclick=()=>run(async()=>{await commit([{path:'p/'+cur.slug+'/index.html',text:pageOut()}],'Edit page '+cur.slug);msg('Saved. Live in 1-2 minutes.')});
+$('#save').onclick=()=>run(async()=>{const out=pageOut(),fl=[{path:'p/'+cur.slug+'/index.html',text:out}];if((await readJson('homepage.json',{})).slug==cur.slug)fl.push({path:'index.html',text:out});await commit(fl,'Edit page '+cur.slug);msg('Saved. Live in 1-2 minutes.')});
 $('#del').onclick=()=>{if(!confirm('Move this page to Trash? You can restore it later.'))return;
  run(async()=>{const id=trashId(),idx=await trashIndex();idx.push({id,type:'page',slug:cur.slug,title:cur.doc.title||cur.slug,deletedAt:new Date().toISOString()});
   await commit([{path:'trash/pages/'+id+'/index.html',text:pageOut()},{path:'trash/index.json',text:JSON.stringify(idx,null,1)},{path:'p/'+cur.slug+'/index.html',del:true}],'Move page '+cur.slug+' to trash');
@@ -418,7 +430,7 @@ const WELCOME='<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta 
 $('#pgTable').parentElement.tHead.innerHTML='<tr><th style="width:30px"><input type="checkbox" id="pgSelAll"></th><th>Page</th><th>Published</th><th>Last updated</th><th></th></tr>';
 $('#pgSelAll').onchange=e=>document.querySelectorAll('.pgchk').forEach(c=>c.checked=e.target.checked);
 async function loadPages2(){const tb=$('#pgTable');tb.innerHTML='<tr><td colspan=5>Loading...</td></tr>';
- const d=(await ls('p')).filter(x=>x.type=='dir');tb.innerHTML='';$('#pgSelAll').checked=false;
+ const d=(await ls('p')).filter(x=>x.type=='dir');tb.innerHTML='';$('#pgSelAll').checked=false;const home=(await readJson('homepage.json',{})).slug;
  if(!d.length){tb.innerHTML='<tr><td colspan=5 class="mut">No pages yet.</td></tr>';return}
  const dt=await Promise.all(d.map(async x=>{try{const c=await(await api('/commits?path=p/'+x.name+'/index.html&per_page=100')).json();return c.length?[c[c.length-1].commit.author.date,c[0].commit.author.date]:['','']}catch(e){return['','']}}));
  d.forEach((x,i)=>{const tr=document.createElement('tr');
@@ -426,7 +438,7 @@ async function loadPages2(){const tb=$('#pgTable');tb.innerHTML='<tr><td colspan
   tr.querySelector('.pgchk').dataset.slug=x.name;tr.querySelector('b').textContent='/p/'+x.name+'/';
   tr.children[2].textContent=dt[i][0]?fmtDT(dt[i][0]):'–';tr.children[3].textContent=dt[i][1]?fmtDT(dt[i][1]):'–';
   const v=document.createElement('a');v.href='/p/'+x.name+'/';v.target='_blank';v.textContent='View';v.style.marginRight='.6rem';
-  const e=document.createElement('button');e.textContent='Edit';e.onclick=()=>openPage(x.name);tr.children[4].append(v,e);tb.append(tr)})}
+  const e=document.createElement('button');e.textContent='Edit';e.onclick=()=>openPage(x.name);const hb=document.createElement('button');hb.textContent=home==x.name?'🏠 Homepage':'Set as Home';hb.disabled=home==x.name;hb.style.marginRight='.4rem';hb.onclick=()=>run(async()=>{await setHome(x.name);msg('Homepage set. Live in 1-2 minutes.');loadPages2()});tr.children[4].append(v,hb,e);tb.append(tr)})}
 LOAD.pages=loadPages2;
 $('#pgBulkDel').onclick=()=>{const sel=[...document.querySelectorAll('.pgchk:checked')].map(c=>c.dataset.slug);
  if(!sel.length)return msg('Select at least one page.');
@@ -443,7 +455,7 @@ async function resetWebsite(){
  if(prompt('This deletes ALL pages, posts and trash. Type RESET to confirm:')!=='RESET')return;
  run(async()=>{const tr=await(await api('/git/trees/'+cfg.branch+'?recursive=1')).json();
   const files=tr.tree.filter(x=>x.type=='blob'&&/^(p|posts|trash)\//.test(x.path)&&!/^(posts|trash)\/index\.json$/.test(x.path)&&x.path!='p/home/index.html').map(x=>({path:x.path,del:true}));
-  files.push({path:'posts/index.json',text:'[]'},{path:'trash/index.json',text:'[]'},{path:'theme.json',text:JSON.stringify(DEFTHEME)},{path:'theme.css',text:themeCss(DEFTHEME)},{path:'p/home/index.html',text:WELCOME});
+  files.push({path:'posts/index.json',text:'[]'},{path:'trash/index.json',text:'[]'},{path:'theme.json',text:JSON.stringify(DEFTHEME)},{path:'theme.css',text:themeCss(DEFTHEME)},{path:'p/home/index.html',text:WELCOME},{path:'index.html',text:WELCOME},{path:'menu.json',text:'[]'},{path:'menu.js',text:MENU_JS},{path:'homepage.json',text:JSON.stringify({slug:'home'})});
   await commit(files,'Reset website');msg('Website reset. Live in 1-2 minutes.');tab('dash')})}
 $('#resetSite').onclick=resetWebsite;
 document.querySelector('.qa').insertAdjacentHTML('beforeend','<button class="d" id="dashReset" style="grid-column:1/-1;border-color:#e0393e">⚠️ Reset Website</button>');
@@ -488,6 +500,49 @@ $('#plCode').previousElementSibling.insertAdjacentHTML('beforebegin','<label>Or 
 $('#plFile').onchange=async e=>{const f=e.target.files[0];if(!f)return;$('#plCode').value=await f.text();if(!$('#plName').value)$('#plName').value=f.name.replace(/\.js$/i,'')};
 const _go=$('#go').onclick;$('#go').onclick=async()=>{await _go();if(cfg)run(loadAllPlugins)};
 if(cfg)run(loadAllPlugins);
+
+/* ===== ADD-ON 2: Menu + Homepage ===== */
+const MENU_JS=`(function(){fetch('/menu.json?'+Date.now()).then(function(r){return r.ok?r.json():[]}).then(function(m){if(!m.length)return;var n=document.getElementById('site-menu');if(!n){n=document.createElement('nav');n.id='site-menu';document.body.insertBefore(n,document.body.firstChild)}var u=document.createElement('ul');u.style.cssText='list-style:none;display:flex;flex-wrap:wrap;gap:1rem;margin:0;padding:1rem;justify-content:center';m.forEach(function(i){var li=document.createElement('li'),a=document.createElement('a');a.href=i.url;a.textContent=i.label;if(location.pathname.replace(/\\/$/,'')==i.url.replace(/\\/$/,''))a.style.fontWeight='700';li.appendChild(a);u.appendChild(li)});n.innerHTML='';n.appendChild(u)}).catch(function(){})})();`;
+async function setHome(s){const html=await readText('p/'+s+'/index.html');
+ await commit([{path:'index.html',text:html},{path:'homepage.json',text:JSON.stringify({slug:s})},{path:'menu.js',text:MENU_JS}],'Set homepage '+s)}
+let menuItems=[];
+VIEWS.push('menu');
+async function loadMenu(){menuItems=await readJson('menu.json',[]);
+ const d=(await ls('p')).filter(x=>x.type=='dir').map(x=>x.name),home=(await readJson('homepage.json',{})).slug||'';
+ const sel=$('#mnPage'),hs=$('#hpSel');sel.innerHTML='';hs.innerHTML='';
+ d.forEach(n=>{sel.add(new Option('/p/'+n+'/',n));hs.add(new Option('/p/'+n+'/',n))});
+ if(home&&d.includes(home))hs.value=home;
+ $('#hpCur').textContent=home?'Current homepage: /p/'+home+'/':'No homepage set yet.';
+ drawMenu()}
+LOAD.menu=loadMenu;
+function drawMenu(){const b=$('#mnList');b.innerHTML='';
+ if(!menuItems.length){b.innerHTML='<p class="mut">Menu is empty. Add pages below.</p>';return}
+ const mk=(t,f,c)=>{const x=document.createElement('button');x.textContent=t;if(c)x.className=c;x.onclick=f;return x};
+ menuItems.forEach((it,i)=>{const r=document.createElement('div');r.className='row';
+  const l=document.createElement('input'),u=document.createElement('input');
+  l.value=it.label;u.value=it.url;l.placeholder='Label';u.placeholder='/p/about/';
+  l.style.cssText='flex:1 1 140px;width:auto';u.style.cssText='flex:2 1 200px;width:auto';
+  l.oninput=()=>it.label=l.value;u.oninput=()=>it.url=u.value;
+  r.append(l,u,
+   mk('↑',()=>{if(i>0){[menuItems[i-1],menuItems[i]]=[menuItems[i],menuItems[i-1]];drawMenu()}}),
+   mk('↓',()=>{if(i<menuItems.length-1){[menuItems[i+1],menuItems[i]]=[menuItems[i],menuItems[i+1]];drawMenu()}}),
+   mk('✕',()=>{menuItems.splice(i,1);drawMenu()},'d'));
+  b.append(r)})}
+$('#mnAddPage').onclick=()=>{const n=$('#mnPage').value;if(!n)return msg('No pages yet.');
+ menuItems.push({label:n.charAt(0).toUpperCase()+n.slice(1).replace(/-/g,' '),url:'/p/'+n+'/'});drawMenu()};
+$('#mnAddHome').onclick=()=>{menuItems.push({label:'Home',url:'/'});drawMenu()};
+$('#mnAddLink').onclick=()=>{menuItems.push({label:'New link',url:'https://'});drawMenu()};
+$('#hpSave').onclick=()=>run(async()=>{const s=$('#hpSel').value;if(!s)throw new Error('Create a page first');
+ await setHome(s);msg('Homepage set to /p/'+s+'/. Live in 1-2 minutes.');loadMenu()});
+$('#mnSave').onclick=()=>run(async()=>{
+ const items=menuItems.filter(i=>i.label.trim()&&i.url.trim()).map(i=>({label:i.label.trim(),url:i.url.trim()}));
+ const files=[{path:'menu.json',text:JSON.stringify(items,null,1)},{path:'menu.js',text:MENU_JS}];
+ /* add the menu script to existing pages, posts and homepage (commit() injects it) */
+ const names=(await ls('p')).filter(x=>x.type=='dir').map(x=>x.name);
+ for(const n of names){const h=await readText('p/'+n+'/index.html');if(!h.includes('menu.js')&&!h.includes('data-no-menu'))files.push({path:'p/'+n+'/index.html',text:h})}
+ for(const po of await readJson('posts/index.json',[])){try{const h=await readText('posts/'+po.slug+'/index.html');if(!h.includes('menu.js'))files.push({path:'posts/'+po.slug+'/index.html',text:h})}catch(e){}}
+ try{const h=await readText('index.html');if(!h.includes('menu.js')&&!h.includes('data-no-menu'))files.push({path:'index.html',text:h})}catch(e){}
+ await commit(files,'Update menu');menuItems=items;drawMenu();msg('Menu saved. Live in 1-2 minutes.')});
 
 showApp();
 </script></body></html>
