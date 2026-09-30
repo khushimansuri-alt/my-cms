@@ -68,6 +68,7 @@ code{background:var(--bg);padding:.1rem .3rem;border-radius:4px}
   <button data-t="theme">🎨 Theme</button>
   <button data-t="code">💻 Code</button>
   <button data-t="trash">🗑️ Trash</button>
+  <button data-t="plugins">🧩 Plugins</button>
   <button data-t="users">👥 Users</button>
   <button data-t="settings">⚙️ Settings</button>
   <button id="out">🚪 Log out</button>
@@ -102,13 +103,13 @@ code{background:var(--bg);padding:.1rem .3rem;border-radius:4px}
    <div class="info-row"><span>Site name</span><span id="siName">–</span></div>
    <div class="info-row"><span>Repository</span><span id="siRepo">–</span></div>
    <div class="info-row"><span>Branch</span><span id="siBranch">–</span></div>
-   <div class="info-row"><span>Active theme</span><span>Custom theme.css</span></div>
+   <div class="info-row"><span>Active theme</span><span id="siTheme">–</span></div>
   </div>
 </div>
 </section>
 
-<section id="v-pages" class="hide"><div class="card"><div class="row"><b>Pages</b><button class="p" id="pgNewBtn">Add New</button></div>
-<table><thead><tr><th>Page</th><th></th></tr></thead><tbody id="pgTable"></tbody></table></div>
+<section id="v-pages" class="hide"><div class="card"><div class="row"><b>Pages</b><button class="d" id="pgBulkDel">Delete Selected</button><button class="p" id="pgNewBtn">Add New</button></div>
+<table><thead><tr><th style="width:30px"><input type="checkbox" id="pgSelAll"></th><th>Page</th><th>Last updated</th><th></th></tr></thead><tbody id="pgTable"></tbody></table></div>
 <div id="pgNew" class="card hide"><h3>Add a page</h3><label>Page name (example: about)</label><input id="nslug">
 <label>Paste the page HTML</label><textarea id="nhtml" style="min-height:220px" placeholder="&lt;!doctype html&gt;..."></textarea>
 <p class="mut">Mark editable parts with <code>data-cms</code>, <code>data-cms-html</code> or <code>data-cms-image</code>. Mark a button/link's URL with <code>data-cms-link</code> to make it editable too. Reusing a name replaces that page.</p>
@@ -134,6 +135,7 @@ code{background:var(--bg);padding:.1rem .3rem;border-radius:4px}
 
 <section id="v-theme" class="hide">
 <div class="card"><h3>Quick theme</h3><p class="mut">Used through CSS variables (--primary, --bg, --text, --font, --radius) in theme.css.</p>
+<label>Theme name (shown on your Dashboard)</label><input id="tName" placeholder="My Theme">
 <label>Main color</label><input id="tc1" type="color"><label>Background</label><input id="tc2" type="color"><label>Text color</label><input id="tc3" type="color">
 <label>Font</label><select id="tf"></select><label>Corner roundness (px)</label><input id="tr" type="number" min="0" max="40">
 <p><button class="p" id="tsave">Save theme</button></p></div>
@@ -156,13 +158,24 @@ code{background:var(--bg);padding:.1rem .3rem;border-radius:4px}
 <label>Role</label><select id="ur"><option value="push">Editor (can edit content)</option><option value="pull">Viewer (read only)</option><option value="admin">Admin</option></select>
 <p class="mut">They get an email from GitHub and must accept. Editors can change any file in the repo — GitHub has no per-page permission.</p><button class="p" id="uadd">Send invite</button></div></section>
 
+<section id="v-plugins" class="hide">
+<div class="card"><div class="row"><b>Plugins</b><button id="plReload">Reload Plugins</button></div><div id="plList"></div></div>
+<div class="card"><h3>Add a plugin</h3>
+<p class="mut">A plugin is a small JavaScript file. Your code runs with a <code>CMS</code> object available: <code>CMS.registerTab({id,label,icon,render(container)})</code> adds a new sidebar section you control; <code>CMS.commit(files,message)</code>, <code>CMS.readText(path)</code>, <code>CMS.readJson(path,fallback)</code>, <code>CMS.msg(text)</code>, <code>CMS.pickPhoto(cb)</code> and <code>CMS.slug(text)</code> are also available. Plugins load automatically each time you log in, or click Reload Plugins above.</p>
+<label>Plugin name</label><input id="plName" placeholder="My Plugin">
+<label>Plugin code (JavaScript)</label><textarea id="plCode" style="min-height:200px;font-family:ui-monospace,monospace" placeholder="CMS.registerTab({ id: 'hello', label: 'Hello', icon: '👋', render(el){ el.innerHTML = '&lt;h3&gt;Hello from my plugin&lt;/h3&gt;'; } });"></textarea>
+<p><button class="p" id="plSave">Save plugin</button></p></div></section>
+
 <section id="v-settings" class="hide"><div class="card"><h3>Site settings</h3>
 <label>Site name</label><input id="stName"><label>Tagline</label><input id="stTag">
 <label>Site logo</label><input id="stLogo"><button id="stLogoPick">Choose photo</button>
 <label>Live site URL (example: https://my-cms.pages.dev or your custom domain)</label><input id="stUrl" placeholder="https://...">
 <p class="mut">Used to make the Preview button show real fonts, styles and photos.</p>
 <label>Default SEO description</label><textarea id="stDesc"></textarea>
-<p><button class="p" id="stSave">Save settings</button></p></div></section>
+<p><button class="p" id="stSave">Save settings</button></p></div>
+<div class="card" style="border-color:var(--err)"><h3 style="color:var(--err)">Danger Zone</h3>
+<p class="mut">Resets your website: deletes every page, every post and everything in Trash, resets the theme, and replaces your homepage with a blank "Welcome to your CMS" page. Media, Users and this Settings info are kept. This cannot be undone.</p>
+<button class="d" id="resetSite" style="border-color:var(--err)">Reset Website</button></div></section>
 
 </main></div>
 <div id="pick"><div class="card"><div class="row"><b>Choose a photo</b><button id="pclose">Close</button></div><div id="pgrid" class="grid"></div></div></div>
@@ -191,8 +204,8 @@ const trashId=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
 const trashIndex=async()=>await readJson('trash/index.json',[]);
 
 /* NAV */
-const VIEWS=['dash','pages','edit','posts','pedit','media','theme','code','trash','users','settings'];
-const LOAD={dash:loadDash,pages:loadPages,posts:loadPosts,media:loadMedia,theme:loadTheme,trash:loadTrash,users:loadUsers,settings:loadSettings};
+const VIEWS=['dash','pages','edit','posts','pedit','media','theme','code','trash','plugins','users','settings'];
+const LOAD={dash:loadDash,pages:loadPages,posts:loadPosts,media:loadMedia,theme:loadTheme,trash:loadTrash,plugins:loadPlugins,users:loadUsers,settings:loadSettings};
 function tab(n,opt){VIEWS.forEach(x=>$('#v-'+x).classList.toggle('hide',x!=n));
  document.querySelectorAll('#side button[data-t]').forEach(b=>b.classList.toggle('active',b.dataset.t==n));
  if(n=='pages'){$('#pgNew').classList.toggle('hide',opt!='new')}
@@ -394,6 +407,87 @@ $('#stLogoPick').onclick=()=>pick(p=>$('#stLogo').value=p);
 $('#stSave').onclick=()=>run(async()=>{const s={name:$('#stName').value.trim(),tagline:$('#stTag').value.trim(),logo:$('#stLogo').value.trim(),description:$('#stDesc').value.trim(),siteUrl:$('#stUrl').value.trim()};
  siteUrl=s.siteUrl.replace(/\/+$/,'');
  await commit([{path:'settings.json',text:JSON.stringify(s,null,1)}],'Update settings');msg('Settings saved. Live in 1-2 minutes.')});
+
+/* ===== ADD-ON: bulk delete, dates, reset, theme name, plugins ===== */
+const fmtDT=iso=>{const d=new Date(iso);return d.toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'})+', '+d.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'})};
+const themeCss=t=>':root{--primary:'+t.primary+';--bg:'+t.bg+';--text:'+t.text+';--font:'+FONTS[t.font]+';--radius:'+t.radius+'px}\nbody{margin:0;background:var(--bg);color:var(--text);font-family:var(--font);line-height:1.6}\na{color:var(--primary)}\n.post,.wrap{max-width:720px;margin:0 auto;padding:2rem 1rem}\n.post img{max-width:100%;border-radius:var(--radius)}\n.card{border:1px solid rgba(128,128,128,.3);border-radius:var(--radius);padding:1rem;margin:1rem 0}\n';
+const DEFTHEME={name:'Default Theme',primary:'#2f6f5e',bg:'#ffffff',text:'#1b2130',font:'Clean sans',radius:12};
+const WELCOME='<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Welcome to your CMS</title><link rel="stylesheet" href="/theme.css"></head><body><div class="wrap" style="text-align:center;padding-top:20vh"><h1>Welcome to your CMS</h1></div></body></html>';
+
+/* Pages: select, select all, bulk delete, publish + update date/time */
+$('#pgTable').parentElement.tHead.innerHTML='<tr><th style="width:30px"><input type="checkbox" id="pgSelAll"></th><th>Page</th><th>Published</th><th>Last updated</th><th></th></tr>';
+$('#pgSelAll').onchange=e=>document.querySelectorAll('.pgchk').forEach(c=>c.checked=e.target.checked);
+async function loadPages2(){const tb=$('#pgTable');tb.innerHTML='<tr><td colspan=5>Loading...</td></tr>';
+ const d=(await ls('p')).filter(x=>x.type=='dir');tb.innerHTML='';$('#pgSelAll').checked=false;
+ if(!d.length){tb.innerHTML='<tr><td colspan=5 class="mut">No pages yet.</td></tr>';return}
+ const dt=await Promise.all(d.map(async x=>{try{const c=await(await api('/commits?path=p/'+x.name+'/index.html&per_page=100')).json();return c.length?[c[c.length-1].commit.author.date,c[0].commit.author.date]:['','']}catch(e){return['','']}}));
+ d.forEach((x,i)=>{const tr=document.createElement('tr');
+  tr.innerHTML='<td><input type="checkbox" class="pgchk"></td><td><b></b></td><td></td><td></td><td style="text-align:right"></td>';
+  tr.querySelector('.pgchk').dataset.slug=x.name;tr.querySelector('b').textContent='/p/'+x.name+'/';
+  tr.children[2].textContent=dt[i][0]?fmtDT(dt[i][0]):'–';tr.children[3].textContent=dt[i][1]?fmtDT(dt[i][1]):'–';
+  const v=document.createElement('a');v.href='/p/'+x.name+'/';v.target='_blank';v.textContent='View';v.style.marginRight='.6rem';
+  const e=document.createElement('button');e.textContent='Edit';e.onclick=()=>openPage(x.name);tr.children[4].append(v,e);tb.append(tr)})}
+LOAD.pages=loadPages2;
+$('#pgBulkDel').onclick=()=>{const sel=[...document.querySelectorAll('.pgchk:checked')].map(c=>c.dataset.slug);
+ if(!sel.length)return msg('Select at least one page.');
+ if(!confirm('Move '+sel.length+' page(s) to Trash?'))return;
+ run(async()=>{const idx=await trashIndex(),files=[];
+  for(const n of sel){const html=await readText('p/'+n+'/index.html'),id=trashId();
+   idx.push({id,type:'page',slug:n,title:new DOMParser().parseFromString(html,'text/html').title||n,deletedAt:new Date().toISOString()});
+   files.push({path:'trash/pages/'+id+'/index.html',text:html},{path:'p/'+n+'/index.html',del:true})}
+  files.push({path:'trash/index.json',text:JSON.stringify(idx,null,1)});
+  await commit(files,'Move '+sel.length+' page(s) to trash');msg(sel.length+' page(s) moved to Trash.');loadPages2()})};
+
+/* Reset website (Dashboard + Settings) */
+async function resetWebsite(){
+ if(prompt('This deletes ALL pages, posts and trash. Type RESET to confirm:')!=='RESET')return;
+ run(async()=>{const tr=await(await api('/git/trees/'+cfg.branch+'?recursive=1')).json();
+  const files=tr.tree.filter(x=>x.type=='blob'&&/^(p|posts|trash)\//.test(x.path)&&!/^(posts|trash)\/index\.json$/.test(x.path)&&x.path!='p/home/index.html').map(x=>({path:x.path,del:true}));
+  files.push({path:'posts/index.json',text:'[]'},{path:'trash/index.json',text:'[]'},{path:'theme.json',text:JSON.stringify(DEFTHEME)},{path:'theme.css',text:themeCss(DEFTHEME)},{path:'p/home/index.html',text:WELCOME});
+  await commit(files,'Reset website');msg('Website reset. Live in 1-2 minutes.');tab('dash')})}
+$('#resetSite').onclick=resetWebsite;
+document.querySelector('.qa').insertAdjacentHTML('beforeend','<button class="d" id="dashReset" style="grid-column:1/-1;border-color:#e0393e">⚠️ Reset Website</button>');
+$('#dashReset').onclick=resetWebsite;
+
+/* Theme name (like WordPress) */
+const oldTheme=loadTheme;LOAD.theme=async()=>{await oldTheme();$('#tName').value=(await readJson('theme.json',{})).name||''};
+$('#tsave').onclick=()=>run(async()=>{const t={name:$('#tName').value.trim()||'My Theme',primary:$('#tc1').value,bg:$('#tc2').value,text:$('#tc3').value,font:$('#tf').value,radius:+$('#tr').value||0};
+ await commit([{path:'theme.json',text:JSON.stringify(t)},{path:'theme.css',text:themeCss(t)}],'Update theme');msg('Theme "'+t.name+'" activated. Live in 1-2 minutes.')});
+const oldDash=loadDash;LOAD.dash=async()=>{await oldDash();$('#siTheme').textContent=(await readJson('theme.json',{})).name||'Default Theme'};
+let zipName='';$('#zipfile').addEventListener('change',e=>{const f=e.target.files[0];if(f)zipName=f.name.replace(/\.zip$/i,'')});
+const oldImp=importZipAll;importZipAll=async function(){await oldImp();const t=await readJson('theme.json',{});t.name=zipName||t.name||'Imported Theme';
+ await commit([{path:'theme.json',text:JSON.stringify(t)}],'Activate theme '+t.name);$('#siTheme').textContent=t.name;msg('Theme "'+t.name+'" activated.')};
+
+/* Plugins: your own JS plugins, saved in repo and auto-loaded on login */
+const PL_IDX='plugins/index.json';
+const CMS={commit,readText,readJson,msg,pickPhoto:pick,slug,api,ls,esc,
+ registerTab({id,label,icon,render}){const vid='p_'+id;
+  if(document.getElementById('v-'+vid)){LOAD[vid]=async()=>{const s=$('#v-'+vid);s.innerHTML='';await render(s)};return}
+  const s=document.createElement('section');s.id='v-'+vid;s.className='hide';document.querySelector('main').append(s);
+  VIEWS.push(vid);LOAD[vid]=async()=>{s.innerHTML='';await render(s)};
+  const b=document.createElement('button');b.dataset.t=vid;b.textContent=(icon||'🧩')+' '+label;$('#out').before(b)}};
+async function loadAllPlugins(){for(const p of await readJson(PL_IDX,[])){if(p.off)continue;
+ try{const code=await readText('plugins/'+p.slug+'.js');new Function('CMS',code)(CMS)}catch(e){msg('Plugin "'+p.name+'" error: '+e.message)}}}
+async function loadPlugins(){const l=await readJson(PL_IDX,[]),b=$('#plList');b.innerHTML='';
+ if(!l.length){b.innerHTML='<p class="mut">No plugins yet.</p>';return}
+ const mk=(t,c,f)=>{const x=document.createElement('button');x.textContent=t;if(c)x.className=c;x.onclick=f;return x};
+ l.forEach(p=>{const r=document.createElement('div');r.className='row';const n=document.createElement('b');n.textContent='🧩 '+p.name+(p.off?' (off)':'');
+  r.append(n,
+   mk('Edit','',()=>run(async()=>{$('#plName').value=p.name;$('#plCode').value=await readText('plugins/'+p.slug+'.js');scrollTo(0,document.body.scrollHeight)})),
+   mk(p.off?'Turn on':'Turn off','',()=>run(async()=>{p.off=!p.off;await commit([{path:PL_IDX,text:JSON.stringify(l,null,1)}],'Toggle plugin '+p.slug);msg('Done. Log in again to fully apply.');loadPlugins()})),
+   mk('Delete','d',()=>confirm('Delete plugin '+p.name+'?')&&run(async()=>{const nl=l.filter(x=>x.slug!=p.slug);
+    await commit([{path:'plugins/'+p.slug+'.js',del:true},{path:PL_IDX,text:JSON.stringify(nl,null,1)}],'Delete plugin '+p.slug);msg('Plugin deleted.');loadPlugins()})));
+  b.append(r)})}
+$('#plSave').onclick=()=>run(async()=>{const name=$('#plName').value.trim(),code=$('#plCode').value;if(!name||!code.trim())throw new Error('Enter plugin name and code');
+ new Function('CMS',code);/* syntax check */
+ const s=slug(name),l=await readJson(PL_IDX,[]),i=l.findIndex(x=>x.slug==s),e={slug:s,name};if(i<0)l.push(e);else l[i]={...l[i],...e,off:false};
+ await commit([{path:'plugins/'+s+'.js',text:code},{path:PL_IDX,text:JSON.stringify(l,null,1)}],'Save plugin '+s);
+ await loadAllPlugins();msg('Plugin saved and loaded.');loadPlugins()});
+$('#plReload').onclick=()=>run(async()=>{await loadAllPlugins();await loadPlugins();msg('Plugins reloaded.')});
+$('#plCode').previousElementSibling.insertAdjacentHTML('beforebegin','<label>Or upload a .js file</label><input type="file" id="plFile" accept=".js">');
+$('#plFile').onchange=async e=>{const f=e.target.files[0];if(!f)return;$('#plCode').value=await f.text();if(!$('#plName').value)$('#plName').value=f.name.replace(/\.js$/i,'')};
+const _go=$('#go').onclick;$('#go').onclick=async()=>{await _go();if(cfg)run(loadAllPlugins)};
+if(cfg)run(loadAllPlugins);
 
 showApp();
 </script></body></html>
