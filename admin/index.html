@@ -391,6 +391,12 @@ async function importZipAll(){
   const s=/^index$/i.test(base)?'home':slug(base);
   if(s)commitFiles.push({path:'p/'+s+'/index.html',text:f.text});
  });
+ files.filter(f=>/^img\//i.test(f.name)).forEach(f=>commitFiles.push(f.text!==undefined?{path:f.name,text:f.text}:{path:f.name,b64:f.b64}));
+ let needMenuJs=false;
+ const mj=files.find(f=>/^menu\.json$/i.test(f.name));
+ if(mj){commitFiles.push({path:'menu.json',text:mj.text});needMenuJs=true}
+ if(files.some(f=>/^index\.html?$/i.test(f.name))){const hm=files.find(f=>/^index\.html?$/i.test(f.name));commitFiles.push({path:'index.html',text:hm.text},{path:'homepage.json',text:JSON.stringify({slug:'home'})});needMenuJs=true}
+ if(needMenuJs)commitFiles.push({path:'menu.js',text:MENU_JS});
  if(!commitFiles.length)throw new Error('No CSS or HTML files found in this zip.');
  await commit(commitFiles,'Import and activate theme zip');
  $('#zipStatus').textContent='Imported '+commitFiles.length+' file(s) and activated them. Live in 1-2 minutes.';
@@ -502,7 +508,7 @@ const _go=$('#go').onclick;$('#go').onclick=async()=>{await _go();if(cfg)run(loa
 if(cfg)run(loadAllPlugins);
 
 /* ===== ADD-ON 2: Menu + Homepage ===== */
-const MENU_JS=`(function(){fetch('/menu.json?'+Date.now()).then(function(r){return r.ok?r.json():[]}).then(function(m){if(!m.length)return;var n=document.getElementById('site-menu');if(!n){n=document.createElement('nav');n.id='site-menu';document.body.insertBefore(n,document.body.firstChild)}var u=document.createElement('ul');u.style.cssText='list-style:none;display:flex;flex-wrap:wrap;gap:1rem;margin:0;padding:1rem;justify-content:center';m.forEach(function(i){var li=document.createElement('li'),a=document.createElement('a');a.href=i.url;a.textContent=i.label;if(location.pathname.replace(/\\/$/,'')==i.url.replace(/\\/$/,''))a.style.fontWeight='700';li.appendChild(a);u.appendChild(li)});n.innerHTML='';n.appendChild(u)}).catch(function(){})})();`;
+const MENU_JS=`(function(){fetch('/menu.json?'+Date.now()).then(function(r){return r.ok?r.json():[]}).then(function(m){if(!m.length)return;var n=document.getElementById('site-menu');if(!n){n=document.createElement('nav');n.id='site-menu';document.body.insertBefore(n,document.body.firstChild)}var u=document.createElement('ul');if(!n.hasAttribute('data-styled'))u.style.cssText='list-style:none;display:flex;flex-wrap:wrap;gap:1rem;margin:0;padding:1rem;justify-content:center';m.forEach(function(i){var li=document.createElement('li'),a=document.createElement('a');a.href=i.url;a.textContent=i.label;if(location.pathname.replace(/\\/$/,'')==i.url.replace(/\\/$/,'')){a.style.fontWeight='700';a.className='active'}li.appendChild(a);u.appendChild(li)});n.innerHTML='';n.appendChild(u)}).catch(function(){})})();`;
 async function setHome(s){const html=await readText('p/'+s+'/index.html');
  await commit([{path:'index.html',text:html},{path:'homepage.json',text:JSON.stringify({slug:s})},{path:'menu.js',text:MENU_JS}],'Set homepage '+s)}
 let menuItems=[];
