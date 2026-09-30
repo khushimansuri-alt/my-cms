@@ -138,7 +138,7 @@ code{background:var(--bg);padding:.1rem .3rem;border-radius:4px}
 <label>Font</label><select id="tf"></select><label>Corner roundness (px)</label><input id="tr" type="number" min="0" max="40">
 <p><button class="p" id="tsave">Save theme</button></p></div>
 <div class="card"><h3>Upload a theme (.zip)</h3>
-<p class="mut">Upload a zip of HTML/CSS/JS/images. Files are added under <code>/theme-assets/</code>, keeping their folder structure. Nothing on your live site is replaced automatically — use the buttons below each extracted file to apply it.</p>
+<p class="mut">Upload a zip of HTML/CSS/JS/images. After it reads the zip, click <b>Import &amp; Activate Everything</b> to set the stylesheet and publish every page in one go — <code>index.html</code> becomes your home page, and every other file becomes a page named after itself (e.g. <code>about.html</code> → <code>/p/about/</code>). Prefer to apply files one at a time instead? Use the buttons under each file below.</p>
 <input id="zipfile" type="file" accept=".zip"><div id="zipStatus" class="mut" style="margin-top:.5rem"></div>
 <div id="zipList" style="margin-top:.8rem"></div></div></section>
 
@@ -331,19 +331,21 @@ $('#tsave').onclick=()=>run(async()=>{const t={primary:$('#tc1').value,bg:$('#tc
 
 const b64ab=buf=>{let bin='';const bytes=new Uint8Array(buf);for(let i=0;i<bytes.length;i++)bin+=String.fromCharCode(bytes[i]);return btoa(bin)};
 const TEXTEXT=/\.(html?|css|js|json|svg|txt|md)$/i;
+let lastZipFiles=[];
 $('#zipfile').onchange=async e=>{const f=e.target.files[0];if(!f)return;
  $('#zipStatus').textContent='Reading zip...';$('#zipList').innerHTML='';
  try{
   const zip=await JSZip.loadAsync(f),entries=Object.values(zip.files).filter(z=>!z.dir);
-  $('#zipStatus').textContent='Uploading '+entries.length+' file(s)...';
+  $('#zipStatus').textContent='Reading '+entries.length+' file(s)...';
   const files=[];
   for(const z of entries){
    const path='theme-assets/'+z.name.replace(/^\/+/,'');
-   if(TEXTEXT.test(z.name)) files.push({path,text:await z.async('string')});
-   else files.push({path,b64:b64ab(await z.async('arraybuffer'))});
+   if(TEXTEXT.test(z.name)) files.push({path,text:await z.async('string'),name:z.name});
+   else files.push({path,b64:b64ab(await z.async('arraybuffer')),name:z.name});
   }
-  await commit(files,'Upload theme zip: '+f.name);
-  $('#zipStatus').textContent='Uploaded. Live in 1-2 minutes.';
+  lastZipFiles=files;
+  $('#zipStatus').innerHTML='Found '+entries.length+' file(s). <button class="p" id="zipImportAll">Import &amp; Activate Everything</button>';
+  $('#zipImportAll').onclick=()=>run(importZipAll);
   const list=$('#zipList');list.innerHTML='';
   files.forEach(ff=>{const row=document.createElement('div');row.className='row';
    const b=document.createElement('b');b.textContent='/'+ff.path;row.append(b);
@@ -355,6 +357,20 @@ $('#zipfile').onchange=async e=>{const f=e.target.files[0];if(!f)return;
    list.append(row)})
  }catch(err){$('#zipStatus').textContent='Error: '+err.message}
  e.target.value=''};
+async function importZipAll(){
+ const files=lastZipFiles,commitFiles=[];
+ const css=files.find(f=>/(^|\/)(theme|style)\.css$/i.test(f.name))||files.find(f=>/\.css$/i.test(f.name));
+ if(css)commitFiles.push({path:'theme.css',text:css.text});
+ files.filter(f=>/\.html?$/i.test(f.name)).forEach(f=>{
+  const base=f.name.split('/').pop().replace(/\.html?$/i,'');
+  const s=/^index$/i.test(base)?'home':slug(base);
+  if(s)commitFiles.push({path:'p/'+s+'/index.html',text:f.text});
+ });
+ if(!commitFiles.length)throw new Error('No CSS or HTML files found in this zip.');
+ await commit(commitFiles,'Import and activate theme zip');
+ $('#zipStatus').textContent='Imported '+commitFiles.length+' file(s) and activated them. Live in 1-2 minutes.';
+ msg('Theme imported and activated.');
+}
 
 /* CODE EDITOR */
 $('#cdLoad').onclick=()=>run(async()=>{const p=$('#cdPath').value.trim();if(!p)throw new Error('Enter a file path first');
