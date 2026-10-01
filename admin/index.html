@@ -39,6 +39,22 @@ th{color:var(--mut);font-size:13px;font-weight:600}
 .info-row:last-child{border-bottom:0}
 .info-row span:first-child{color:var(--mut)}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:.6rem}
+.plugin-table{width:100%;border-collapse:collapse}
+.plugin-table tr{border-bottom:1px solid var(--bd)}
+.plugin-table tr.active-row{background:#f3f9ff}
+.plugin-table td{padding:.9rem .5rem;vertical-align:top}
+.plugin-name{font-weight:700;font-size:1rem}
+.plugin-status{display:inline-block;font-size:.72rem;font-weight:700;padding:.15rem .6rem;border-radius:100px;margin-left:.5rem}
+.status-active{background:#e3fbe9;color:#1a8a3d}
+.status-inactive{background:#eee;color:#777}
+.plugin-actions a{color:var(--pr);font-weight:600;cursor:pointer;font-size:.85rem}
+.plugin-actions span{color:var(--mut);padding:0 .3rem}
+.menu-item{display:flex;align-items:center;gap:.7rem;background:var(--bg);border:1px solid var(--bd);border-radius:8px;padding:.7rem .9rem;margin-bottom:.5rem;cursor:grab}
+.menu-item.dragging{opacity:.4}
+.menu-item .handle{font-size:1.2rem;color:var(--mut)}
+.menu-item .lbl{font-weight:700;flex:1}
+.menu-item .url{color:var(--mut);font-size:.85rem}
+.theme-swatch{width:90px;height:70px;border-radius:10px;flex:0 0 90px}
 .grid figure{margin:0;border:1px solid var(--bd);border-radius:8px;overflow:hidden;cursor:pointer;font-size:12px}
 .grid img{width:100%;height:90px;object-fit:cover;display:block;background:var(--bd)}
 .grid figcaption{padding:.3rem;word-break:break-all}
@@ -63,10 +79,10 @@ code{background:var(--bg);padding:.1rem .3rem;border-radius:4px}
   <div class="brand">📘 CMS Admin</div>
   <button data-t="dash" class="active">🏠 Dashboard</button>
   <button data-t="pages">📄 Pages</button>
-  <button data-t="menu">🍔 Menu</button>
   <button data-t="posts">📝 Posts</button>
   <button data-t="media">🖼️ Media</button>
   <button data-t="theme">🎨 Theme</button>
+  <button data-t="menus">☰ Menus</button>
   <button data-t="code">💻 Code</button>
   <button data-t="trash">🗑️ Trash</button>
   <button data-t="plugins">🧩 Plugins</button>
@@ -120,15 +136,6 @@ code{background:var(--bg);padding:.1rem .3rem;border-radius:4px}
 <section id="v-edit" class="hide"><div class="card"><div class="row"><b id="etitle"></b><button id="prev">Preview</button><button class="d" id="del">Delete</button></div>
 <div id="fields"></div><p><button class="p" id="save">Save changes</button> <button data-t="pages">Back</button></p><iframe id="frame" title="Preview"></iframe></div></section>
 
-<section id="v-menu" class="hide">
-<div class="card"><h3>Homepage</h3><p class="mut">Choose which page opens first when someone visits your website (the main address).</p>
-<p id="hpCur" class="mut"></p><label>Select page</label><select id="hpSel"></select>
-<p><button class="p" id="hpSave">Set as Homepage</button></p></div>
-<div class="card"><h3>Website menu</h3><p class="mut">Pick which pages show in the menu on the front of your website. Change the order with the arrows, rename the labels, then click Save menu. The menu is shown automatically on every page, post and the homepage. (To hide it on a page, add <code>data-no-menu</code> anywhere in that page's HTML. To place it yourself, add <code>&lt;nav id="site-menu"&gt;&lt;/nav&gt;</code> where you want it.)</p>
-<div id="mnList"></div>
-<div class="row" style="margin-top:.8rem"><select id="mnPage" style="flex:1 1 180px;width:auto"></select><button id="mnAddPage">Add page</button><button id="mnAddHome">Add Home</button><button id="mnAddLink">Add custom link</button></div>
-<p><button class="p" id="mnSave">Save menu</button></p></div></section>
-
 <section id="v-posts" class="hide"><div class="card"><div class="row"><b>Posts</b><button class="p" id="pnew">Add New</button></div>
 <table><thead><tr><th>Title</th><th>Date</th><th>Status</th><th></th></tr></thead><tbody id="poTable"></tbody></table></div></section>
 
@@ -141,9 +148,10 @@ code{background:var(--bg);padding:.1rem .3rem;border-radius:4px}
 <p><button class="p" id="psave">Save post</button> <button class="d" id="pdel">Delete</button> <button data-t="posts">Back</button></p></div></section>
 
 <section id="v-media" class="hide"><div class="card"><h3>Media library</h3><p class="mut">Photos are resized to 1600px. New photos appear after the site rebuilds (1-2 min). Tap a photo to copy its path.</p>
-<input id="up" type="file" accept="image/*" multiple><div id="mgrid" class="grid" style="margin-top:1rem"></div></div></section>
+<input id="up" type="file" accept="image/*,.pdf,application/pdf" multiple><div id="mgrid" class="grid" style="margin-top:1rem"></div></div></section>
 
 <section id="v-theme" class="hide">
+<div class="card"><h3>Current Theme</h3><div id="themeBox" class="row" style="align-items:center"></div></div>
 <div class="card"><h3>Quick theme</h3><p class="mut">Used through CSS variables (--primary, --bg, --text, --font, --radius) in theme.css.</p>
 <label>Theme name (shown on your Dashboard)</label><input id="tName" placeholder="My Theme">
 <label>Main color</label><input id="tc1" type="color"><label>Background</label><input id="tc2" type="color"><label>Text color</label><input id="tc3" type="color">
@@ -153,6 +161,30 @@ code{background:var(--bg);padding:.1rem .3rem;border-radius:4px}
 <p class="mut">Upload a zip of HTML/CSS/JS/images. After it reads the zip, click <b>Import &amp; Activate Everything</b> to set the stylesheet and publish every page in one go — <code>index.html</code> becomes your home page, and every other file becomes a page named after itself (e.g. <code>about.html</code> → <code>/p/about/</code>). Prefer to apply files one at a time instead? Use the buttons under each file below.</p>
 <input id="zipfile" type="file" accept=".zip"><div id="zipStatus" class="mut" style="margin-top:.5rem"></div>
 <div id="zipList" style="margin-top:.8rem"></div></div></section>
+
+<section id="v-menus" class="hide">
+<div class="card"><div class="row"><b>Menu Items</b><button class="p" id="menuSave">Save Menu</button></div>
+<p class="mut">Drag items by the ⠿ handle to reorder them. This is the order your site's navigation will follow.</p>
+<div id="menuList"></div></div>
+<div class="card"><h3>Add to Menu</h3>
+<label>Add an existing page</label>
+<div class="row"><select id="menuPageSel" style="flex:1"></select><button id="menuAddPage">Add</button></div>
+<label style="margin-top:1.2rem">Or add a custom link</label>
+<div class="row"><input id="menuCustomLabel" placeholder="Label, e.g. Admissions" style="flex:1"><input id="menuCustomUrl" placeholder="/p/admissions/ or https://..." style="flex:1"><button id="menuAddCustom">Add</button></div>
+</div>
+<div class="card"><h3>Using this menu on your site</h3>
+<p class="mut">This menu is saved as <code>/menu.json</code>. To make your theme's navigation read it automatically, add this snippet before <code>&lt;/body&gt;</code> on each page:</p>
+<textarea readonly style="min-height:120px;font-family:ui-monospace,monospace" onclick="this.select()">&lt;script&gt;
+fetch('/menu.json').then(r=&gt;r.json()).then(items=&gt;{
+  var nav=document.querySelector('.menu'); if(!nav) return;
+  nav.innerHTML='';
+  items.forEach(function(i){var a=document.createElement('a');a.href=i.url;a.textContent=i.label;nav.appendChild(a);});
+}).catch(function(){});
+&lt;/script&gt;</textarea>
+<p class="mut">This looks for an element with class <code>menu</code> (the nav links container most of our themes use) and fills it from your saved menu.</p>
+</div></section>
+
+
 
 <section id="v-code" class="hide"><div class="card"><h3>Code editor</h3>
 <p class="mut">Create or edit any file in the repo directly — a new stylesheet, script, or a full HTML page at a custom path.</p>
@@ -202,11 +234,9 @@ const run=async f=>{try{await f();return true}catch(e){msg('Error: '+e.message);
 const ls=async d=>{try{return await(await api('/contents/'+d+'?ref='+cfg.branch)).json()}catch(e){if(e.status==404)return[];throw e}};
 const readText=async p=>(await api('/contents/'+p+'?ref='+cfg.branch,{headers:{Accept:'application/vnd.github.raw+json'}})).text();
 const readJson=async(p,d)=>{try{return JSON.parse(await readText(p))}catch(e){return d}};
-function injectMenu(h){if(h.includes('menu.js')||h.includes('data-no-menu'))return h;const t='<script src="/menu.js" defer></'+'script>';return /<\/body>/i.test(h)?h.replace(/<\/body>/i,t+'</body>'):h+t}
 async function commit(files,message){
  const head=(await(await api('/git/ref/heads/'+cfg.branch)).json()).object.sha,base=(await(await api('/git/commits/'+head)).json()).tree.sha,tree=[];
  for(const f of files){if(f.del){tree.push({path:f.path,mode:'100644',type:'blob',sha:null});continue}
-  if(f.text&&/^(index\.html|p\/[^\/]+\/index\.html|posts\/[^\/]+\/index\.html)$/.test(f.path))f.text=injectMenu(f.text);
   const b=await(await api('/git/blobs',{method:'POST',body:JSON.stringify(f.b64?{content:f.b64,encoding:'base64'}:{content:f.text,encoding:'utf-8'})})).json();
   tree.push({path:f.path,mode:'100644',type:'blob',sha:b.sha})}
  const t=await(await api('/git/trees',{method:'POST',body:JSON.stringify({base_tree:base,tree})})).json();
@@ -216,15 +246,15 @@ const trashId=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
 const trashIndex=async()=>await readJson('trash/index.json',[]);
 
 /* NAV */
-const VIEWS=['dash','pages','edit','posts','pedit','media','theme','code','trash','plugins','users','settings'];
-const LOAD={dash:loadDash,pages:loadPages,posts:loadPosts,media:loadMedia,theme:loadTheme,trash:loadTrash,plugins:loadPlugins,users:loadUsers,settings:loadSettings};
+const VIEWS=['dash','pages','edit','posts','pedit','media','theme','menus','code','trash','plugins','users','settings'];
+const LOAD={dash:loadDash,pages:loadPages,posts:loadPosts,media:loadMedia,theme:loadTheme,menus:loadMenus,trash:loadTrash,plugins:loadPlugins,users:loadUsers,settings:loadSettings};
 function tab(n,opt){VIEWS.forEach(x=>$('#v-'+x).classList.toggle('hide',x!=n));
  document.querySelectorAll('#side button[data-t]').forEach(b=>b.classList.toggle('active',b.dataset.t==n));
  if(n=='pages'){$('#pgNew').classList.toggle('hide',opt!='new')}
  if(n=='posts'&&opt=='new')return editPost();
  if(LOAD[n])run(LOAD[n])}
 document.addEventListener('click',e=>{const b=e.target.closest('[data-t]');if(b)tab(b.dataset.t,b.dataset.go)});
-function showApp(){$('#login').classList.toggle('hide',!!cfg);$('#shell').classList.toggle('hide',!cfg);if(cfg){tab('dash');readJson('settings.json',{}).then(s=>siteUrl=(s.siteUrl||'').replace(/\/+$/,''))}}
+function showApp(){$('#login').classList.toggle('hide',!!cfg);$('#shell').classList.toggle('hide',!cfg);if(cfg){tab('dash');readJson('settings.json',{}).then(s=>siteUrl=(s.siteUrl||'').replace(/\/+$/,''));loadPluginsRuntime()}}
 $('#go').onclick=async()=>{cfg={owner:$('#o').value.trim(),repo:$('#r').value.trim(),branch:$('#b').value.trim()||'main',token:$('#t').value.trim()};
  try{await api('');localStorage.setItem('cmsCfg',JSON.stringify(cfg));showApp()}catch(e){cfg=null;msg('Login failed: '+e.message)}};
 $('#out').onclick=()=>{localStorage.removeItem('cmsCfg');cfg=null;showApp()};
@@ -240,6 +270,7 @@ async function loadDash(){
  $('#cPages').textContent=npages;$('#cPosts').textContent=po.length;$('#cMedia').textContent=ph.length;$('#cUsers').textContent=users.length||'–';
  $('#agPosts').textContent=po.length;$('#agPages').textContent=npages;$('#agMedia').textContent=ph.length;
  $('#siName').textContent=settings.name||cfg.repo;$('#siRepo').textContent=cfg.owner+'/'+cfg.repo;$('#siBranch').textContent=cfg.branch;
+ readJson('theme.json',{}).then(t=>$('#siTheme').textContent=t.themeName||'Default Theme');
  const box=$('#activity');box.innerHTML='Loading...';
  try{
   const commits=await(await api('/commits?per_page=6')).json();
@@ -252,11 +283,26 @@ async function loadDash(){
  }catch(e){box.textContent='Could not load recent activity.'}}
 
 /* PAGES */
-async function loadPages(){const tb=$('#pgTable');tb.innerHTML='<tr><td colspan=2>Loading...</td></tr>';const d=(await ls('p')).filter(x=>x.type=='dir');tb.innerHTML='';
- if(!d.length)tb.innerHTML='<tr><td colspan=2 class="mut">No pages yet.</td></tr>';
- d.forEach(x=>{const tr=document.createElement('tr');tr.innerHTML='<td><b>/p/'+x.name+'/</b></td><td style="text-align:right"></td>';
+const fmtDateTime=iso=>{const d=new Date(iso);return d.toLocaleDateString()+' '+d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})};
+async function pageLastUpdated(slugName){try{const c=await(await api('/commits?path=p/'+slugName+'/index.html&per_page=1')).json();if(c&&c.length)return c[0].commit.author.date}catch(e){}return null}
+async function loadPages(){const tb=$('#pgTable');tb.innerHTML='<tr><td colspan=4>Loading...</td></tr>';const d=(await ls('p')).filter(x=>x.type=='dir');tb.innerHTML='';
+ if(!d.length){tb.innerHTML='<tr><td colspan=4 class="mut">No pages yet.</td></tr>';return}
+ d.forEach(x=>{const tr=document.createElement('tr');
+  tr.innerHTML='<td><input type="checkbox" class="pgSel" value="'+x.name+'"></td><td><b>/p/'+x.name+'/</b></td><td class="mut">Loading…</td><td style="text-align:right"></td>';
   const td=tr.lastElementChild,v=document.createElement('a');v.href='/p/'+x.name+'/';v.target='_blank';v.textContent='View';v.style.marginRight='.6rem';
-  const e=document.createElement('button');e.textContent='Edit';e.onclick=()=>openPage(x.name);td.append(v,e);tb.append(tr)})}
+  const e=document.createElement('button');e.textContent='Edit';e.onclick=()=>openPage(x.name);td.append(v,e);tb.append(tr);
+  pageLastUpdated(x.name).then(dt=>{tr.children[2].textContent=dt?fmtDateTime(dt):'—'})});
+ $('#pgSelAll').checked=false}
+$('#pgSelAll').onchange=e=>{document.querySelectorAll('.pgSel').forEach(c=>c.checked=e.target.checked)};
+$('#pgBulkDel').onclick=()=>{const sels=[...document.querySelectorAll('.pgSel:checked')].map(c=>c.value);
+ if(!sels.length)return msg('Select at least one page first.');
+ if(!confirm('Move '+sels.length+' page(s) to Trash?'))return;
+ run(async()=>{const idx=await trashIndex(),files=[];
+  for(const s of sels){const html=await readText('p/'+s+'/index.html'),id=trashId();
+   idx.push({id,type:'page',slug:s,title:s,deletedAt:new Date().toISOString()});
+   files.push({path:'trash/pages/'+id+'/index.html',text:html});files.push({path:'p/'+s+'/index.html',del:true})}
+  files.push({path:'trash/index.json',text:JSON.stringify(idx,null,1)});
+  await commit(files,'Bulk move '+sels.length+' page(s) to trash');msg(sels.length+' page(s) moved to Trash.');loadPages()})};
 $('#pgNewBtn').onclick=()=>{$('#pgNew').classList.remove('hide')};
 $('#pgNewCancel').onclick=()=>{$('#pgNew').classList.add('hide')};
 $('#newbtn').onclick=()=>{const s=slug($('#nslug').value.trim()),h=$('#nhtml').value;if(!s||!h.includes('<'))return msg('Enter a page name and paste the HTML.');
@@ -279,7 +325,7 @@ const pageOut=()=>'<!DOCTYPE html>\n'+cur.doc.documentElement.outerHTML;
 const withBase=html=>siteUrl?html.replace(/<head[^>]*>/i,m=>m+'<base href="'+siteUrl+'/">'):html+'\n<!-- Preview note: add your live Site URL under Settings to see real fonts, styles and photos here. -->';
 $('#prev').onclick=()=>{$('#frame').srcdoc=withBase(pageOut())};
 $('#nprev').onclick=()=>{const h=$('#nhtml').value;if(!h.includes('<'))return msg('Paste the page HTML first.');$('#nframe').classList.remove('hide');$('#nframe').srcdoc=withBase(h)};
-$('#save').onclick=()=>run(async()=>{const out=pageOut(),fl=[{path:'p/'+cur.slug+'/index.html',text:out}];if((await readJson('homepage.json',{})).slug==cur.slug)fl.push({path:'index.html',text:out});await commit(fl,'Edit page '+cur.slug);msg('Saved. Live in 1-2 minutes.')});
+$('#save').onclick=()=>run(async()=>{await commit([{path:'p/'+cur.slug+'/index.html',text:pageOut()}],'Edit page '+cur.slug);msg('Saved. Live in 1-2 minutes.')});
 $('#del').onclick=()=>{if(!confirm('Move this page to Trash? You can restore it later.'))return;
  run(async()=>{const id=trashId(),idx=await trashIndex();idx.push({id,type:'page',slug:cur.slug,title:cur.doc.title||cur.slug,deletedAt:new Date().toISOString()});
   await commit([{path:'trash/pages/'+id+'/index.html',text:pageOut()},{path:'trash/index.json',text:JSON.stringify(idx,null,1)},{path:'p/'+cur.slug+'/index.html',del:true}],'Move page '+cur.slug+' to trash');
@@ -333,31 +379,43 @@ async function purgeItem(it){const idx=(await trashIndex()).filter(x=>x.id!=it.i
  files.push({path:'trash/index.json',text:JSON.stringify(idx,null,1)});await commit(files,'Permanently delete '+it.type+' '+it.slug)}
 
 /* MEDIA */
-const photos=async()=>(await ls('img')).filter(x=>x.type=='file'&&IMG.test(x.name));
-function fill(g,l,cb){g.innerHTML='';if(!l.length)g.textContent='No photos yet.';
- l.forEach(x=>{const f=document.createElement('figure'),im=document.createElement('img'),c=document.createElement('figcaption');im.loading='lazy';im.src='/img/'+x.name;c.textContent=x.name;f.append(im,c);f.onclick=()=>cb('/img/'+x.name);g.append(f)})}
+const MEDIAEXT=/\.(jpe?g|png|webp|gif|svg|pdf)$/i;
+const photos=async()=>(await ls('img')).filter(x=>x.type=='file'&&MEDIAEXT.test(x.name));
+function fill(g,l,cb){g.innerHTML='';if(!l.length)g.textContent='No files yet.';
+ l.forEach(x=>{const isPdf=/\.pdf$/i.test(x.name);const f=document.createElement('figure'),c=document.createElement('figcaption');c.textContent=x.name;
+  if(isPdf){const ic=document.createElement('div');ic.style.cssText='height:90px;display:flex;align-items:center;justify-content:center;font-size:2rem;background:#fdeccb';ic.textContent='📄';f.append(ic)}
+  else{const im=document.createElement('img');im.loading='lazy';im.src='/img/'+x.name;f.append(im)}
+  f.append(c);f.onclick=()=>cb('/img/'+x.name);g.append(f)})}
 async function loadMedia(){fill($('#mgrid'),await photos(),p=>navigator.clipboard?navigator.clipboard.writeText(p).then(()=>msg('Copied '+p)):msg(p))}
-function pick(cb){$('#pick').style.display='block';run(async()=>fill($('#pgrid'),await photos(),p=>{$('#pick').style.display='none';cb(p)}))}
+function pick(cb){$('#pick').style.display='block';run(async()=>fill($('#pgrid'),(await photos()).filter(x=>!/\.pdf$/i.test(x.name)),p=>{$('#pick').style.display='none';cb(p)}))}
 $('#pclose').onclick=()=>$('#pick').style.display='none';
 const rd=(f,ext)=>new Promise(r=>{const x=new FileReader();x.onload=()=>r({b64:x.result.split(',')[1],ext});x.readAsDataURL(f)});
-const prep=f=>/svg|gif/.test(f.type)?rd(f,f.name.split('.').pop().toLowerCase()):new Promise(res=>{const im=new Image();im.onload=()=>{
- const s=Math.min(1,1600/Math.max(im.width,im.height)),c=document.createElement('canvas'),png=f.type=='image/png';c.width=Math.round(im.width*s);c.height=Math.round(im.height*s);
- c.getContext('2d').drawImage(im,0,0,c.width,c.height);res({b64:c.toDataURL(png?'image/png':'image/jpeg',.82).split(',')[1],ext:png?'png':'jpg'})};im.src=URL.createObjectURL(f)});
+const prep=f=>{if(f.type=='application/pdf')return rd(f,'pdf');
+ if(/svg|gif/.test(f.type))return rd(f,f.name.split('.').pop().toLowerCase());
+ return new Promise(res=>{const im=new Image();im.onload=()=>{
+  const s=Math.min(1,1600/Math.max(im.width,im.height)),c=document.createElement('canvas'),png=f.type=='image/png';c.width=Math.round(im.width*s);c.height=Math.round(im.height*s);
+  c.getContext('2d').drawImage(im,0,0,c.width,c.height);res({b64:c.toDataURL(png?'image/png':'image/jpeg',.82).split(',')[1],ext:png?'png':'jpg'})};im.src=URL.createObjectURL(f)})};
 $('#up').onchange=e=>{const fs=[...e.target.files];if(!fs.length)return;msg('Uploading...');
- run(async()=>{const o=[];for(const f of fs){const p=await prep(f);o.push({path:'img/'+(slug(f.name.replace(/\.[^.]+$/,''))||'photo')+'.'+p.ext,b64:p.b64})}
-  await commit(o,'Upload '+o.length+' photo(s)');e.target.value='';msg('Uploaded. Photos show on the site in 1-2 minutes.');loadMedia()})};
+ run(async()=>{const o=[];for(const f of fs){const p=await prep(f);o.push({path:'img/'+(slug(f.name.replace(/\.[^.]+$/,''))||'file')+'.'+p.ext,b64:p.b64})}
+  await commit(o,'Upload '+o.length+' file(s)');e.target.value='';msg('Uploaded. Files show on the site in 1-2 minutes.');loadMedia()})};
 
 /* THEME */
-async function loadTheme(){const t={primary:'#2f6f5e',bg:'#ffffff',text:'#1b2130',font:'Clean sans',radius:12,...await readJson('theme.json',{})};
- $('#tc1').value=t.primary;$('#tc2').value=t.bg;$('#tc3').value=t.text;$('#tf').value=t.font;$('#tr').value=t.radius}
-$('#tsave').onclick=()=>run(async()=>{const t={primary:$('#tc1').value,bg:$('#tc2').value,text:$('#tc3').value,font:$('#tf').value,radius:+$('#tr').value||0};
+async function loadTheme(){const t={primary:'#2f6f5e',bg:'#ffffff',text:'#1b2130',font:'Clean sans',radius:12,themeName:'Default Theme',...await readJson('theme.json',{})};
+ $('#tName').value=t.themeName;$('#tc1').value=t.primary;$('#tc2').value=t.bg;$('#tc3').value=t.text;$('#tf').value=t.font;$('#tr').value=t.radius;
+ renderThemeBox(t)}
+function renderThemeBox(t){const box=$('#themeBox');box.innerHTML='';
+ const sw=document.createElement('div');sw.className='theme-swatch';sw.style.background=t.primary;
+ const info=document.createElement('div');info.innerHTML='<div style="font-weight:800;font-size:1.1rem">'+esc(t.themeName||'Default Theme')+' <span class="plugin-status status-active">Active</span></div><div class="mut">Primary color: '+esc(t.primary)+' · Font: '+esc(t.font)+'</div>';
+ box.append(sw,info)}
+$('#tsave').onclick=()=>run(async()=>{const t={primary:$('#tc1').value,bg:$('#tc2').value,text:$('#tc3').value,font:$('#tf').value,radius:+$('#tr').value||0,themeName:$('#tName').value.trim()||'Custom Theme'};
  const css=':root{--primary:'+t.primary+';--bg:'+t.bg+';--text:'+t.text+';--font:'+FONTS[t.font]+';--radius:'+t.radius+'px}\nbody{margin:0;background:var(--bg);color:var(--text);font-family:var(--font);line-height:1.6}\na{color:var(--primary)}\n.post,.wrap{max-width:720px;margin:0 auto;padding:2rem 1rem}\n.post img{max-width:100%;border-radius:var(--radius)}\n.card{border:1px solid rgba(128,128,128,.3);border-radius:var(--radius);padding:1rem;margin:1rem 0}\n';
  await commit([{path:'theme.json',text:JSON.stringify(t)},{path:'theme.css',text:css}],'Update theme');msg('Theme saved. Live in 1-2 minutes.')});
 
 const b64ab=buf=>{let bin='';const bytes=new Uint8Array(buf);for(let i=0;i<bytes.length;i++)bin+=String.fromCharCode(bytes[i]);return btoa(bin)};
 const TEXTEXT=/\.(html?|css|js|json|svg|txt|md)$/i;
-let lastZipFiles=[];
+let lastZipFiles=[],lastZipName='';
 $('#zipfile').onchange=async e=>{const f=e.target.files[0];if(!f)return;
+ lastZipName=f.name.replace(/\.zip$/i,'').replace(/[-_]+/g,' ').trim();
  $('#zipStatus').textContent='Reading zip...';$('#zipList').innerHTML='';
  try{
   const zip=await JSZip.loadAsync(f),entries=Object.values(zip.files).filter(z=>!z.dir);
@@ -385,22 +443,21 @@ $('#zipfile').onchange=async e=>{const f=e.target.files[0];if(!f)return;
 async function importZipAll(){
  const files=lastZipFiles,commitFiles=[];
  const css=files.find(f=>/(^|\/)(theme|style)\.css$/i.test(f.name))||files.find(f=>/\.css$/i.test(f.name));
- if(css)commitFiles.push({path:'theme.css',text:css.text});
+ if(css){commitFiles.push({path:'theme.css',text:css.text});
+  const existing=await readJson('theme.json',{primary:'#2f6f5e',bg:'#ffffff',text:'#1b2130',font:'Clean sans',radius:12});
+  const t={...existing,themeName:lastZipName||'Custom Theme'};
+  commitFiles.push({path:'theme.json',text:JSON.stringify(t)});
+ }
  files.filter(f=>/\.html?$/i.test(f.name)).forEach(f=>{
   const base=f.name.split('/').pop().replace(/\.html?$/i,'');
   const s=/^index$/i.test(base)?'home':slug(base);
   if(s)commitFiles.push({path:'p/'+s+'/index.html',text:f.text});
  });
- files.filter(f=>/^img\//i.test(f.name)).forEach(f=>commitFiles.push(f.text!==undefined?{path:f.name,text:f.text}:{path:f.name,b64:f.b64}));
- let needMenuJs=false;
- const mj=files.find(f=>/^menu\.json$/i.test(f.name));
- if(mj){commitFiles.push({path:'menu.json',text:mj.text});needMenuJs=true}
- if(files.some(f=>/^index\.html?$/i.test(f.name))){const hm=files.find(f=>/^index\.html?$/i.test(f.name));commitFiles.push({path:'index.html',text:hm.text},{path:'homepage.json',text:JSON.stringify({slug:'home'})});needMenuJs=true}
- if(needMenuJs)commitFiles.push({path:'menu.js',text:MENU_JS});
  if(!commitFiles.length)throw new Error('No CSS or HTML files found in this zip.');
  await commit(commitFiles,'Import and activate theme zip');
  $('#zipStatus').textContent='Imported '+commitFiles.length+' file(s) and activated them. Live in 1-2 minutes.';
  msg('Theme imported and activated.');
+ loadTheme();
 }
 
 /* CODE EDITOR */
@@ -426,129 +483,117 @@ $('#stSave').onclick=()=>run(async()=>{const s={name:$('#stName').value.trim(),t
  siteUrl=s.siteUrl.replace(/\/+$/,'');
  await commit([{path:'settings.json',text:JSON.stringify(s,null,1)}],'Update settings');msg('Settings saved. Live in 1-2 minutes.')});
 
-/* ===== ADD-ON: bulk delete, dates, reset, theme name, plugins ===== */
-const fmtDT=iso=>{const d=new Date(iso);return d.toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'})+', '+d.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'})};
-const themeCss=t=>':root{--primary:'+t.primary+';--bg:'+t.bg+';--text:'+t.text+';--font:'+FONTS[t.font]+';--radius:'+t.radius+'px}\nbody{margin:0;background:var(--bg);color:var(--text);font-family:var(--font);line-height:1.6}\na{color:var(--primary)}\n.post,.wrap{max-width:720px;margin:0 auto;padding:2rem 1rem}\n.post img{max-width:100%;border-radius:var(--radius)}\n.card{border:1px solid rgba(128,128,128,.3);border-radius:var(--radius);padding:1rem;margin:1rem 0}\n';
-const DEFTHEME={name:'Default Theme',primary:'#2f6f5e',bg:'#ffffff',text:'#1b2130',font:'Clean sans',radius:12};
-const WELCOME='<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Welcome to your CMS</title><link rel="stylesheet" href="/theme.css"></head><body><div class="wrap" style="text-align:center;padding-top:20vh"><h1>Welcome to your CMS</h1></div></body></html>';
-
-/* Pages: select, select all, bulk delete, publish + update date/time */
-$('#pgTable').parentElement.tHead.innerHTML='<tr><th style="width:30px"><input type="checkbox" id="pgSelAll"></th><th>Page</th><th>Published</th><th>Last updated</th><th></th></tr>';
-$('#pgSelAll').onchange=e=>document.querySelectorAll('.pgchk').forEach(c=>c.checked=e.target.checked);
-async function loadPages2(){const tb=$('#pgTable');tb.innerHTML='<tr><td colspan=5>Loading...</td></tr>';
- const d=(await ls('p')).filter(x=>x.type=='dir');tb.innerHTML='';$('#pgSelAll').checked=false;const home=(await readJson('homepage.json',{})).slug;
- if(!d.length){tb.innerHTML='<tr><td colspan=5 class="mut">No pages yet.</td></tr>';return}
- const dt=await Promise.all(d.map(async x=>{try{const c=await(await api('/commits?path=p/'+x.name+'/index.html&per_page=100')).json();return c.length?[c[c.length-1].commit.author.date,c[0].commit.author.date]:['','']}catch(e){return['','']}}));
- d.forEach((x,i)=>{const tr=document.createElement('tr');
-  tr.innerHTML='<td><input type="checkbox" class="pgchk"></td><td><b></b></td><td></td><td></td><td style="text-align:right"></td>';
-  tr.querySelector('.pgchk').dataset.slug=x.name;tr.querySelector('b').textContent='/p/'+x.name+'/';
-  tr.children[2].textContent=dt[i][0]?fmtDT(dt[i][0]):'–';tr.children[3].textContent=dt[i][1]?fmtDT(dt[i][1]):'–';
-  const v=document.createElement('a');v.href='/p/'+x.name+'/';v.target='_blank';v.textContent='View';v.style.marginRight='.6rem';
-  const e=document.createElement('button');e.textContent='Edit';e.onclick=()=>openPage(x.name);const hb=document.createElement('button');hb.textContent=home==x.name?'🏠 Homepage':'Set as Home';hb.disabled=home==x.name;hb.style.marginRight='.4rem';hb.onclick=()=>run(async()=>{await setHome(x.name);msg('Homepage set. Live in 1-2 minutes.');loadPages2()});tr.children[4].append(v,hb,e);tb.append(tr)})}
-LOAD.pages=loadPages2;
-$('#pgBulkDel').onclick=()=>{const sel=[...document.querySelectorAll('.pgchk:checked')].map(c=>c.dataset.slug);
- if(!sel.length)return msg('Select at least one page.');
- if(!confirm('Move '+sel.length+' page(s) to Trash?'))return;
- run(async()=>{const idx=await trashIndex(),files=[];
-  for(const n of sel){const html=await readText('p/'+n+'/index.html'),id=trashId();
-   idx.push({id,type:'page',slug:n,title:new DOMParser().parseFromString(html,'text/html').title||n,deletedAt:new Date().toISOString()});
-   files.push({path:'trash/pages/'+id+'/index.html',text:html},{path:'p/'+n+'/index.html',del:true})}
-  files.push({path:'trash/index.json',text:JSON.stringify(idx,null,1)});
-  await commit(files,'Move '+sel.length+' page(s) to trash');msg(sel.length+' page(s) moved to Trash.');loadPages2()})};
-
-/* Reset website (Dashboard + Settings) */
-async function resetWebsite(){
- if(prompt('This deletes ALL pages, posts and trash. Type RESET to confirm:')!=='RESET')return;
- run(async()=>{const tr=await(await api('/git/trees/'+cfg.branch+'?recursive=1')).json();
-  const files=tr.tree.filter(x=>x.type=='blob'&&/^(p|posts|trash)\//.test(x.path)&&!/^(posts|trash)\/index\.json$/.test(x.path)&&x.path!='p/home/index.html').map(x=>({path:x.path,del:true}));
-  files.push({path:'posts/index.json',text:'[]'},{path:'trash/index.json',text:'[]'},{path:'theme.json',text:JSON.stringify(DEFTHEME)},{path:'theme.css',text:themeCss(DEFTHEME)},{path:'p/home/index.html',text:WELCOME},{path:'index.html',text:WELCOME},{path:'menu.json',text:'[]'},{path:'menu.js',text:MENU_JS},{path:'homepage.json',text:JSON.stringify({slug:'home'})});
-  await commit(files,'Reset website');msg('Website reset. Live in 1-2 minutes.');tab('dash')})}
-$('#resetSite').onclick=resetWebsite;
-document.querySelector('.qa').insertAdjacentHTML('beforeend','<button class="d" id="dashReset" style="grid-column:1/-1;border-color:#e0393e">⚠️ Reset Website</button>');
-$('#dashReset').onclick=resetWebsite;
-
-/* Theme name (like WordPress) */
-const oldTheme=loadTheme;LOAD.theme=async()=>{await oldTheme();$('#tName').value=(await readJson('theme.json',{})).name||''};
-$('#tsave').onclick=()=>run(async()=>{const t={name:$('#tName').value.trim()||'My Theme',primary:$('#tc1').value,bg:$('#tc2').value,text:$('#tc3').value,font:$('#tf').value,radius:+$('#tr').value||0};
- await commit([{path:'theme.json',text:JSON.stringify(t)},{path:'theme.css',text:themeCss(t)}],'Update theme');msg('Theme "'+t.name+'" activated. Live in 1-2 minutes.')});
-const oldDash=loadDash;LOAD.dash=async()=>{await oldDash();$('#siTheme').textContent=(await readJson('theme.json',{})).name||'Default Theme'};
-let zipName='';$('#zipfile').addEventListener('change',e=>{const f=e.target.files[0];if(f)zipName=f.name.replace(/\.zip$/i,'')});
-const oldImp=importZipAll;importZipAll=async function(){await oldImp();const t=await readJson('theme.json',{});t.name=zipName||t.name||'Imported Theme';
- await commit([{path:'theme.json',text:JSON.stringify(t)}],'Activate theme '+t.name);$('#siTheme').textContent=t.name;msg('Theme "'+t.name+'" activated.')};
-
-/* Plugins: your own JS plugins, saved in repo and auto-loaded on login */
-const PL_IDX='plugins/index.json';
-const CMS={commit,readText,readJson,msg,pickPhoto:pick,slug,api,ls,esc,
- registerTab({id,label,icon,render}){const vid='p_'+id;
-  if(document.getElementById('v-'+vid)){LOAD[vid]=async()=>{const s=$('#v-'+vid);s.innerHTML='';await render(s)};return}
-  const s=document.createElement('section');s.id='v-'+vid;s.className='hide';document.querySelector('main').append(s);
-  VIEWS.push(vid);LOAD[vid]=async()=>{s.innerHTML='';await render(s)};
-  const b=document.createElement('button');b.dataset.t=vid;b.textContent=(icon||'🧩')+' '+label;$('#out').before(b)}};
-async function loadAllPlugins(){for(const p of await readJson(PL_IDX,[])){if(p.off)continue;
- try{const code=await readText('plugins/'+p.slug+'.js');new Function('CMS',code)(CMS)}catch(e){msg('Plugin "'+p.name+'" error: '+e.message)}}}
-async function loadPlugins(){const l=await readJson(PL_IDX,[]),b=$('#plList');b.innerHTML='';
- if(!l.length){b.innerHTML='<p class="mut">No plugins yet.</p>';return}
- const mk=(t,c,f)=>{const x=document.createElement('button');x.textContent=t;if(c)x.className=c;x.onclick=f;return x};
- l.forEach(p=>{const r=document.createElement('div');r.className='row';const n=document.createElement('b');n.textContent='🧩 '+p.name+(p.off?' (off)':'');
-  r.append(n,
-   mk('Edit','',()=>run(async()=>{$('#plName').value=p.name;$('#plCode').value=await readText('plugins/'+p.slug+'.js');scrollTo(0,document.body.scrollHeight)})),
-   mk(p.off?'Turn on':'Turn off','',()=>run(async()=>{p.off=!p.off;await commit([{path:PL_IDX,text:JSON.stringify(l,null,1)}],'Toggle plugin '+p.slug);msg('Done. Log in again to fully apply.');loadPlugins()})),
-   mk('Delete','d',()=>confirm('Delete plugin '+p.name+'?')&&run(async()=>{const nl=l.filter(x=>x.slug!=p.slug);
-    await commit([{path:'plugins/'+p.slug+'.js',del:true},{path:PL_IDX,text:JSON.stringify(nl,null,1)}],'Delete plugin '+p.slug);msg('Plugin deleted.');loadPlugins()})));
-  b.append(r)})}
-$('#plSave').onclick=()=>run(async()=>{const name=$('#plName').value.trim(),code=$('#plCode').value;if(!name||!code.trim())throw new Error('Enter plugin name and code');
- new Function('CMS',code);/* syntax check */
- const s=slug(name),l=await readJson(PL_IDX,[]),i=l.findIndex(x=>x.slug==s),e={slug:s,name};if(i<0)l.push(e);else l[i]={...l[i],...e,off:false};
- await commit([{path:'plugins/'+s+'.js',text:code},{path:PL_IDX,text:JSON.stringify(l,null,1)}],'Save plugin '+s);
- await loadAllPlugins();msg('Plugin saved and loaded.');loadPlugins()});
-$('#plReload').onclick=()=>run(async()=>{await loadAllPlugins();await loadPlugins();msg('Plugins reloaded.')});
-$('#plCode').previousElementSibling.insertAdjacentHTML('beforebegin','<label>Or upload a .js file</label><input type="file" id="plFile" accept=".js">');
-$('#plFile').onchange=async e=>{const f=e.target.files[0];if(!f)return;$('#plCode').value=await f.text();if(!$('#plName').value)$('#plName').value=f.name.replace(/\.js$/i,'')};
-const _go=$('#go').onclick;$('#go').onclick=async()=>{await _go();if(cfg)run(loadAllPlugins)};
-if(cfg)run(loadAllPlugins);
-
-/* ===== ADD-ON 2: Menu + Homepage ===== */
-const MENU_JS=`(function(){fetch('/menu.json?'+Date.now()).then(function(r){return r.ok?r.json():[]}).then(function(m){if(!m.length)return;var n=document.getElementById('site-menu');if(!n){n=document.createElement('nav');n.id='site-menu';document.body.insertBefore(n,document.body.firstChild)}var u=document.createElement('ul');if(!n.hasAttribute('data-styled'))u.style.cssText='list-style:none;display:flex;flex-wrap:wrap;gap:1rem;margin:0;padding:1rem;justify-content:center';m.forEach(function(i){var li=document.createElement('li'),a=document.createElement('a');a.href=i.url;a.textContent=i.label;if(location.pathname.replace(/\\/$/,'')==i.url.replace(/\\/$/,'')){a.style.fontWeight='700';a.className='active'}li.appendChild(a);u.appendChild(li)});n.innerHTML='';n.appendChild(u)}).catch(function(){})})();`;
-async function setHome(s){const html=await readText('p/'+s+'/index.html');
- await commit([{path:'index.html',text:html},{path:'homepage.json',text:JSON.stringify({slug:s})},{path:'menu.js',text:MENU_JS}],'Set homepage '+s)}
+/* MENUS */
+async function loadMenus(){
+ const items=await readJson('menu.json',[]);
+ renderMenuList(items);
+ const pages=(await ls('p')).filter(x=>x.type=='dir');
+ const sel=$('#menuPageSel');sel.innerHTML='';
+ pages.forEach(p=>sel.add(new Option('/p/'+p.name+'/','/p/'+p.name+'/'+'|'+p.name)));
+ if(!pages.length)sel.add(new Option('No pages yet',''));
+}
 let menuItems=[];
-VIEWS.push('menu');
-async function loadMenu(){menuItems=await readJson('menu.json',[]);
- const d=(await ls('p')).filter(x=>x.type=='dir').map(x=>x.name),home=(await readJson('homepage.json',{})).slug||'';
- const sel=$('#mnPage'),hs=$('#hpSel');sel.innerHTML='';hs.innerHTML='';
- d.forEach(n=>{sel.add(new Option('/p/'+n+'/',n));hs.add(new Option('/p/'+n+'/',n))});
- if(home&&d.includes(home))hs.value=home;
- $('#hpCur').textContent=home?'Current homepage: /p/'+home+'/':'No homepage set yet.';
- drawMenu()}
-LOAD.menu=loadMenu;
-function drawMenu(){const b=$('#mnList');b.innerHTML='';
- if(!menuItems.length){b.innerHTML='<p class="mut">Menu is empty. Add pages below.</p>';return}
- const mk=(t,f,c)=>{const x=document.createElement('button');x.textContent=t;if(c)x.className=c;x.onclick=f;return x};
- menuItems.forEach((it,i)=>{const r=document.createElement('div');r.className='row';
-  const l=document.createElement('input'),u=document.createElement('input');
-  l.value=it.label;u.value=it.url;l.placeholder='Label';u.placeholder='/p/about/';
-  l.style.cssText='flex:1 1 140px;width:auto';u.style.cssText='flex:2 1 200px;width:auto';
-  l.oninput=()=>it.label=l.value;u.oninput=()=>it.url=u.value;
-  r.append(l,u,
-   mk('↑',()=>{if(i>0){[menuItems[i-1],menuItems[i]]=[menuItems[i],menuItems[i-1]];drawMenu()}}),
-   mk('↓',()=>{if(i<menuItems.length-1){[menuItems[i+1],menuItems[i]]=[menuItems[i],menuItems[i+1]];drawMenu()}}),
-   mk('✕',()=>{menuItems.splice(i,1);drawMenu()},'d'));
-  b.append(r)})}
-$('#mnAddPage').onclick=()=>{const n=$('#mnPage').value;if(!n)return msg('No pages yet.');
- menuItems.push({label:n.charAt(0).toUpperCase()+n.slice(1).replace(/-/g,' '),url:'/p/'+n+'/'});drawMenu()};
-$('#mnAddHome').onclick=()=>{menuItems.push({label:'Home',url:'/'});drawMenu()};
-$('#mnAddLink').onclick=()=>{menuItems.push({label:'New link',url:'https://'});drawMenu()};
-$('#hpSave').onclick=()=>run(async()=>{const s=$('#hpSel').value;if(!s)throw new Error('Create a page first');
- await setHome(s);msg('Homepage set to /p/'+s+'/. Live in 1-2 minutes.');loadMenu()});
-$('#mnSave').onclick=()=>run(async()=>{
- const items=menuItems.filter(i=>i.label.trim()&&i.url.trim()).map(i=>({label:i.label.trim(),url:i.url.trim()}));
- const files=[{path:'menu.json',text:JSON.stringify(items,null,1)},{path:'menu.js',text:MENU_JS}];
- /* add the menu script to existing pages, posts and homepage (commit() injects it) */
- const names=(await ls('p')).filter(x=>x.type=='dir').map(x=>x.name);
- for(const n of names){const h=await readText('p/'+n+'/index.html');if(!h.includes('menu.js')&&!h.includes('data-no-menu'))files.push({path:'p/'+n+'/index.html',text:h})}
- for(const po of await readJson('posts/index.json',[])){try{const h=await readText('posts/'+po.slug+'/index.html');if(!h.includes('menu.js'))files.push({path:'posts/'+po.slug+'/index.html',text:h})}catch(e){}}
- try{const h=await readText('index.html');if(!h.includes('menu.js')&&!h.includes('data-no-menu'))files.push({path:'index.html',text:h})}catch(e){}
- await commit(files,'Update menu');menuItems=items;drawMenu();msg('Menu saved. Live in 1-2 minutes.')});
+function renderMenuList(items){menuItems=items.map((it,i)=>({...it,_id:it._id||('m'+i+Date.now())}));
+ const box=$('#menuList');box.innerHTML='';
+ if(!menuItems.length){box.innerHTML='<p class="mut">No menu items yet. Add one below.</p>';return}
+ menuItems.forEach(it=>{
+  const row=document.createElement('div');row.className='menu-item';row.draggable=true;row.dataset.id=it._id;
+  row.innerHTML='<span class="handle">⠿</span><span class="lbl"></span><span class="url"></span><button class="d" style="margin-left:auto">Remove</button>';
+  row.querySelector('.lbl').textContent=it.label;row.querySelector('.url').textContent=it.url;
+  row.querySelector('button').onclick=()=>{menuItems=menuItems.filter(x=>x._id!=it._id);renderMenuList(menuItems)};
+  row.addEventListener('dragstart',()=>row.classList.add('dragging'));
+  row.addEventListener('dragend',()=>row.classList.remove('dragging'));
+  box.append(row)});
+}
+$('#menuList').addEventListener('dragover',e=>{e.preventDefault();
+ const dragging=document.querySelector('.menu-item.dragging');if(!dragging)return;
+ const after=[...$('#menuList').querySelectorAll('.menu-item:not(.dragging)')].find(el=>e.clientY<el.getBoundingClientRect().top+el.offsetHeight/2);
+ if(after)$('#menuList').insertBefore(dragging,after);else $('#menuList').appendChild(dragging)});
+$('#menuAddPage').onclick=()=>{const v=$('#menuPageSel').value;if(!v)return;const [url,name]=v.split('|');
+ menuItems.push({_id:'m'+Date.now(),label:name,url});renderMenuList(menuItems)};
+$('#menuAddCustom').onclick=()=>{const l=$('#menuCustomLabel').value.trim(),u=$('#menuCustomUrl').value.trim();
+ if(!l||!u)return msg('Enter both a label and a URL.');
+ menuItems.push({_id:'m'+Date.now(),label:l,url:u});renderMenuList(menuItems);
+ $('#menuCustomLabel').value='';$('#menuCustomUrl').value=''};
+$('#menuSave').onclick=()=>run(async()=>{
+ const ordered=[...document.querySelectorAll('#menuList .menu-item')].map(row=>{
+  const id=row.dataset.id;return menuItems.find(it=>it._id==id)});
+ const clean=ordered.filter(Boolean).map(it=>({label:it.label,url:it.url}));
+ await commit([{path:'menu.json',text:JSON.stringify(clean,null,1)}],'Update menu');
+ msg('Menu saved. Live in 1-2 minutes.');
+});
+
+/* PLUGINS (WordPress-style list) */
+async function loadPlugins(){
+ const idx=await readJson('plugins/index.json',[]),box=$('#plList');box.innerHTML='';
+ if(!idx.length){box.innerHTML='<p class="mut">No plugins installed yet. Add one below.</p>';return}
+ const table=document.createElement('table');table.className='plugin-table';
+ idx.forEach(p=>{
+  const tr=document.createElement('tr');tr.className=p.enabled?'active-row':'';
+  tr.innerHTML='<td style="width:60%"><div class="plugin-name"></div><div class="mut" style="margin-top:.3rem"></div><div class="plugin-actions" style="margin-top:.5rem"></div></td><td></td>';
+  tr.querySelector('.plugin-name').append(document.createTextNode(p.name),Object.assign(document.createElement('span'),{className:'plugin-status '+(p.enabled?'status-active':'status-inactive'),textContent:p.enabled?'Active':'Inactive'}));
+  tr.children[0].children[1].textContent=p.description||'No description provided.';
+  const actions=tr.querySelector('.plugin-actions');
+  const toggle=document.createElement('a');toggle.textContent=p.enabled?'Deactivate':'Activate';
+  toggle.onclick=()=>run(async()=>{p.enabled=!p.enabled;await commit([{path:'plugins/index.json',text:JSON.stringify(idx,null,1)}],(p.enabled?'Activate':'Deactivate')+' plugin '+p.name);msg(p.enabled?'Activated. Reload Plugins to run it.':'Deactivated.');loadPlugins()});
+  const sep=document.createElement('span');sep.textContent='|';
+  const del=document.createElement('a');del.textContent='Delete';del.style.color='var(--err)';
+  del.onclick=()=>{if(!confirm('Delete plugin "'+p.name+'"?'))return;run(async()=>{const rest=idx.filter(x=>x.slug!=p.slug);await commit([{path:'plugins/'+p.slug+'.js',del:true},{path:'plugins/index.json',text:JSON.stringify(rest,null,1)}],'Remove plugin '+p.name);msg('Deleted.');loadPlugins()})};
+  actions.append(toggle,sep,del);
+  tr.children[1].textContent='';table.append(tr)});
+ box.append(table);
+}
+$('#plSave').onclick=()=>run(async()=>{const name=$('#plName').value.trim(),code=$('#plCode').value;
+ if(!name||!code.trim())throw new Error('Enter a plugin name and its code.');
+ const s=slug(name),idx=await readJson('plugins/index.json',[]),i=idx.findIndex(p=>p.slug==s);
+ const entry={slug:s,name,enabled:true,description:''};
+ if(i<0)idx.push(entry);else idx[i]={...idx[i],name};
+ await commit([{path:'plugins/'+s+'.js',text:code},{path:'plugins/index.json',text:JSON.stringify(idx,null,1)}],'Add plugin '+name);
+ msg('Plugin saved and activated. Click Reload Plugins to run it now.');
+ $('#plName').value='';$('#plCode').value='';loadPlugins()});
+$('#plReload').onclick=()=>run(async()=>{await loadPluginsRuntime();msg('Plugins reloaded.')});
+const PluginAPI={msg,commit,readText,readJson,ls,pickPhoto:pick,slug,esc,
+ registerTab(opts){
+  if(!opts||!opts.id||!opts.render||document.getElementById('v-'+opts.id))return;
+  const sec=document.createElement('section');sec.id='v-'+opts.id;sec.className='hide';
+  const card=document.createElement('div');card.className='card';sec.append(card);
+  document.querySelector('main').append(sec);
+  VIEWS.push(opts.id);
+  LOAD[opts.id]=async()=>{if(!card.dataset.rendered){await opts.render(card);card.dataset.rendered='1'}};
+  const btn=document.createElement('button');btn.dataset.t=opts.id;btn.textContent=(opts.icon||'🧩')+' '+(opts.label||opts.id);
+  $('#out').parentNode.insertBefore(btn,$('#out'));
+ }};
+async function loadPluginsRuntime(){
+ try{const idx=await readJson('plugins/index.json',[]);
+  for(const p of idx.filter(x=>x.enabled)){
+   try{const code=await readText('plugins/'+p.slug+'.js');new Function('CMS',code)(PluginAPI)}
+   catch(e){msg('Plugin "'+p.name+'" failed to load: '+e.message)}
+  }
+ }catch(e){}
+}
+
+/* RESET WEBSITE */
+async function resetWebsite(){
+ const files=[];
+ const pages=(await ls('p')).filter(x=>x.type=='dir');
+ for(const p of pages)files.push({path:'p/'+p.name+'/index.html',del:true});
+ const posts=await readJson('posts/index.json',[]);
+ for(const p of posts){files.push({path:'posts/'+p.slug+'/post.json',del:true});files.push({path:'posts/'+p.slug+'/index.html',del:true})}
+ files.push({path:'posts/index.json',text:'[]'});
+ const trash=await trashIndex();
+ for(const t of trash){if(t.type=='page')files.push({path:'trash/pages/'+t.id+'/index.html',del:true});
+  else{files.push({path:'trash/posts/'+t.id+'/post.json',del:true});files.push({path:'trash/posts/'+t.id+'/index.html',del:true})}}
+ files.push({path:'trash/index.json',text:'[]'});
+ files.push({path:'menu.json',text:'[]'});
+ files.push({path:'index.html',text:'<!DOCTYPE html>\n<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Welcome</title><link rel="stylesheet" href="/theme.css"></head><body><div class="wrap" style="max-width:600px;margin:4rem auto;text-align:center"><h1>Welcome to your CMS</h1><p>Your website has been reset. Open <a href="/admin/">/admin/</a> to start building pages.</p></div></body></html>'});
+ const defTheme={primary:'#2f6f5e',bg:'#ffffff',text:'#1b2130',font:'Clean sans',radius:12,themeName:'Default Theme'};
+ const css=':root{--primary:'+defTheme.primary+';--bg:'+defTheme.bg+';--text:'+defTheme.text+';--font:system-ui,sans-serif;--radius:'+defTheme.radius+'px}\nbody{margin:0;background:var(--bg);color:var(--text);font-family:var(--font);line-height:1.6}\na{color:var(--primary)}\n.wrap{max-width:720px;margin:0 auto;padding:2rem 1rem}\n';
+ files.push({path:'theme.json',text:JSON.stringify(defTheme)});
+ files.push({path:'theme.css',text:css});
+ await commit(files,'Reset website to blank state');
+}
+$('#resetSite').onclick=()=>{const v=prompt('This permanently deletes all pages, posts, trash and your menu, and resets the theme. Type RESET to confirm.');
+ if(v!=='RESET')return;run(async()=>{await resetWebsite();msg('Website reset. Live in 1-2 minutes.');tab('dash')})};
 
 showApp();
 </script></body></html>
