@@ -39,22 +39,6 @@ th{color:var(--mut);font-size:13px;font-weight:600}
 .info-row:last-child{border-bottom:0}
 .info-row span:first-child{color:var(--mut)}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:.6rem}
-.plugin-table{width:100%;border-collapse:collapse}
-.plugin-table tr{border-bottom:1px solid var(--bd)}
-.plugin-table tr.active-row{background:#f3f9ff}
-.plugin-table td{padding:.9rem .5rem;vertical-align:top}
-.plugin-name{font-weight:700;font-size:1rem}
-.plugin-status{display:inline-block;font-size:.72rem;font-weight:700;padding:.15rem .6rem;border-radius:100px;margin-left:.5rem}
-.status-active{background:#e3fbe9;color:#1a8a3d}
-.status-inactive{background:#eee;color:#777}
-.plugin-actions a{color:var(--pr);font-weight:600;cursor:pointer;font-size:.85rem}
-.plugin-actions span{color:var(--mut);padding:0 .3rem}
-.menu-item{display:flex;align-items:center;gap:.7rem;background:var(--bg);border:1px solid var(--bd);border-radius:8px;padding:.7rem .9rem;margin-bottom:.5rem;cursor:grab}
-.menu-item.dragging{opacity:.4}
-.menu-item .handle{font-size:1.2rem;color:var(--mut)}
-.menu-item .lbl{font-weight:700;flex:1}
-.menu-item .url{color:var(--mut);font-size:.85rem}
-.theme-swatch{width:90px;height:70px;border-radius:10px;flex:0 0 90px}
 .grid figure{margin:0;border:1px solid var(--bd);border-radius:8px;overflow:hidden;cursor:pointer;font-size:12px}
 .grid img{width:100%;height:90px;object-fit:cover;display:block;background:var(--bd)}
 .grid figcaption{padding:.3rem;word-break:break-all}
@@ -63,6 +47,11 @@ iframe{width:100%;height:420px;border:1px solid var(--bd);border-radius:8px;back
 #pick{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:10;display:none;padding:1rem;overflow:auto}
 .hide{display:none!important}.mut{color:var(--mut);font-size:13px}
 code{background:var(--bg);padding:.1rem .3rem;border-radius:4px}
+.mnbox{max-height:170px;overflow:auto;border:1px solid var(--bd);border-radius:8px;padding:.4rem;margin:.3rem 0 .6rem}.mnbox label{display:flex;gap:.4rem;align-items:center;font-weight:400;margin:.2rem 0}
+.mnrow{background:var(--card);border:1px solid var(--bd);border-radius:8px;padding:.5rem .6rem;margin:.35rem 0}.mnrow .h{display:flex;align-items:center;gap:.5rem}.mnrow .hnd{cursor:grab;touch-action:none;font-size:1.2rem;color:var(--mut);user-select:none}
+.mnrow.drag{outline:2px solid var(--pr);background:#eef1ff}.mnrow .bd{display:none;margin-top:.5rem}.mnrow.open .bd{display:block}@media(max-width:820px){.mnwrap{grid-template-columns:1fr!important}}
+#mdl{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:15;display:none;padding:1rem;overflow:auto}
+.chk{background:repeating-conic-gradient(#eee 0 25%,#fff 0 50%) 0 0/20px 20px;border-radius:8px;text-align:center}
 </style></head><body>
 
 <section id="login" class="card" style="max-width:420px;margin:3rem auto">
@@ -79,10 +68,10 @@ code{background:var(--bg);padding:.1rem .3rem;border-radius:4px}
   <div class="brand">📘 CMS Admin</div>
   <button data-t="dash" class="active">🏠 Dashboard</button>
   <button data-t="pages">📄 Pages</button>
+  <button data-t="menu">🍔 Menu</button>
   <button data-t="posts">📝 Posts</button>
   <button data-t="media">🖼️ Media</button>
   <button data-t="theme">🎨 Theme</button>
-  <button data-t="menus">☰ Menus</button>
   <button data-t="code">💻 Code</button>
   <button data-t="trash">🗑️ Trash</button>
   <button data-t="plugins">🧩 Plugins</button>
@@ -136,6 +125,19 @@ code{background:var(--bg);padding:.1rem .3rem;border-radius:4px}
 <section id="v-edit" class="hide"><div class="card"><div class="row"><b id="etitle"></b><button id="prev">Preview</button><button class="d" id="del">Delete</button></div>
 <div id="fields"></div><p><button class="p" id="save">Save changes</button> <button data-t="pages">Back</button></p><iframe id="frame" title="Preview"></iframe></div></section>
 
+<section id="v-menu" class="hide">
+<div class="card"><h3>Homepage</h3><p class="mut">Choose which page opens first when someone visits your website (the main address).</p>
+<p id="hpCur" class="mut"></p><label>Select page</label><select id="hpSel"></select>
+<p><button class="p" id="hpSave">Set as Homepage</button></p></div>
+<div class="mnwrap" style="display:grid;grid-template-columns:300px 1fr;gap:1rem;align-items:start">
+<div class="card"><h3>Add menu items</h3>
+<b>Pages</b><div id="mnPages" class="mnbox"></div><button id="mnAddP">Add to Menu</button>
+<p style="margin-bottom:.2rem"><b>Posts</b></p><div id="mnPosts" class="mnbox"></div><button id="mnAddPo">Add to Menu</button>
+<p style="margin-bottom:.2rem"><b>Custom link</b></p><input id="mnCu" placeholder="https://..."><input id="mnCl" placeholder="Link text" style="margin-top:.4rem"><p><button id="mnAddC">Add to Menu</button></p></div>
+<div class="card"><h3>Menu structure</h3><p class="mut">Drag ⠿ up or down to reorder. Drag to the right to make a sub-menu (dropdown). Click ▾ to rename or change a link. Then press Save Menu — it updates every page automatically.</p>
+<div id="mnList"></div><p><button class="p" id="mnSave">Save Menu</button></p></div></div>
+</section>
+
 <section id="v-posts" class="hide"><div class="card"><div class="row"><b>Posts</b><button class="p" id="pnew">Add New</button></div>
 <table><thead><tr><th>Title</th><th>Date</th><th>Status</th><th></th></tr></thead><tbody id="poTable"></tbody></table></div></section>
 
@@ -147,11 +149,10 @@ code{background:var(--bg);padding:.1rem .3rem;border-radius:4px}
 <label><input type="checkbox" id="pdr"> Draft (hidden from the blog list)</label>
 <p><button class="p" id="psave">Save post</button> <button class="d" id="pdel">Delete</button> <button data-t="posts">Back</button></p></div></section>
 
-<section id="v-media" class="hide"><div class="card"><h3>Media library</h3><p class="mut">Photos are resized to 1600px. New photos appear after the site rebuilds (1-2 min). Tap a photo to copy its path.</p>
-<input id="up" type="file" accept="image/*,.pdf,application/pdf" multiple><div id="mgrid" class="grid" style="margin-top:1rem"></div></div></section>
+<section id="v-media" class="hide"><div class="card"><h3>Media library</h3><p class="mut">Photos are resized to 1600px. New photos appear after the site rebuilds (1-2 min). Click a photo to see it large, copy its link or delete it.</p>
+<input id="up" type="file" accept="image/*" multiple><div id="mgrid" class="grid" style="margin-top:1rem"></div></div></section>
 
 <section id="v-theme" class="hide">
-<div class="card"><h3>Current Theme</h3><div id="themeBox" class="row" style="align-items:center"></div></div>
 <div class="card"><h3>Quick theme</h3><p class="mut">Used through CSS variables (--primary, --bg, --text, --font, --radius) in theme.css.</p>
 <label>Theme name (shown on your Dashboard)</label><input id="tName" placeholder="My Theme">
 <label>Main color</label><input id="tc1" type="color"><label>Background</label><input id="tc2" type="color"><label>Text color</label><input id="tc3" type="color">
@@ -161,30 +162,6 @@ code{background:var(--bg);padding:.1rem .3rem;border-radius:4px}
 <p class="mut">Upload a zip of HTML/CSS/JS/images. After it reads the zip, click <b>Import &amp; Activate Everything</b> to set the stylesheet and publish every page in one go — <code>index.html</code> becomes your home page, and every other file becomes a page named after itself (e.g. <code>about.html</code> → <code>/p/about/</code>). Prefer to apply files one at a time instead? Use the buttons under each file below.</p>
 <input id="zipfile" type="file" accept=".zip"><div id="zipStatus" class="mut" style="margin-top:.5rem"></div>
 <div id="zipList" style="margin-top:.8rem"></div></div></section>
-
-<section id="v-menus" class="hide">
-<div class="card"><div class="row"><b>Menu Items</b><button class="p" id="menuSave">Save Menu</button></div>
-<p class="mut">Drag items by the ⠿ handle to reorder them. This is the order your site's navigation will follow.</p>
-<div id="menuList"></div></div>
-<div class="card"><h3>Add to Menu</h3>
-<label>Add an existing page</label>
-<div class="row"><select id="menuPageSel" style="flex:1"></select><button id="menuAddPage">Add</button></div>
-<label style="margin-top:1.2rem">Or add a custom link</label>
-<div class="row"><input id="menuCustomLabel" placeholder="Label, e.g. Admissions" style="flex:1"><input id="menuCustomUrl" placeholder="/p/admissions/ or https://..." style="flex:1"><button id="menuAddCustom">Add</button></div>
-</div>
-<div class="card"><h3>Using this menu on your site</h3>
-<p class="mut">This menu is saved as <code>/menu.json</code>. To make your theme's navigation read it automatically, add this snippet before <code>&lt;/body&gt;</code> on each page:</p>
-<textarea readonly style="min-height:120px;font-family:ui-monospace,monospace" onclick="this.select()">&lt;script&gt;
-fetch('/menu.json').then(r=&gt;r.json()).then(items=&gt;{
-  var nav=document.querySelector('.menu'); if(!nav) return;
-  nav.innerHTML='';
-  items.forEach(function(i){var a=document.createElement('a');a.href=i.url;a.textContent=i.label;nav.appendChild(a);});
-}).catch(function(){});
-&lt;/script&gt;</textarea>
-<p class="mut">This looks for an element with class <code>menu</code> (the nav links container most of our themes use) and fills it from your saved menu.</p>
-</div></section>
-
-
 
 <section id="v-code" class="hide"><div class="card"><h3>Code editor</h3>
 <p class="mut">Create or edit any file in the repo directly — a new stylesheet, script, or a full HTML page at a custom path.</p>
@@ -196,9 +173,9 @@ fetch('/menu.json').then(r=&gt;r.json()).then(items=&gt;{
 <section id="v-trash" class="hide"><div class="card"><h3>Trash</h3><p class="mut">Deleted pages and posts stay here until you remove them for good.</p><div id="trList"></div></div></section>
 
 <section id="v-users" class="hide"><div class="card"><h3>Users</h3><div id="ulist"></div></div>
-<div class="card"><h3>Invite a user</h3><label>GitHub username</label><input id="un">
+<div class="card"><h3>Invite a user</h3><label>Email or GitHub username</label><input id="un" placeholder="name@example.com or github-username"><label>Their email (to send login instructions)</label><input id="ue" type="email" placeholder="optional">
 <label>Role</label><select id="ur"><option value="push">Editor (can edit content)</option><option value="pull">Viewer (read only)</option><option value="admin">Admin</option></select>
-<p class="mut">They get an email from GitHub and must accept. Editors can change any file in the repo — GitHub has no per-page permission.</p><button class="p" id="uadd">Send invite</button></div></section>
+<p class="mut">GitHub sends the invitation email and the person must accept it. There is no separate password: each person logs in with their own GitHub access token. Editors can change any file in the repo — GitHub has no per-page permission.</p><button class="p" id="uadd">Send invite</button><div id="uinfo" style="margin-top:.7rem"></div></div></section>
 
 <section id="v-plugins" class="hide">
 <div class="card"><div class="row"><b>Plugins</b><button id="plReload">Reload Plugins</button></div><div id="plList"></div></div>
@@ -220,6 +197,11 @@ fetch('/menu.json').then(r=&gt;r.json()).then(items=&gt;{
 <button class="d" id="resetSite" style="border-color:var(--err)">Reset Website</button></div></section>
 
 </main></div>
+<div id="mdl"><div class="card" style="max-width:860px;margin:1.5rem auto"><div class="row"><b id="mdlName"></b><button id="mdlClose">Close</button></div>
+<div class="chk"><img id="mdlImg" alt="" style="max-width:100%;max-height:60vh;object-fit:contain"></div>
+<div class="info-row"><span>Size</span><span id="mdlSize"></span></div><div class="info-row"><span>Dimensions</span><span id="mdlDim"></span></div>
+<label>File path</label><input id="mdlUrl" readonly>
+<div class="row" style="margin-top:.7rem"><button class="p" id="mdlCopy">Copy path</button><button id="mdlCopyFull">Copy full URL</button><a id="mdlOpen" target="_blank">Open in new tab</a><button class="d" id="mdlDel" style="margin-left:auto">Delete permanently</button></div></div></div>
 <div id="pick"><div class="card"><div class="row"><b>Choose a photo</b><button id="pclose">Close</button></div><div id="pgrid" class="grid"></div></div></div>
 <div id="msg" role="status"></div>
 
@@ -234,7 +216,16 @@ const run=async f=>{try{await f();return true}catch(e){msg('Error: '+e.message);
 const ls=async d=>{try{return await(await api('/contents/'+d+'?ref='+cfg.branch)).json()}catch(e){if(e.status==404)return[];throw e}};
 const readText=async p=>(await api('/contents/'+p+'?ref='+cfg.branch,{headers:{Accept:'application/vnd.github.raw+json'}})).text();
 const readJson=async(p,d)=>{try{return JSON.parse(await readText(p))}catch(e){return d}};
+function injectMenu(h){if(h.includes('menu.js')||h.includes('data-no-menu'))return h;const t='<script src="/menu.js" defer></'+'script>';return /<\/body>/i.test(h)?h.replace(/<\/body>/i,t+'</body>'):h+t}
+const PAGE_RE=/^(index\.html|p\/[^\/]+\/index\.html|posts\/[^\/]+\/index\.html)$/,NAV_RE=/(<nav\b[^>]*\bid=["']site-menu["'][^>]*>)[\s\S]*?<\/nav>/i;
+const MENU_CSS='<style>#site-menu li{position:relative}#site-menu .sub{display:none;position:absolute;left:0;top:100%;min-width:200px;background:#fff;box-shadow:0 8px 24px rgba(0,0,0,.14);border-radius:10px;padding:.5rem .7rem;z-index:50;flex-direction:column;gap:.35rem;list-style:none;margin:0}#site-menu li:hover>.sub,#site-menu li:focus-within>.sub{display:flex}#site-menu .sub .sub{left:100%;top:0}#site-menu .has-sub>a:after{content:" \\25BE";font-size:.75em}@media(max-width:900px){#site-menu .sub{display:flex;position:static;box-shadow:none;padding:0 0 0 1rem}}</style>';
+const ACTIVE_JS='<script>document.querySelectorAll("#site-menu a").forEach(function(a){if(a.pathname.replace(/\\/$/,"")==location.pathname.replace(/\\/$/,""))a.className+=" active"})<\/script>';
+function menuMarkup(items,at){const e=esc,L=(arr,d)=>'<ul'+(d?' class="sub"':(at.ul?' class="'+e(at.ul)+'"':''))+'>'+arr.map(i=>{const k=(i.children||[]).length;return '<li class="'+(at.li?e(at.li)+' ':'')+(k?'has-sub':'')+'"><a'+(at.a?' class="'+e(at.a)+'"':'')+' href="'+e(i.url)+'">'+e(i.label)+'</a>'+(k?L(i.children,d+1):'')+'</li>'}).join('')+'</ul>';return (items.length?L(items,0):'')+MENU_CSS+ACTIVE_JS}
+function bakeMenu(h,items){const m=h.match(NAV_RE);if(!m)return injectMenu(h);const g=n=>{const x=m[1].match(new RegExp('data-'+n+'=["\']([^"\']*)["\']'));return x?x[1]:''};
+ return h.replace(NAV_RE,()=>m[1]+menuMarkup(items,{ul:g('ul'),li:g('li'),a:g('a')})+'</nav>')}
 async function commit(files,message){
+ if(files.some(f=>f.text&&PAGE_RE.test(f.path))){const mf=files.find(f=>f.path=='menu.json'&&f.text);let items=[];try{items=mf?JSON.parse(mf.text):await readJson('menu.json',[])}catch(e){}
+  files.forEach(f=>{if(f.text&&PAGE_RE.test(f.path))f.text=bakeMenu(f.text,items)})}
  const head=(await(await api('/git/ref/heads/'+cfg.branch)).json()).object.sha,base=(await(await api('/git/commits/'+head)).json()).tree.sha,tree=[];
  for(const f of files){if(f.del){tree.push({path:f.path,mode:'100644',type:'blob',sha:null});continue}
   const b=await(await api('/git/blobs',{method:'POST',body:JSON.stringify(f.b64?{content:f.b64,encoding:'base64'}:{content:f.text,encoding:'utf-8'})})).json();
@@ -246,15 +237,15 @@ const trashId=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
 const trashIndex=async()=>await readJson('trash/index.json',[]);
 
 /* NAV */
-const VIEWS=['dash','pages','edit','posts','pedit','media','theme','menus','code','trash','plugins','users','settings'];
-const LOAD={dash:loadDash,pages:loadPages,posts:loadPosts,media:loadMedia,theme:loadTheme,menus:loadMenus,trash:loadTrash,plugins:loadPlugins,users:loadUsers,settings:loadSettings};
+const VIEWS=['dash','pages','edit','posts','pedit','media','theme','code','trash','plugins','users','settings'];
+const LOAD={dash:loadDash,pages:loadPages,posts:loadPosts,media:loadMedia,theme:loadTheme,trash:loadTrash,plugins:loadPlugins,users:loadUsers,settings:loadSettings};
 function tab(n,opt){VIEWS.forEach(x=>$('#v-'+x).classList.toggle('hide',x!=n));
  document.querySelectorAll('#side button[data-t]').forEach(b=>b.classList.toggle('active',b.dataset.t==n));
  if(n=='pages'){$('#pgNew').classList.toggle('hide',opt!='new')}
  if(n=='posts'&&opt=='new')return editPost();
  if(LOAD[n])run(LOAD[n])}
 document.addEventListener('click',e=>{const b=e.target.closest('[data-t]');if(b)tab(b.dataset.t,b.dataset.go)});
-function showApp(){$('#login').classList.toggle('hide',!!cfg);$('#shell').classList.toggle('hide',!cfg);if(cfg){tab('dash');readJson('settings.json',{}).then(s=>siteUrl=(s.siteUrl||'').replace(/\/+$/,''));loadPluginsRuntime()}}
+function showApp(){$('#login').classList.toggle('hide',!!cfg);$('#shell').classList.toggle('hide',!cfg);if(cfg){tab('dash');readJson('settings.json',{}).then(s=>siteUrl=(s.siteUrl||'').replace(/\/+$/,''))}}
 $('#go').onclick=async()=>{cfg={owner:$('#o').value.trim(),repo:$('#r').value.trim(),branch:$('#b').value.trim()||'main',token:$('#t').value.trim()};
  try{await api('');localStorage.setItem('cmsCfg',JSON.stringify(cfg));showApp()}catch(e){cfg=null;msg('Login failed: '+e.message)}};
 $('#out').onclick=()=>{localStorage.removeItem('cmsCfg');cfg=null;showApp()};
@@ -270,7 +261,6 @@ async function loadDash(){
  $('#cPages').textContent=npages;$('#cPosts').textContent=po.length;$('#cMedia').textContent=ph.length;$('#cUsers').textContent=users.length||'–';
  $('#agPosts').textContent=po.length;$('#agPages').textContent=npages;$('#agMedia').textContent=ph.length;
  $('#siName').textContent=settings.name||cfg.repo;$('#siRepo').textContent=cfg.owner+'/'+cfg.repo;$('#siBranch').textContent=cfg.branch;
- readJson('theme.json',{}).then(t=>$('#siTheme').textContent=t.themeName||'Default Theme');
  const box=$('#activity');box.innerHTML='Loading...';
  try{
   const commits=await(await api('/commits?per_page=6')).json();
@@ -283,26 +273,11 @@ async function loadDash(){
  }catch(e){box.textContent='Could not load recent activity.'}}
 
 /* PAGES */
-const fmtDateTime=iso=>{const d=new Date(iso);return d.toLocaleDateString()+' '+d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})};
-async function pageLastUpdated(slugName){try{const c=await(await api('/commits?path=p/'+slugName+'/index.html&per_page=1')).json();if(c&&c.length)return c[0].commit.author.date}catch(e){}return null}
-async function loadPages(){const tb=$('#pgTable');tb.innerHTML='<tr><td colspan=4>Loading...</td></tr>';const d=(await ls('p')).filter(x=>x.type=='dir');tb.innerHTML='';
- if(!d.length){tb.innerHTML='<tr><td colspan=4 class="mut">No pages yet.</td></tr>';return}
- d.forEach(x=>{const tr=document.createElement('tr');
-  tr.innerHTML='<td><input type="checkbox" class="pgSel" value="'+x.name+'"></td><td><b>/p/'+x.name+'/</b></td><td class="mut">Loading…</td><td style="text-align:right"></td>';
+async function loadPages(){const tb=$('#pgTable');tb.innerHTML='<tr><td colspan=2>Loading...</td></tr>';const d=(await ls('p')).filter(x=>x.type=='dir');tb.innerHTML='';
+ if(!d.length)tb.innerHTML='<tr><td colspan=2 class="mut">No pages yet.</td></tr>';
+ d.forEach(x=>{const tr=document.createElement('tr');tr.innerHTML='<td><b>/p/'+x.name+'/</b></td><td style="text-align:right"></td>';
   const td=tr.lastElementChild,v=document.createElement('a');v.href='/p/'+x.name+'/';v.target='_blank';v.textContent='View';v.style.marginRight='.6rem';
-  const e=document.createElement('button');e.textContent='Edit';e.onclick=()=>openPage(x.name);td.append(v,e);tb.append(tr);
-  pageLastUpdated(x.name).then(dt=>{tr.children[2].textContent=dt?fmtDateTime(dt):'—'})});
- $('#pgSelAll').checked=false}
-$('#pgSelAll').onchange=e=>{document.querySelectorAll('.pgSel').forEach(c=>c.checked=e.target.checked)};
-$('#pgBulkDel').onclick=()=>{const sels=[...document.querySelectorAll('.pgSel:checked')].map(c=>c.value);
- if(!sels.length)return msg('Select at least one page first.');
- if(!confirm('Move '+sels.length+' page(s) to Trash?'))return;
- run(async()=>{const idx=await trashIndex(),files=[];
-  for(const s of sels){const html=await readText('p/'+s+'/index.html'),id=trashId();
-   idx.push({id,type:'page',slug:s,title:s,deletedAt:new Date().toISOString()});
-   files.push({path:'trash/pages/'+id+'/index.html',text:html});files.push({path:'p/'+s+'/index.html',del:true})}
-  files.push({path:'trash/index.json',text:JSON.stringify(idx,null,1)});
-  await commit(files,'Bulk move '+sels.length+' page(s) to trash');msg(sels.length+' page(s) moved to Trash.');loadPages()})};
+  const e=document.createElement('button');e.textContent='Edit';e.onclick=()=>openPage(x.name);td.append(v,e);tb.append(tr)})}
 $('#pgNewBtn').onclick=()=>{$('#pgNew').classList.remove('hide')};
 $('#pgNewCancel').onclick=()=>{$('#pgNew').classList.add('hide')};
 $('#newbtn').onclick=()=>{const s=slug($('#nslug').value.trim()),h=$('#nhtml').value;if(!s||!h.includes('<'))return msg('Enter a page name and paste the HTML.');
@@ -325,7 +300,7 @@ const pageOut=()=>'<!DOCTYPE html>\n'+cur.doc.documentElement.outerHTML;
 const withBase=html=>siteUrl?html.replace(/<head[^>]*>/i,m=>m+'<base href="'+siteUrl+'/">'):html+'\n<!-- Preview note: add your live Site URL under Settings to see real fonts, styles and photos here. -->';
 $('#prev').onclick=()=>{$('#frame').srcdoc=withBase(pageOut())};
 $('#nprev').onclick=()=>{const h=$('#nhtml').value;if(!h.includes('<'))return msg('Paste the page HTML first.');$('#nframe').classList.remove('hide');$('#nframe').srcdoc=withBase(h)};
-$('#save').onclick=()=>run(async()=>{await commit([{path:'p/'+cur.slug+'/index.html',text:pageOut()}],'Edit page '+cur.slug);msg('Saved. Live in 1-2 minutes.')});
+$('#save').onclick=()=>run(async()=>{const out=pageOut(),fl=[{path:'p/'+cur.slug+'/index.html',text:out}];if((await readJson('homepage.json',{})).slug==cur.slug)fl.push({path:'index.html',text:out});await commit(fl,'Edit page '+cur.slug);msg('Saved. Live in 1-2 minutes.')});
 $('#del').onclick=()=>{if(!confirm('Move this page to Trash? You can restore it later.'))return;
  run(async()=>{const id=trashId(),idx=await trashIndex();idx.push({id,type:'page',slug:cur.slug,title:cur.doc.title||cur.slug,deletedAt:new Date().toISOString()});
   await commit([{path:'trash/pages/'+id+'/index.html',text:pageOut()},{path:'trash/index.json',text:JSON.stringify(idx,null,1)},{path:'p/'+cur.slug+'/index.html',del:true}],'Move page '+cur.slug+' to trash');
@@ -379,43 +354,33 @@ async function purgeItem(it){const idx=(await trashIndex()).filter(x=>x.id!=it.i
  files.push({path:'trash/index.json',text:JSON.stringify(idx,null,1)});await commit(files,'Permanently delete '+it.type+' '+it.slug)}
 
 /* MEDIA */
-const MEDIAEXT=/\.(jpe?g|png|webp|gif|svg|pdf)$/i;
-const photos=async()=>(await ls('img')).filter(x=>x.type=='file'&&MEDIAEXT.test(x.name));
-function fill(g,l,cb){g.innerHTML='';if(!l.length)g.textContent='No files yet.';
- l.forEach(x=>{const isPdf=/\.pdf$/i.test(x.name);const f=document.createElement('figure'),c=document.createElement('figcaption');c.textContent=x.name;
-  if(isPdf){const ic=document.createElement('div');ic.style.cssText='height:90px;display:flex;align-items:center;justify-content:center;font-size:2rem;background:#fdeccb';ic.textContent='📄';f.append(ic)}
-  else{const im=document.createElement('img');im.loading='lazy';im.src='/img/'+x.name;f.append(im)}
-  f.append(c);f.onclick=()=>cb('/img/'+x.name);g.append(f)})}
+const photos=async()=>(await ls('img')).filter(x=>x.type=='file'&&IMG.test(x.name));
+const blobCache={},MIME={svg:'image/svg+xml',png:'image/png',gif:'image/gif',webp:'image/webp',jpg:'image/jpeg',jpeg:'image/jpeg'};
+function thumb(im,name){im.src='/img/'+name;im.onerror=async()=>{im.onerror=null;try{if(!blobCache[name]){const r=await api('/contents/img/'+encodeURIComponent(name)+'?ref='+cfg.branch,{headers:{Accept:'application/vnd.github.raw+json'}});blobCache[name]=URL.createObjectURL(new Blob([await r.arrayBuffer()],{type:MIME[name.split('.').pop().toLowerCase()]||'image/png'}))}im.src=blobCache[name]}catch(e){}}}
+function fill(g,l,cb){g.innerHTML='';if(!l.length)g.textContent='No photos yet.';
+ l.forEach(x=>{const f=document.createElement('figure'),im=document.createElement('img'),c=document.createElement('figcaption');im.loading='lazy';thumb(im,x.name);c.textContent=x.name;f.append(im,c);f.onclick=()=>cb('/img/'+x.name);g.append(f)})}
 async function loadMedia(){fill($('#mgrid'),await photos(),p=>navigator.clipboard?navigator.clipboard.writeText(p).then(()=>msg('Copied '+p)):msg(p))}
-function pick(cb){$('#pick').style.display='block';run(async()=>fill($('#pgrid'),(await photos()).filter(x=>!/\.pdf$/i.test(x.name)),p=>{$('#pick').style.display='none';cb(p)}))}
+function pick(cb){$('#pick').style.display='block';run(async()=>fill($('#pgrid'),await photos(),p=>{$('#pick').style.display='none';cb(p)}))}
 $('#pclose').onclick=()=>$('#pick').style.display='none';
 const rd=(f,ext)=>new Promise(r=>{const x=new FileReader();x.onload=()=>r({b64:x.result.split(',')[1],ext});x.readAsDataURL(f)});
-const prep=f=>{if(f.type=='application/pdf')return rd(f,'pdf');
- if(/svg|gif/.test(f.type))return rd(f,f.name.split('.').pop().toLowerCase());
- return new Promise(res=>{const im=new Image();im.onload=()=>{
-  const s=Math.min(1,1600/Math.max(im.width,im.height)),c=document.createElement('canvas'),png=f.type=='image/png';c.width=Math.round(im.width*s);c.height=Math.round(im.height*s);
-  c.getContext('2d').drawImage(im,0,0,c.width,c.height);res({b64:c.toDataURL(png?'image/png':'image/jpeg',.82).split(',')[1],ext:png?'png':'jpg'})};im.src=URL.createObjectURL(f)})};
+const prep=f=>/svg|gif/.test(f.type)?rd(f,f.name.split('.').pop().toLowerCase()):new Promise(res=>{const im=new Image();im.onload=()=>{
+ const s=Math.min(1,1600/Math.max(im.width,im.height)),c=document.createElement('canvas'),png=f.type=='image/png';c.width=Math.round(im.width*s);c.height=Math.round(im.height*s);
+ c.getContext('2d').drawImage(im,0,0,c.width,c.height);res({b64:c.toDataURL(png?'image/png':'image/jpeg',.82).split(',')[1],ext:png?'png':'jpg'})};im.src=URL.createObjectURL(f)});
 $('#up').onchange=e=>{const fs=[...e.target.files];if(!fs.length)return;msg('Uploading...');
- run(async()=>{const o=[];for(const f of fs){const p=await prep(f);o.push({path:'img/'+(slug(f.name.replace(/\.[^.]+$/,''))||'file')+'.'+p.ext,b64:p.b64})}
-  await commit(o,'Upload '+o.length+' file(s)');e.target.value='';msg('Uploaded. Files show on the site in 1-2 minutes.');loadMedia()})};
+ run(async()=>{const o=[];for(const f of fs){const p=await prep(f);o.push({path:'img/'+(slug(f.name.replace(/\.[^.]+$/,''))||'photo')+'.'+p.ext,b64:p.b64})}
+  await commit(o,'Upload '+o.length+' photo(s)');e.target.value='';msg('Uploaded. Photos show on the site in 1-2 minutes.');loadMedia()})};
 
 /* THEME */
-async function loadTheme(){const t={primary:'#2f6f5e',bg:'#ffffff',text:'#1b2130',font:'Clean sans',radius:12,themeName:'Default Theme',...await readJson('theme.json',{})};
- $('#tName').value=t.themeName;$('#tc1').value=t.primary;$('#tc2').value=t.bg;$('#tc3').value=t.text;$('#tf').value=t.font;$('#tr').value=t.radius;
- renderThemeBox(t)}
-function renderThemeBox(t){const box=$('#themeBox');box.innerHTML='';
- const sw=document.createElement('div');sw.className='theme-swatch';sw.style.background=t.primary;
- const info=document.createElement('div');info.innerHTML='<div style="font-weight:800;font-size:1.1rem">'+esc(t.themeName||'Default Theme')+' <span class="plugin-status status-active">Active</span></div><div class="mut">Primary color: '+esc(t.primary)+' · Font: '+esc(t.font)+'</div>';
- box.append(sw,info)}
-$('#tsave').onclick=()=>run(async()=>{const t={primary:$('#tc1').value,bg:$('#tc2').value,text:$('#tc3').value,font:$('#tf').value,radius:+$('#tr').value||0,themeName:$('#tName').value.trim()||'Custom Theme'};
+async function loadTheme(){const t={primary:'#2f6f5e',bg:'#ffffff',text:'#1b2130',font:'Clean sans',radius:12,...await readJson('theme.json',{})};
+ $('#tc1').value=t.primary;$('#tc2').value=t.bg;$('#tc3').value=t.text;$('#tf').value=t.font;$('#tr').value=t.radius}
+$('#tsave').onclick=()=>run(async()=>{const t={primary:$('#tc1').value,bg:$('#tc2').value,text:$('#tc3').value,font:$('#tf').value,radius:+$('#tr').value||0};
  const css=':root{--primary:'+t.primary+';--bg:'+t.bg+';--text:'+t.text+';--font:'+FONTS[t.font]+';--radius:'+t.radius+'px}\nbody{margin:0;background:var(--bg);color:var(--text);font-family:var(--font);line-height:1.6}\na{color:var(--primary)}\n.post,.wrap{max-width:720px;margin:0 auto;padding:2rem 1rem}\n.post img{max-width:100%;border-radius:var(--radius)}\n.card{border:1px solid rgba(128,128,128,.3);border-radius:var(--radius);padding:1rem;margin:1rem 0}\n';
  await commit([{path:'theme.json',text:JSON.stringify(t)},{path:'theme.css',text:css}],'Update theme');msg('Theme saved. Live in 1-2 minutes.')});
 
 const b64ab=buf=>{let bin='';const bytes=new Uint8Array(buf);for(let i=0;i<bytes.length;i++)bin+=String.fromCharCode(bytes[i]);return btoa(bin)};
 const TEXTEXT=/\.(html?|css|js|json|svg|txt|md)$/i;
-let lastZipFiles=[],lastZipName='';
+let lastZipFiles=[];
 $('#zipfile').onchange=async e=>{const f=e.target.files[0];if(!f)return;
- lastZipName=f.name.replace(/\.zip$/i,'').replace(/[-_]+/g,' ').trim();
  $('#zipStatus').textContent='Reading zip...';$('#zipList').innerHTML='';
  try{
   const zip=await JSZip.loadAsync(f),entries=Object.values(zip.files).filter(z=>!z.dir);
@@ -441,23 +406,44 @@ $('#zipfile').onchange=async e=>{const f=e.target.files[0];if(!f)return;
  }catch(err){$('#zipStatus').textContent='Error: '+err.message}
  e.target.value=''};
 async function importZipAll(){
- const files=lastZipFiles,commitFiles=[];
+ const files=lastZipFiles.map(f=>({...f}));
+ const tops=new Set(files.map(f=>f.name.split('/')[0]));
+ if(tops.size==1&&files.every(f=>f.name.includes('/'))){const pre=[...tops][0]+'/';files.forEach(f=>{f.name=f.name.slice(pre.length);f.path='theme-assets/'+f.name})}
+ const htmls=files.filter(f=>/\.html?$/i.test(f.name)),out=[];
+ if(!htmls.length&&!files.some(f=>/\.css$/i.test(f.name)))throw new Error('No CSS or HTML files found in this zip.');
+ const slugOf=n=>{const b=n.split('/').pop().replace(/\.html?$/i,'');return /^index$/i.test(b)?'home':slug(b)};
+ const pageUrl={};htmls.forEach(f=>pageUrl[f.name.toLowerCase()]=slugOf(f.name)=='home'?'/':'/p/'+slugOf(f.name)+'/');
+ const join=(dir,u)=>{const o=[];(dir?dir.split('/'):[]).concat(u.split('/')).forEach(x=>{if(x=='..')o.pop();else if(x&&x!='.')o.push(x)});return o.join('/')};
+ const fixUrl=(u,dir)=>{u=(u||'').trim();if(!u||/^(https?:|\/\/|\/|#|data:|mailto:|tel:|javascript:)/i.test(u))return u;
+  const m=u.match(/^([^?#]*)([?#].*)?$/),p=join(dir,m[1]),suf=m[2]||'';
+  if(pageUrl[p.toLowerCase()])return pageUrl[p.toLowerCase()]+(suf[0]=='#'?suf:'');
+  return (/^img\//i.test(p)?'/'+p:'/theme-assets/'+p)+suf};
  const css=files.find(f=>/(^|\/)(theme|style)\.css$/i.test(f.name))||files.find(f=>/\.css$/i.test(f.name));
- if(css){commitFiles.push({path:'theme.css',text:css.text});
-  const existing=await readJson('theme.json',{primary:'#2f6f5e',bg:'#ffffff',text:'#1b2130',font:'Clean sans',radius:12});
-  const t={...existing,themeName:lastZipName||'Custom Theme'};
-  commitFiles.push({path:'theme.json',text:JSON.stringify(t)});
- }
- files.filter(f=>/\.html?$/i.test(f.name)).forEach(f=>{
-  const base=f.name.split('/').pop().replace(/\.html?$/i,'');
-  const s=/^index$/i.test(base)?'home':slug(base);
-  if(s)commitFiles.push({path:'p/'+s+'/index.html',text:f.text});
- });
- if(!commitFiles.length)throw new Error('No CSS or HTML files found in this zip.');
- await commit(commitFiles,'Import and activate theme zip');
- $('#zipStatus').textContent='Imported '+commitFiles.length+' file(s) and activated them. Live in 1-2 minutes.';
+ if(css)out.push({path:'theme.css',text:css.text.replace(/url\(\s*(['"]?)([^'")]+)\1\s*\)/g,(m,q,u)=>'url('+q+fixUrl(u,css.name.split('/').slice(0,-1).join('/'))+q+')')});
+ let menu=null;const mj=files.find(f=>/^menu\.json$/i.test(f.name));if(mj){try{menu=JSON.parse(mj.text)}catch(e){}}
+ const parseUl=(ul,dir)=>[...ul.children].filter(li=>li.tagName=='LI').map(li=>{const a=li.querySelector(':scope>a')||li.querySelector('a');if(!a)return null;const sub=li.querySelector(':scope>ul'),o={label:a.textContent.trim().replace(/\s+/g,' '),url:fixUrl(a.getAttribute('href'),dir)};
+  if(sub){const c=parseUl(sub,dir);if(c.length)o.children=c}return o.label?o:null}).filter(Boolean);
+ const clsOf=e=>e?(e.className||'').replace(/\bactive\b|\bcurrent[\w-]*/g,'').trim():'';
+ let derived=false;
+ htmls.sort((a,b)=>/^index\./i.test(b.name.split('/').pop())-/^index\./i.test(a.name.split('/').pop()));
+ for(const f of htmls){const doc=new DOMParser().parseFromString(f.text,'text/html'),dir=f.name.split('/').slice(0,-1).join('/');
+  const nav=doc.querySelector('#site-menu')||doc.querySelector('header nav')||doc.querySelector('nav');
+  if(nav){const ul=nav.querySelector('ul');
+   if(!menu&&!derived&&nav.id!='site-menu'){const it=ul?parseUl(ul,dir):[...nav.querySelectorAll('a')].map(a=>({label:a.textContent.trim().replace(/\s+/g,' '),url:fixUrl(a.getAttribute('href'),dir)})).filter(i=>i.label);if(it.length){menu=it;derived=true}}
+   if(nav.id!='site-menu'){nav.id='site-menu';nav.setAttribute('data-ul',clsOf(ul));nav.setAttribute('data-li',clsOf(ul&&ul.querySelector('li')));nav.setAttribute('data-a',clsOf(ul&&ul.querySelector('a')))}
+   nav.innerHTML=''}
+  doc.querySelectorAll('[href],[src],[poster]').forEach(e=>['href','src','poster'].forEach(k=>{if(e.hasAttribute(k))e.setAttribute(k,fixUrl(e.getAttribute(k),dir))}));
+  doc.querySelectorAll('[srcset]').forEach(e=>e.setAttribute('srcset',e.getAttribute('srcset').split(',').map(x=>{const t=x.trim().split(/\s+/);t[0]=fixUrl(t[0],dir);return t.join(' ')}).join(', ')));
+  const s=slugOf(f.name),html='<!DOCTYPE html>\n'+doc.documentElement.outerHTML;out.push({path:'p/'+s+'/index.html',text:html});if(s=='home')out.push({path:'index.html',text:html})}
+ if(htmls.some(f=>slugOf(f.name)=='home'))out.push({path:'homepage.json',text:JSON.stringify({slug:'home'})});
+ if(!menu){const ex=await readJson('menu.json',null);if(!ex||!ex.length)menu=[{label:'Home',url:'/'},...htmls.filter(f=>slugOf(f.name)!='home').map(f=>({label:slugOf(f.name).replace(/-/g,' ').replace(/\b\w/g,c=>c.toUpperCase()),url:pageUrl[f.name.toLowerCase()]}))]}
+ if(menu)out.push({path:'menu.json',text:JSON.stringify(menu,null,1)});
+ out.push({path:'menu.js',text:MENU_JS});
+ files.filter(f=>!/\.html?$/i.test(f.name)&&!/^menu\.json$/i.test(f.name)).forEach(f=>{const o=f.text!==undefined?{text:f.text}:{b64:f.b64};out.push({...o,path:/^img\//i.test(f.name)?f.name:f.path})});
+ msg('Importing '+out.length+' file(s)… please wait');
+ await commit(out,'Import and activate theme zip');
+ $('#zipStatus').textContent='Imported '+out.length+' file(s) and activated them. Live in 1-2 minutes.';
  msg('Theme imported and activated.');
- loadTheme();
 }
 
 /* CODE EDITOR */
@@ -483,117 +469,149 @@ $('#stSave').onclick=()=>run(async()=>{const s={name:$('#stName').value.trim(),t
  siteUrl=s.siteUrl.replace(/\/+$/,'');
  await commit([{path:'settings.json',text:JSON.stringify(s,null,1)}],'Update settings');msg('Settings saved. Live in 1-2 minutes.')});
 
-/* MENUS */
-async function loadMenus(){
- const items=await readJson('menu.json',[]);
- renderMenuList(items);
- const pages=(await ls('p')).filter(x=>x.type=='dir');
- const sel=$('#menuPageSel');sel.innerHTML='';
- pages.forEach(p=>sel.add(new Option('/p/'+p.name+'/','/p/'+p.name+'/'+'|'+p.name)));
- if(!pages.length)sel.add(new Option('No pages yet',''));
-}
-let menuItems=[];
-function renderMenuList(items){menuItems=items.map((it,i)=>({...it,_id:it._id||('m'+i+Date.now())}));
- const box=$('#menuList');box.innerHTML='';
- if(!menuItems.length){box.innerHTML='<p class="mut">No menu items yet. Add one below.</p>';return}
- menuItems.forEach(it=>{
-  const row=document.createElement('div');row.className='menu-item';row.draggable=true;row.dataset.id=it._id;
-  row.innerHTML='<span class="handle">⠿</span><span class="lbl"></span><span class="url"></span><button class="d" style="margin-left:auto">Remove</button>';
-  row.querySelector('.lbl').textContent=it.label;row.querySelector('.url').textContent=it.url;
-  row.querySelector('button').onclick=()=>{menuItems=menuItems.filter(x=>x._id!=it._id);renderMenuList(menuItems)};
-  row.addEventListener('dragstart',()=>row.classList.add('dragging'));
-  row.addEventListener('dragend',()=>row.classList.remove('dragging'));
-  box.append(row)});
-}
-$('#menuList').addEventListener('dragover',e=>{e.preventDefault();
- const dragging=document.querySelector('.menu-item.dragging');if(!dragging)return;
- const after=[...$('#menuList').querySelectorAll('.menu-item:not(.dragging)')].find(el=>e.clientY<el.getBoundingClientRect().top+el.offsetHeight/2);
- if(after)$('#menuList').insertBefore(dragging,after);else $('#menuList').appendChild(dragging)});
-$('#menuAddPage').onclick=()=>{const v=$('#menuPageSel').value;if(!v)return;const [url,name]=v.split('|');
- menuItems.push({_id:'m'+Date.now(),label:name,url});renderMenuList(menuItems)};
-$('#menuAddCustom').onclick=()=>{const l=$('#menuCustomLabel').value.trim(),u=$('#menuCustomUrl').value.trim();
- if(!l||!u)return msg('Enter both a label and a URL.');
- menuItems.push({_id:'m'+Date.now(),label:l,url:u});renderMenuList(menuItems);
- $('#menuCustomLabel').value='';$('#menuCustomUrl').value=''};
-$('#menuSave').onclick=()=>run(async()=>{
- const ordered=[...document.querySelectorAll('#menuList .menu-item')].map(row=>{
-  const id=row.dataset.id;return menuItems.find(it=>it._id==id)});
- const clean=ordered.filter(Boolean).map(it=>({label:it.label,url:it.url}));
- await commit([{path:'menu.json',text:JSON.stringify(clean,null,1)}],'Update menu');
- msg('Menu saved. Live in 1-2 minutes.');
-});
+/* ===== ADD-ON: bulk delete, dates, reset, theme name, plugins ===== */
+const fmtDT=iso=>{const d=new Date(iso);return d.toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'})+', '+d.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'})};
+const themeCss=t=>':root{--primary:'+t.primary+';--bg:'+t.bg+';--text:'+t.text+';--font:'+FONTS[t.font]+';--radius:'+t.radius+'px}\nbody{margin:0;background:var(--bg);color:var(--text);font-family:var(--font);line-height:1.6}\na{color:var(--primary)}\n.post,.wrap{max-width:720px;margin:0 auto;padding:2rem 1rem}\n.post img{max-width:100%;border-radius:var(--radius)}\n.card{border:1px solid rgba(128,128,128,.3);border-radius:var(--radius);padding:1rem;margin:1rem 0}\n';
+const DEFTHEME={name:'Default Theme',primary:'#2f6f5e',bg:'#ffffff',text:'#1b2130',font:'Clean sans',radius:12};
+const WELCOME='<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Welcome to your CMS</title><link rel="stylesheet" href="/theme.css"></head><body><div class="wrap" style="text-align:center;padding-top:20vh"><h1>Welcome to your CMS</h1></div></body></html>';
 
-/* PLUGINS (WordPress-style list) */
-async function loadPlugins(){
- const idx=await readJson('plugins/index.json',[]),box=$('#plList');box.innerHTML='';
- if(!idx.length){box.innerHTML='<p class="mut">No plugins installed yet. Add one below.</p>';return}
- const table=document.createElement('table');table.className='plugin-table';
- idx.forEach(p=>{
-  const tr=document.createElement('tr');tr.className=p.enabled?'active-row':'';
-  tr.innerHTML='<td style="width:60%"><div class="plugin-name"></div><div class="mut" style="margin-top:.3rem"></div><div class="plugin-actions" style="margin-top:.5rem"></div></td><td></td>';
-  tr.querySelector('.plugin-name').append(document.createTextNode(p.name),Object.assign(document.createElement('span'),{className:'plugin-status '+(p.enabled?'status-active':'status-inactive'),textContent:p.enabled?'Active':'Inactive'}));
-  tr.children[0].children[1].textContent=p.description||'No description provided.';
-  const actions=tr.querySelector('.plugin-actions');
-  const toggle=document.createElement('a');toggle.textContent=p.enabled?'Deactivate':'Activate';
-  toggle.onclick=()=>run(async()=>{p.enabled=!p.enabled;await commit([{path:'plugins/index.json',text:JSON.stringify(idx,null,1)}],(p.enabled?'Activate':'Deactivate')+' plugin '+p.name);msg(p.enabled?'Activated. Reload Plugins to run it.':'Deactivated.');loadPlugins()});
-  const sep=document.createElement('span');sep.textContent='|';
-  const del=document.createElement('a');del.textContent='Delete';del.style.color='var(--err)';
-  del.onclick=()=>{if(!confirm('Delete plugin "'+p.name+'"?'))return;run(async()=>{const rest=idx.filter(x=>x.slug!=p.slug);await commit([{path:'plugins/'+p.slug+'.js',del:true},{path:'plugins/index.json',text:JSON.stringify(rest,null,1)}],'Remove plugin '+p.name);msg('Deleted.');loadPlugins()})};
-  actions.append(toggle,sep,del);
-  tr.children[1].textContent='';table.append(tr)});
- box.append(table);
-}
-$('#plSave').onclick=()=>run(async()=>{const name=$('#plName').value.trim(),code=$('#plCode').value;
- if(!name||!code.trim())throw new Error('Enter a plugin name and its code.');
- const s=slug(name),idx=await readJson('plugins/index.json',[]),i=idx.findIndex(p=>p.slug==s);
- const entry={slug:s,name,enabled:true,description:''};
- if(i<0)idx.push(entry);else idx[i]={...idx[i],name};
- await commit([{path:'plugins/'+s+'.js',text:code},{path:'plugins/index.json',text:JSON.stringify(idx,null,1)}],'Add plugin '+name);
- msg('Plugin saved and activated. Click Reload Plugins to run it now.');
- $('#plName').value='';$('#plCode').value='';loadPlugins()});
-$('#plReload').onclick=()=>run(async()=>{await loadPluginsRuntime();msg('Plugins reloaded.')});
-const PluginAPI={msg,commit,readText,readJson,ls,pickPhoto:pick,slug,esc,
- registerTab(opts){
-  if(!opts||!opts.id||!opts.render||document.getElementById('v-'+opts.id))return;
-  const sec=document.createElement('section');sec.id='v-'+opts.id;sec.className='hide';
-  const card=document.createElement('div');card.className='card';sec.append(card);
-  document.querySelector('main').append(sec);
-  VIEWS.push(opts.id);
-  LOAD[opts.id]=async()=>{if(!card.dataset.rendered){await opts.render(card);card.dataset.rendered='1'}};
-  const btn=document.createElement('button');btn.dataset.t=opts.id;btn.textContent=(opts.icon||'🧩')+' '+(opts.label||opts.id);
-  $('#out').parentNode.insertBefore(btn,$('#out'));
- }};
-async function loadPluginsRuntime(){
- try{const idx=await readJson('plugins/index.json',[]);
-  for(const p of idx.filter(x=>x.enabled)){
-   try{const code=await readText('plugins/'+p.slug+'.js');new Function('CMS',code)(PluginAPI)}
-   catch(e){msg('Plugin "'+p.name+'" failed to load: '+e.message)}
-  }
- }catch(e){}
-}
+/* Pages: select, select all, bulk delete, publish + update date/time */
+$('#pgTable').parentElement.tHead.innerHTML='<tr><th style="width:30px"><input type="checkbox" id="pgSelAll"></th><th>Page</th><th>Published</th><th>Last updated</th><th></th></tr>';
+$('#pgSelAll').onchange=e=>document.querySelectorAll('.pgchk').forEach(c=>c.checked=e.target.checked);
+async function loadPages2(){const tb=$('#pgTable');tb.innerHTML='<tr><td colspan=5>Loading...</td></tr>';
+ const d=(await ls('p')).filter(x=>x.type=='dir');tb.innerHTML='';$('#pgSelAll').checked=false;const home=(await readJson('homepage.json',{})).slug;
+ if(!d.length){tb.innerHTML='<tr><td colspan=5 class="mut">No pages yet.</td></tr>';return}
+ const dt=await Promise.all(d.map(async x=>{try{const c=await(await api('/commits?path=p/'+x.name+'/index.html&per_page=100')).json();return c.length?[c[c.length-1].commit.author.date,c[0].commit.author.date]:['','']}catch(e){return['','']}}));
+ d.forEach((x,i)=>{const tr=document.createElement('tr');
+  tr.innerHTML='<td><input type="checkbox" class="pgchk"></td><td><b></b></td><td></td><td></td><td style="text-align:right"></td>';
+  tr.querySelector('.pgchk').dataset.slug=x.name;tr.querySelector('b').textContent='/p/'+x.name+'/';
+  tr.children[2].textContent=dt[i][0]?fmtDT(dt[i][0]):'–';tr.children[3].textContent=dt[i][1]?fmtDT(dt[i][1]):'–';
+  const v=document.createElement('a');v.href='/p/'+x.name+'/';v.target='_blank';v.textContent='View';v.style.marginRight='.6rem';
+  const e=document.createElement('button');e.textContent='Edit';e.onclick=()=>openPage(x.name);const hb=document.createElement('button');hb.textContent=home==x.name?'🏠 Homepage':'Set as Home';hb.disabled=home==x.name;hb.style.marginRight='.4rem';hb.onclick=()=>run(async()=>{await setHome(x.name);msg('Homepage set. Live in 1-2 minutes.');loadPages2()});tr.children[4].append(v,hb,e);tb.append(tr)})}
+LOAD.pages=loadPages2;
+$('#pgBulkDel').onclick=()=>{const sel=[...document.querySelectorAll('.pgchk:checked')].map(c=>c.dataset.slug);
+ if(!sel.length)return msg('Select at least one page.');
+ if(!confirm('Move '+sel.length+' page(s) to Trash?'))return;
+ run(async()=>{const idx=await trashIndex(),files=[];
+  for(const n of sel){const html=await readText('p/'+n+'/index.html'),id=trashId();
+   idx.push({id,type:'page',slug:n,title:new DOMParser().parseFromString(html,'text/html').title||n,deletedAt:new Date().toISOString()});
+   files.push({path:'trash/pages/'+id+'/index.html',text:html},{path:'p/'+n+'/index.html',del:true})}
+  files.push({path:'trash/index.json',text:JSON.stringify(idx,null,1)});
+  await commit(files,'Move '+sel.length+' page(s) to trash');msg(sel.length+' page(s) moved to Trash.');loadPages2()})};
 
-/* RESET WEBSITE */
+/* Reset website (Dashboard + Settings) */
 async function resetWebsite(){
- const files=[];
- const pages=(await ls('p')).filter(x=>x.type=='dir');
- for(const p of pages)files.push({path:'p/'+p.name+'/index.html',del:true});
- const posts=await readJson('posts/index.json',[]);
- for(const p of posts){files.push({path:'posts/'+p.slug+'/post.json',del:true});files.push({path:'posts/'+p.slug+'/index.html',del:true})}
- files.push({path:'posts/index.json',text:'[]'});
- const trash=await trashIndex();
- for(const t of trash){if(t.type=='page')files.push({path:'trash/pages/'+t.id+'/index.html',del:true});
-  else{files.push({path:'trash/posts/'+t.id+'/post.json',del:true});files.push({path:'trash/posts/'+t.id+'/index.html',del:true})}}
- files.push({path:'trash/index.json',text:'[]'});
- files.push({path:'menu.json',text:'[]'});
- files.push({path:'index.html',text:'<!DOCTYPE html>\n<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Welcome</title><link rel="stylesheet" href="/theme.css"></head><body><div class="wrap" style="max-width:600px;margin:4rem auto;text-align:center"><h1>Welcome to your CMS</h1><p>Your website has been reset. Open <a href="/admin/">/admin/</a> to start building pages.</p></div></body></html>'});
- const defTheme={primary:'#2f6f5e',bg:'#ffffff',text:'#1b2130',font:'Clean sans',radius:12,themeName:'Default Theme'};
- const css=':root{--primary:'+defTheme.primary+';--bg:'+defTheme.bg+';--text:'+defTheme.text+';--font:system-ui,sans-serif;--radius:'+defTheme.radius+'px}\nbody{margin:0;background:var(--bg);color:var(--text);font-family:var(--font);line-height:1.6}\na{color:var(--primary)}\n.wrap{max-width:720px;margin:0 auto;padding:2rem 1rem}\n';
- files.push({path:'theme.json',text:JSON.stringify(defTheme)});
- files.push({path:'theme.css',text:css});
- await commit(files,'Reset website to blank state');
-}
-$('#resetSite').onclick=()=>{const v=prompt('This permanently deletes all pages, posts, trash and your menu, and resets the theme. Type RESET to confirm.');
- if(v!=='RESET')return;run(async()=>{await resetWebsite();msg('Website reset. Live in 1-2 minutes.');tab('dash')})};
+ if(prompt('This deletes ALL pages, posts and trash. Type RESET to confirm:')!=='RESET')return;
+ run(async()=>{const tr=await(await api('/git/trees/'+cfg.branch+'?recursive=1')).json();
+  const files=tr.tree.filter(x=>x.type=='blob'&&/^(p|posts|trash)\//.test(x.path)&&!/^(posts|trash)\/index\.json$/.test(x.path)&&x.path!='p/home/index.html').map(x=>({path:x.path,del:true}));
+  files.push({path:'posts/index.json',text:'[]'},{path:'trash/index.json',text:'[]'},{path:'theme.json',text:JSON.stringify(DEFTHEME)},{path:'theme.css',text:themeCss(DEFTHEME)},{path:'p/home/index.html',text:WELCOME},{path:'index.html',text:WELCOME},{path:'menu.json',text:'[]'},{path:'menu.js',text:MENU_JS},{path:'homepage.json',text:JSON.stringify({slug:'home'})});
+  await commit(files,'Reset website');msg('Website reset. Live in 1-2 minutes.');tab('dash')})}
+$('#resetSite').onclick=resetWebsite;
+document.querySelector('.qa').insertAdjacentHTML('beforeend','<button class="d" id="dashReset" style="grid-column:1/-1;border-color:#e0393e">⚠️ Reset Website</button>');
+$('#dashReset').onclick=resetWebsite;
+
+/* Theme name (like WordPress) */
+const oldTheme=loadTheme;LOAD.theme=async()=>{await oldTheme();$('#tName').value=(await readJson('theme.json',{})).name||''};
+$('#tsave').onclick=()=>run(async()=>{const t={name:$('#tName').value.trim()||'My Theme',primary:$('#tc1').value,bg:$('#tc2').value,text:$('#tc3').value,font:$('#tf').value,radius:+$('#tr').value||0};
+ await commit([{path:'theme.json',text:JSON.stringify(t)},{path:'theme.css',text:themeCss(t)}],'Update theme');msg('Theme "'+t.name+'" activated. Live in 1-2 minutes.')});
+const oldDash=loadDash;LOAD.dash=async()=>{await oldDash();$('#siTheme').textContent=(await readJson('theme.json',{})).name||'Default Theme'};
+let zipName='';$('#zipfile').addEventListener('change',e=>{const f=e.target.files[0];if(f)zipName=f.name.replace(/\.zip$/i,'')});
+const oldImp=importZipAll;importZipAll=async function(){await oldImp();const t=await readJson('theme.json',{});t.name=zipName||t.name||'Imported Theme';
+ await commit([{path:'theme.json',text:JSON.stringify(t)}],'Activate theme '+t.name);$('#siTheme').textContent=t.name;msg('Theme "'+t.name+'" activated.')};
+
+/* Plugins: your own JS plugins, saved in repo and auto-loaded on login */
+const PL_IDX='plugins/index.json';
+const CMS={commit,readText,readJson,msg,pickPhoto:pick,slug,api,ls,esc,
+ registerTab({id,label,icon,render}){const vid='p_'+id;
+  if(document.getElementById('v-'+vid)){LOAD[vid]=async()=>{const s=$('#v-'+vid);s.innerHTML='';await render(s)};return}
+  const s=document.createElement('section');s.id='v-'+vid;s.className='hide';document.querySelector('main').append(s);
+  VIEWS.push(vid);LOAD[vid]=async()=>{s.innerHTML='';await render(s)};
+  const b=document.createElement('button');b.dataset.t=vid;b.textContent=(icon||'🧩')+' '+label;$('#out').before(b)}};
+async function loadAllPlugins(){for(const p of await readJson(PL_IDX,[])){if(p.off)continue;
+ try{const code=await readText('plugins/'+p.slug+'.js');new Function('CMS',code)(CMS)}catch(e){msg('Plugin "'+p.name+'" error: '+e.message)}}}
+async function loadPlugins(){const l=await readJson(PL_IDX,[]),b=$('#plList');b.innerHTML='';
+ if(!l.length){b.innerHTML='<p class="mut">No plugins yet.</p>';return}
+ const mk=(t,c,f)=>{const x=document.createElement('button');x.textContent=t;if(c)x.className=c;x.onclick=f;return x};
+ l.forEach(p=>{const r=document.createElement('div');r.className='row';const n=document.createElement('b');n.textContent='🧩 '+p.name+(p.off?' (off)':'');
+  r.append(n,
+   mk('Edit','',()=>run(async()=>{$('#plName').value=p.name;$('#plCode').value=await readText('plugins/'+p.slug+'.js');scrollTo(0,document.body.scrollHeight)})),
+   mk(p.off?'Turn on':'Turn off','',()=>run(async()=>{p.off=!p.off;await commit([{path:PL_IDX,text:JSON.stringify(l,null,1)}],'Toggle plugin '+p.slug);msg('Done. Log in again to fully apply.');loadPlugins()})),
+   mk('Delete','d',()=>confirm('Delete plugin '+p.name+'?')&&run(async()=>{const nl=l.filter(x=>x.slug!=p.slug);
+    await commit([{path:'plugins/'+p.slug+'.js',del:true},{path:PL_IDX,text:JSON.stringify(nl,null,1)}],'Delete plugin '+p.slug);msg('Plugin deleted.');loadPlugins()})));
+  b.append(r)})}
+$('#plSave').onclick=()=>run(async()=>{const name=$('#plName').value.trim(),code=$('#plCode').value;if(!name||!code.trim())throw new Error('Enter plugin name and code');
+ new Function('CMS',code);/* syntax check */
+ const s=slug(name),l=await readJson(PL_IDX,[]),i=l.findIndex(x=>x.slug==s),e={slug:s,name};if(i<0)l.push(e);else l[i]={...l[i],...e,off:false};
+ await commit([{path:'plugins/'+s+'.js',text:code},{path:PL_IDX,text:JSON.stringify(l,null,1)}],'Save plugin '+s);
+ await loadAllPlugins();msg('Plugin saved and loaded.');loadPlugins()});
+$('#plReload').onclick=()=>run(async()=>{await loadAllPlugins();await loadPlugins();msg('Plugins reloaded.')});
+$('#plCode').previousElementSibling.insertAdjacentHTML('beforebegin','<label>Or upload a .js file</label><input type="file" id="plFile" accept=".js">');
+$('#plFile').onchange=async e=>{const f=e.target.files[0];if(!f)return;$('#plCode').value=await f.text();if(!$('#plName').value)$('#plName').value=f.name.replace(/\.js$/i,'')};
+const _go=$('#go').onclick;$('#go').onclick=async()=>{await _go();if(cfg)run(loadAllPlugins)};
+if(cfg)run(loadAllPlugins);
+
+/* ===== ADD-ON 2: Menu + Homepage ===== */
+const MENU_JS=`(function(){fetch('/menu.json?'+Date.now()).then(function(r){return r.ok?r.json():[]}).then(function(m){if(!m.length)return;var n=document.getElementById('site-menu');if(!n){n=document.createElement('nav');n.id='site-menu';document.body.insertBefore(n,document.body.firstChild)}var u=document.createElement('ul');if(!n.hasAttribute('data-styled'))u.style.cssText='list-style:none;display:flex;flex-wrap:wrap;gap:1rem;margin:0;padding:1rem;justify-content:center';m.forEach(function(i){var li=document.createElement('li'),a=document.createElement('a');a.href=i.url;a.textContent=i.label;if(location.pathname.replace(/\\/$/,'')==i.url.replace(/\\/$/,'')){a.style.fontWeight='700';a.className='active'}li.appendChild(a);u.appendChild(li)});n.innerHTML='';n.appendChild(u)}).catch(function(){})})();`;
+async function setHome(s){const html=await readText('p/'+s+'/index.html');
+ await commit([{path:'index.html',text:html},{path:'homepage.json',text:JSON.stringify({slug:s})},{path:'menu.js',text:MENU_JS}],'Set homepage '+s)}
+let flat=[],mnOpen=new Set(),mnUid=0;
+VIEWS.push('menu');
+const toFlat=(a,d)=>a.flatMap(i=>[{id:++mnUid,label:i.label,url:i.url,depth:d},...toFlat(i.children||[],d+1)]);
+const mnNorm=()=>flat.forEach((i,k)=>{i.depth=Math.max(0,Math.min(i.depth,3,k?flat[k-1].depth+1:0))});
+const toTree=()=>{const root=[],st=[];flat.filter(i=>i.label.trim()&&i.url.trim()).forEach(i=>{const n={label:i.label.trim(),url:i.url.trim()},d=Math.min(i.depth,st.length);st.length=d;if(d){const p=st[d-1];(p.children=p.children||[]).push(n)}else root.push(n);st.push(n)});return root};
+const pretty=n=>n.replace(/-/g,' ').replace(/\b\w/g,c=>c.toUpperCase());
+async function loadMenu(){flat=toFlat(await readJson('menu.json',[]),0);mnNorm();
+ const d=(await ls('p')).filter(x=>x.type=='dir').map(x=>x.name),home=(await readJson('homepage.json',{})).slug||'',po=(await readJson('posts/index.json',[])).filter(x=>!x.draft);
+ const hs=$('#hpSel');hs.innerHTML='';d.forEach(n=>hs.add(new Option('/p/'+n+'/',n)));if(home&&d.includes(home))hs.value=home;
+ $('#hpCur').textContent=home?'Current homepage: /p/'+home+'/':'No homepage set yet.';
+ const box=(id,arr)=>{const b=$(id);b.innerHTML='';if(!arr.length)b.innerHTML='<span class="mut">None yet</span>';arr.forEach(([l,u])=>{const x=document.createElement('label'),c=document.createElement('input');c.type='checkbox';c.value=u;c.dataset.l=l;x.append(c,l);b.append(x)})};
+ box('#mnPages',[['Home','/'],...d.filter(n=>n!='home').map(n=>[pretty(n),'/p/'+n+'/'])]);box('#mnPosts',po.map(x=>[x.title,'/posts/'+x.slug+'/']));drawMenu()}
+LOAD.menu=loadMenu;
+function drawMenu(){const b=$('#mnList');b.innerHTML='';if(!flat.length){b.innerHTML='<p class="mut">Menu is empty. Add pages from the left.</p>';return}
+ flat.forEach((it,i)=>{const r=document.createElement('div');r.className='mnrow'+(mnOpen.has(it.id)?' open':'')+(it.drag?' drag':'');r.style.marginLeft=it.depth*30+'px';
+  r.innerHTML='<div class="h"><span class="hnd" title="Drag">⠿</span><b style="margin-right:auto"></b><small class="mut">'+(it.depth?'sub item':'')+'</small><button class="t">▾</button></div><div class="bd"><label>Navigation label</label><input class="l"><label>URL</label><input class="u"><p><button class="d rm">Remove</button></p></div>';
+  const t=r.querySelector('b'),l=r.querySelector('.l'),u=r.querySelector('.u');t.textContent=it.label||'(no label)';l.value=it.label;u.value=it.url;
+  l.oninput=()=>{it.label=l.value;t.textContent=it.label||'(no label)'};u.oninput=()=>it.url=u.value;
+  r.querySelector('.t').onclick=()=>{mnOpen.has(it.id)?mnOpen.delete(it.id):mnOpen.add(it.id);r.classList.toggle('open')};
+  r.querySelector('.rm').onclick=()=>{flat.splice(i,1);mnNorm();drawMenu()};
+  r.querySelector('.hnd').onpointerdown=e=>startSort(e,i);b.append(r)})}
+function startSort(e,i){e.preventDefault();const x0=e.clientX,d0=flat[i].depth;let n=1;while(flat[i+n]&&flat[i+n].depth>d0)n++;
+ const block=flat.slice(i,i+n),od=block.map(b=>b.depth),rest=flat.filter(it=>!block.includes(it));
+ const mv=ev=>{const rows=[...$('#mnList').children],mids=rows.map((r,k)=>({it:flat[k],m:r.getBoundingClientRect().top+r.offsetHeight/2})).filter(o=>!block.includes(o.it)),pos=mids.filter(o=>o.m<ev.clientY).length;
+  const nd=Math.max(0,Math.min(d0+Math.round((ev.clientX-x0)/30),pos?rest[pos-1].depth+1:0,3)),sh=nd-d0;block.forEach((b,k)=>b.depth=od[k]+sh);
+  flat=[...rest.slice(0,pos),...block,...rest.slice(pos)];block[0].drag=true;drawMenu()};
+ const up=()=>{document.removeEventListener('pointermove',mv);document.removeEventListener('pointerup',up);block.forEach(b=>b.drag=false);mnNorm();drawMenu()};
+ document.addEventListener('pointermove',mv);document.addEventListener('pointerup',up)}
+const mnAdd=id=>{[...$(id).querySelectorAll('input:checked')].forEach(c=>{flat.push({id:++mnUid,label:c.dataset.l,url:c.value,depth:0});c.checked=false});drawMenu()};
+$('#mnAddP').onclick=()=>mnAdd('#mnPages');$('#mnAddPo').onclick=()=>mnAdd('#mnPosts');
+$('#mnAddC').onclick=()=>{const u=$('#mnCu').value.trim(),l=$('#mnCl').value.trim()||u;if(!u)return msg('Enter a URL.');flat.push({id:++mnUid,label:l,url:u,depth:0});$('#mnCu').value='';$('#mnCl').value='';drawMenu()};
+$('#hpSave').onclick=()=>run(async()=>{const s=$('#hpSel').value;if(!s)throw new Error('Create a page first');
+ await setHome(s);msg('Homepage set to /p/'+s+'/. Live in 1-2 minutes.');loadMenu()});
+$('#mnSave').onclick=()=>run(async()=>{const items=toTree(),files=[{path:'menu.json',text:JSON.stringify(items,null,1)},{path:'menu.js',text:MENU_JS}];
+ for(const n of (await ls('p')).filter(x=>x.type=='dir').map(x=>x.name)){try{files.push({path:'p/'+n+'/index.html',text:await readText('p/'+n+'/index.html')})}catch(e){}}
+ for(const po of await readJson('posts/index.json',[])){try{files.push({path:'posts/'+po.slug+'/index.html',text:await readText('posts/'+po.slug+'/index.html')})}catch(e){}}
+ try{files.push({path:'index.html',text:await readText('index.html')})}catch(e){}
+ await commit(files,'Update menu');flat=toFlat(items,0);drawMenu();msg('Menu saved on all pages. Live in 1-2 minutes.')});
+
+/* Media library (WordPress style) */
+async function loadMedia2(){const l=await photos(),g=$('#mgrid');g.innerHTML='';if(!l.length){g.textContent='No photos yet.';return}
+ l.forEach(x=>{const f=document.createElement('figure'),im=document.createElement('img'),c=document.createElement('figcaption');im.loading='lazy';thumb(im,x.name);c.textContent=x.name;f.append(im,c);f.onclick=()=>openMedia(x);g.append(f)})}
+LOAD.media=loadMedia2;
+function openMedia(x){$('#mdl').style.display='block';const im=$('#mdlImg');im.onload=()=>$('#mdlDim').textContent=im.naturalWidth+' × '+im.naturalHeight+' px';im.removeAttribute('src');thumb(im,x.name);
+ $('#mdlName').textContent=x.name;$('#mdlUrl').value='/img/'+x.name;$('#mdlSize').textContent=((x.size||0)/1024).toFixed(1)+' KB';$('#mdlDim').textContent='…';$('#mdlOpen').href=blobCache[x.name]||'/img/'+x.name;
+ const cp=t=>navigator.clipboard?navigator.clipboard.writeText(t).then(()=>msg('Copied '+t)):msg(t);
+ $('#mdlCopy').onclick=()=>cp('/img/'+x.name);$('#mdlCopyFull').onclick=()=>cp(location.origin+'/img/'+x.name);
+ $('#mdlDel').onclick=()=>{if(confirm('Delete '+x.name+' permanently? Pages using it will show a broken image.'))run(async()=>{await commit([{path:'img/'+x.name,del:true}],'Delete photo '+x.name);$('#mdl').style.display='none';msg('Deleted.');loadMedia2()})}}
+$('#mdlClose').onclick=()=>$('#mdl').style.display='none';$('#mdl').onclick=e=>{if(e.target.id=='mdl')e.target.style.display='none'};
+
+/* Users: invite by email or username */
+$('#uadd').onclick=()=>run(async()=>{let u=$('#un').value.trim(),mail=$('#ue').value.trim();if(!u)throw new Error('Enter an email or GitHub username');
+ if(u.includes('@')){mail=mail||u;const j=await(await fetch('https://api.github.com/search/users?q='+encodeURIComponent(u+' in:email'),{headers:{Accept:'application/vnd.github+json'}})).json();
+  if(!j.items||!j.items.length)throw new Error('No GitHub account found for this email. Ask the person to create a free GitHub account (github.com/signup) and send you their username.');u=j.items[0].login}
+ await api('/collaborators/'+encodeURIComponent(u),{method:'PUT',body:JSON.stringify({permission:$('#ur').value})});
+ const url=location.href.split('#')[0].split('?')[0],body='Hello,\n\nYou have been invited to manage the website '+cfg.owner+'/'+cfg.repo+'.\n\n1. GitHub has emailed you an invitation - open it and click Accept.\n2. Create an access token: https://github.com/settings/personal-access-tokens/new (select repository '+cfg.repo+', permission Contents: Read and write).\n3. Open the admin panel: '+url+'\n4. Log in with - GitHub username: '+cfg.owner+' | Repository: '+cfg.repo+' | Branch: '+cfg.branch+' | Token: the token you created.\n\nThanks';
+ $('#uinfo').innerHTML='';if(mail){const a=document.createElement('a');a.href='mailto:'+encodeURIComponent(mail).replace('%40','@')+'?subject='+encodeURIComponent('You are invited to the website admin')+'&body='+encodeURIComponent(body);a.textContent='✉️ Open email with login instructions for '+mail;$('#uinfo').append(a)}
+ $('#un').value='';$('#ue').value='';msg('Invite sent to '+u+'. They must accept it on GitHub.');loadUsers()});
 
 showApp();
 </script></body></html>
