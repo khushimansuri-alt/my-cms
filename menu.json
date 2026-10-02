@@ -1,1 +1,32 @@
-[]
+[
+ {
+  "label": "Home",
+  "url": "/"
+ },
+ {
+  "label": "About Us",
+  "url": "/p/about/",
+  "children": [
+   {
+    "label": "Academics",
+    "url": "/p/academics/"
+   },
+   {
+    "label": "Admission Enquiry",
+    "url": "/p/admission-enquiry/"
+   }
+  ]
+ },
+ {
+  "label": "TC Verification",
+  "url": "/p/tc-verification/"
+ },
+ {
+  "label": "Mandatory Public Disclosure",
+  "url": "/p/mandatory-public-disclosure/"
+ },
+ {
+  "label": "Contact",
+  "url": "/p/contact/"
+ }
+]
