@@ -50,6 +50,9 @@ code{background:var(--bg);padding:.1rem .3rem;border-radius:4px}
 .mnbox{max-height:170px;overflow:auto;border:1px solid var(--bd);border-radius:8px;padding:.4rem;margin:.3rem 0 .6rem}.mnbox label{display:flex;gap:.4rem;align-items:center;font-weight:400;margin:.2rem 0}
 .mnrow{background:var(--card);border:1px solid var(--bd);border-radius:8px;padding:.5rem .6rem;margin:.35rem 0}.mnrow .h{display:flex;align-items:center;gap:.5rem}.mnrow .hnd{cursor:grab;touch-action:none;font-size:1.2rem;color:var(--mut);user-select:none}
 .mnrow.drag{outline:2px solid var(--pr);background:#eef1ff}.mnrow .bd{display:none;margin-top:.5rem}.mnrow.open .bd{display:block}@media(max-width:820px){.mnwrap{grid-template-columns:1fr!important}}
+#pubbar{position:fixed;right:1rem;bottom:1rem;background:#fff;border:1px solid var(--bd);border-left:5px solid var(--pr);border-radius:10px;padding:.7rem 1rem;box-shadow:0 6px 24px rgba(0,0,0,.15);z-index:25;display:flex;gap:.7rem;align-items:center;max-width:430px}
+#pubbar[data-s=ok]{border-left-color:#1fae6b}#pubbar[data-s=err]{border-left-color:var(--err)}#pubbar a{white-space:nowrap;font-weight:700;color:var(--pr);text-decoration:none}
+.spin{width:16px;height:16px;border:3px solid var(--bd);border-top-color:var(--pr);border-radius:50%;animation:sp .8s linear infinite;flex:0 0 16px}@keyframes sp{to{transform:rotate(360deg)}}
 #mdl{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:15;display:none;padding:1rem;overflow:auto}
 .chk{background:repeating-conic-gradient(#eee 0 25%,#fff 0 50%) 0 0/20px 20px;border-radius:8px;text-align:center}
 </style></head><body>
@@ -122,8 +125,8 @@ code{background:var(--bg);padding:.1rem .3rem;border-radius:4px}
 <button class="p" id="newbtn">Save page</button> <button id="nprev">Preview</button> <button id="pgNewCancel">Cancel</button>
 <iframe id="nframe" title="Preview" class="hide"></iframe></div></section>
 
-<section id="v-edit" class="hide"><div class="card"><div class="row"><b id="etitle"></b><button id="prev">Preview</button><button class="d" id="del">Delete</button></div>
-<div id="fields"></div><p><button class="p" id="save">Save changes</button> <button data-t="pages">Back</button></p><iframe id="frame" title="Preview"></iframe></div></section>
+<section id="v-edit" class="hide"><div class="card"><div class="row"><b id="etitle"></b><button class="p" id="ebuilder">🧱 Edit with Page Builder</button><button id="prev">Preview</button><button id="eview">🌐 View live</button><button id="ehist">🕘 History</button><button id="edup">Duplicate</button><button id="eren">Rename URL</button><button class="d" id="del">Delete</button></div>
+<div id="fields"></div><p><button class="p" id="save">Save changes</button> <button data-t="pages">Back</button></p><div id="hist" class="hide"><h3>Version history</h3><div id="histList"></div></div><iframe id="frame" title="Preview"></iframe></div></section>
 
 <section id="v-menu" class="hide">
 <div class="card"><h3>Homepage</h3><p class="mut">Choose which page opens first when someone visits your website (the main address).</p>
@@ -149,7 +152,7 @@ code{background:var(--bg);padding:.1rem .3rem;border-radius:4px}
 <label><input type="checkbox" id="pdr"> Draft (hidden from the blog list)</label>
 <p><button class="p" id="psave">Save post</button> <button class="d" id="pdel">Delete</button> <button data-t="posts">Back</button></p></div></section>
 
-<section id="v-media" class="hide"><div class="card"><h3>Media library</h3><p class="mut">Photos are resized to 1600px. New photos appear after the site rebuilds (1-2 min). Click a photo to see it large, copy its link or delete it.</p>
+<section id="v-media" class="hide"><div class="card"><h3>Media library</h3><p class="mut">Photos are resized to 1600px. Click a photo to see it large, copy its link or delete it.</p>
 <input id="up" type="file" accept="image/*" multiple><div id="mgrid" class="grid" style="margin-top:1rem"></div></div></section>
 
 <section id="v-theme" class="hide">
@@ -173,9 +176,13 @@ code{background:var(--bg);padding:.1rem .3rem;border-radius:4px}
 <section id="v-trash" class="hide"><div class="card"><h3>Trash</h3><p class="mut">Deleted pages and posts stay here until you remove them for good.</p><div id="trList"></div></div></section>
 
 <section id="v-users" class="hide"><div class="card"><h3>Users</h3><div id="ulist"></div></div>
-<div class="card"><h3>Invite a user</h3><label>Email or GitHub username</label><input id="un" placeholder="name@example.com or github-username"><label>Their email (to send login instructions)</label><input id="ue" type="email" placeholder="optional">
+<div class="card"><h3>Invite a user</h3>
+<label>Email address</label><input id="ue" type="email" placeholder="name@example.com"><label>Name (optional)</label><input id="uname">
+<label>GitHub username (gives the real access — leave empty to search by email)</label><input id="un" placeholder="github-username">
 <label>Role</label><select id="ur"><option value="push">Editor (can edit content)</option><option value="pull">Viewer (read only)</option><option value="admin">Admin</option></select>
-<p class="mut">GitHub sends the invitation email and the person must accept it. There is no separate password: each person logs in with their own GitHub access token. Editors can change any file in the repo — GitHub has no per-page permission.</p><button class="p" id="uadd">Send invite</button><div id="uinfo" style="margin-top:.7rem"></div></div></section>
+<p class="mut">The person needs a free GitHub account: GitHub sends the access invitation to that account, and the login instructions are emailed to the address above (set up EmailJS in Settings to send it automatically). There is no separate password — each person logs in with their own GitHub token.</p>
+<button class="p" id="uadd">Send invitation</button><div id="uinfo" style="margin-top:.8rem"></div>
+<h4 style="margin:1.2rem 0 .3rem">Pending invitations</h4><div id="uinv"></div></div></section>
 
 <section id="v-plugins" class="hide">
 <div class="card"><div class="row"><b>Plugins</b><button id="plReload">Reload Plugins</button></div><div id="plList"></div></div>
@@ -191,7 +198,16 @@ code{background:var(--bg);padding:.1rem .3rem;border-radius:4px}
 <label>Live site URL (example: https://my-cms.pages.dev or your custom domain)</label><input id="stUrl" placeholder="https://...">
 <p class="mut">Used to make the Preview button show real fonts, styles and photos.</p>
 <label>Default SEO description</label><textarea id="stDesc"></textarea>
+<h4 style="margin:1.2rem 0 0">Favicon</h4><label>Favicon image (shown in browser tab)</label><input id="stFav"><button id="stFavPick">Choose photo</button>
+<h4 style="margin:1.2rem 0 0">Tracking &amp; custom code</h4><p class="mut">Pasted into every page automatically (Google Analytics, Meta Pixel, Search Console tag, chat widget…).</p>
+<label>Code for &lt;head&gt;</label><textarea id="stHead" style="font-family:ui-monospace,monospace" placeholder="&lt;script async src=&quot;https://www.googletagmanager.com/gtag/js?id=G-XXXX&quot;&gt;&lt;/script&gt;"></textarea>
+<label>Code before &lt;/body&gt;</label><textarea id="stFoot" style="font-family:ui-monospace,monospace"></textarea>
+<h4 style="margin:1.2rem 0 0">Invitation emails (EmailJS)</h4><p class="mut">To email invitations to any address: sign up free at emailjs.com → Email Services: add your Gmail → Email Templates: create one with To Email <code>{{to_email}}</code>, Subject <code>{{subject}}</code>, Content <code>{{message}}</code> → paste the Service ID, Template ID and Public Key (Account → General) below.</p>
+<label>EmailJS Service ID</label><input id="ejS"><label>EmailJS Template ID</label><input id="ejT"><label>EmailJS Public Key</label><input id="ejK">
 <p><button class="p" id="stSave">Save settings</button></p></div>
+<div class="card"><h3>Tools</h3><div class="row"><button id="toSitemap">🗺️ Create sitemap.xml + robots.txt</button><button id="to404">🚧 Create 404 page</button><button id="toBackup">💾 Download backup (.zip)</button></div>
+<p class="mut">Sitemap helps Google find your pages (needs the Live site URL above). Backup downloads every file of your site.</p>
+<label>Redirects (one per line: /old-url /new-url 301)</label><textarea id="rdText" style="font-family:ui-monospace,monospace;min-height:110px" placeholder="/old-page /p/new-page/ 301"></textarea><p class="mut">Works on Cloudflare Pages and Netlify.</p><button id="rdSave">Save redirects</button></div>
 <div class="card" style="border-color:var(--err)"><h3 style="color:var(--err)">Danger Zone</h3>
 <p class="mut">Resets your website: deletes every page, every post and everything in Trash, resets the theme, and replaces your homepage with a blank "Welcome to your CMS" page. Media, Users and this Settings info are kept. This cannot be undone.</p>
 <button class="d" id="resetSite" style="border-color:var(--err)">Reset Website</button></div></section>
@@ -204,6 +220,7 @@ code{background:var(--bg);padding:.1rem .3rem;border-radius:4px}
 <div class="row" style="margin-top:.7rem"><button class="p" id="mdlCopy">Copy path</button><button id="mdlCopyFull">Copy full URL</button><a id="mdlOpen" target="_blank">Open in new tab</a><button class="d" id="mdlDel" style="margin-left:auto">Delete permanently</button></div></div></div>
 <div id="pick"><div class="card"><div class="row"><b>Choose a photo</b><button id="pclose">Close</button></div><div id="pgrid" class="grid"></div></div></div>
 <div id="msg" role="status"></div>
+<div id="pubbar" class="hide"><span id="pubSpin" class="spin"></span><span id="pubTxt"></span><a id="pubView" class="hide" target="_blank">👁️ View live</a><button id="pubX">✕</button></div>
 
 <script>
 const $=s=>document.querySelector(s),IMG=/\.(jpe?g|png|webp|gif|svg)$/i,slug=s=>s.toLowerCase().replace(/[^a-z0-9-]+/g,'-').replace(/^-|-$/g,'');
@@ -224,15 +241,17 @@ function menuMarkup(items,at){const e=esc,L=(arr,d)=>'<ul'+(d?' class="sub"':(at
 function bakeMenu(h,items){const m=h.match(NAV_RE);if(!m)return injectMenu(h);const g=n=>{const x=m[1].match(new RegExp('data-'+n+'=["\']([^"\']*)["\']'));return x?x[1]:''};
  return h.replace(NAV_RE,()=>m[1]+menuMarkup(items,{ul:g('ul'),li:g('li'),a:g('a')})+'</nav>')}
 async function commit(files,message){
+ const pf=files.find(f=>!f.del&&liveUrlFor(f.path)),probeUrl=pf?(siteUrl||location.origin).replace(/\/+$/,'')+liveUrlFor(pf.path):null,before=probeUrl?await liveFetch(probeUrl):null;
  if(files.some(f=>f.text&&PAGE_RE.test(f.path))){const mf=files.find(f=>f.path=='menu.json'&&f.text);let items=[];try{items=mf?JSON.parse(mf.text):await readJson('menu.json',[])}catch(e){}
-  files.forEach(f=>{if(f.text&&PAGE_RE.test(f.path))f.text=bakeMenu(f.text,items)})}
+  let st={};try{const sf=files.find(f=>f.path=='settings.json'&&f.text);st=sf?JSON.parse(sf.text):await readJson('settings.json',{})}catch(e){}
+  files.forEach(f=>{if(f.text&&PAGE_RE.test(f.path))f.text=bakeHead(bakeMenu(f.text,items),st)})}
  const head=(await(await api('/git/ref/heads/'+cfg.branch)).json()).object.sha,base=(await(await api('/git/commits/'+head)).json()).tree.sha,tree=[];
  for(const f of files){if(f.del){tree.push({path:f.path,mode:'100644',type:'blob',sha:null});continue}
   const b=await(await api('/git/blobs',{method:'POST',body:JSON.stringify(f.b64?{content:f.b64,encoding:'base64'}:{content:f.text,encoding:'utf-8'})})).json();
   tree.push({path:f.path,mode:'100644',type:'blob',sha:b.sha})}
  const t=await(await api('/git/trees',{method:'POST',body:JSON.stringify({base_tree:base,tree})})).json();
  const n=await(await api('/git/commits',{method:'POST',body:JSON.stringify({message,tree:t.sha,parents:[head]})})).json();
- await api('/git/refs/heads/'+cfg.branch,{method:'PATCH',body:JSON.stringify({sha:n.sha})})}
+ await api('/git/refs/heads/'+cfg.branch,{method:'PATCH',body:JSON.stringify({sha:n.sha})});watchPublish(n.sha,files,before,probeUrl)}
 const trashId=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
 const trashIndex=async()=>await readJson('trash/index.json',[]);
 
@@ -281,7 +300,7 @@ async function loadPages(){const tb=$('#pgTable');tb.innerHTML='<tr><td colspan=
 $('#pgNewBtn').onclick=()=>{$('#pgNew').classList.remove('hide')};
 $('#pgNewCancel').onclick=()=>{$('#pgNew').classList.add('hide')};
 $('#newbtn').onclick=()=>{const s=slug($('#nslug').value.trim()),h=$('#nhtml').value;if(!s||!h.includes('<'))return msg('Enter a page name and paste the HTML.');
- run(async()=>{await commit([{path:'p/'+s+'/index.html',text:h}],'Add page '+s);$('#nhtml').value='';$('#nslug').value='';$('#pgNew').classList.add('hide');msg('Page saved. Live in 1-2 minutes.');loadPages()})};
+ run(async()=>{await commit([{path:'p/'+s+'/index.html',text:h}],'Add page '+s);$('#nhtml').value='';$('#nslug').value='';$('#pgNew').classList.add('hide');msg('Page saved.');loadPages()})};
 function openPage(s){run(async()=>{cur={slug:s,doc:new DOMParser().parseFromString(await readText('p/'+s+'/index.html'),'text/html')};buildFields();$('#etitle').textContent='/p/'+s+'/';$('#frame').srcdoc='';tab('edit')})}
 function buildFields(){const d=cur.doc,f=$('#fields');f.innerHTML='';
  const add=(label,val,kind,apply)=>{const w=document.createElement('div'),l=document.createElement('label');l.textContent=label;
@@ -290,6 +309,8 @@ function buildFields(){const d=cur.doc,f=$('#fields');f.innerHTML='';
  add('Page title',d.title,'line',v=>d.title=v);
  const md=d.querySelector('meta[name=description]');
  add('SEO description',md?md.content:'','line',v=>{let m=d.querySelector('meta[name=description]');if(!m){m=d.createElement('meta');m.name='description';d.head.append(m)}m.content=v});
+ const og=d.querySelector('meta[property="og:image"]');add('Social share image (og:image)',og?og.content:'','image',v=>{let m=d.querySelector('meta[property="og:image"]');if(!m){m=d.createElement('meta');m.setAttribute('property','og:image');d.head.append(m)}m.content=v});
+ const rb=d.querySelector('meta[name=robots]');add('Hide from Google? Type noindex (empty = visible)',rb&&/noindex/.test(rb.content)?'noindex':'','line',v=>{let m=d.querySelector('meta[name=robots]');if(!m){m=d.createElement('meta');m.name='robots';d.head.append(m)}m.content=v.trim()||'index,follow'});
  const els=d.querySelectorAll('[data-cms],[data-cms-html],[data-cms-image],[data-cms-link]');
  if(!els.length){const p=document.createElement('p');p.className='mut';p.textContent='No editable parts found. Add data-cms attributes to the HTML.';f.append(p)}
  els.forEach(el=>{if(el.hasAttribute('data-cms-image'))add('Photo: '+el.dataset.cmsImage,el.getAttribute('src')||'','image',v=>el.setAttribute('src',v));
@@ -300,7 +321,7 @@ const pageOut=()=>'<!DOCTYPE html>\n'+cur.doc.documentElement.outerHTML;
 const withBase=html=>siteUrl?html.replace(/<head[^>]*>/i,m=>m+'<base href="'+siteUrl+'/">'):html+'\n<!-- Preview note: add your live Site URL under Settings to see real fonts, styles and photos here. -->';
 $('#prev').onclick=()=>{$('#frame').srcdoc=withBase(pageOut())};
 $('#nprev').onclick=()=>{const h=$('#nhtml').value;if(!h.includes('<'))return msg('Paste the page HTML first.');$('#nframe').classList.remove('hide');$('#nframe').srcdoc=withBase(h)};
-$('#save').onclick=()=>run(async()=>{const out=pageOut(),fl=[{path:'p/'+cur.slug+'/index.html',text:out}];if((await readJson('homepage.json',{})).slug==cur.slug)fl.push({path:'index.html',text:out});await commit(fl,'Edit page '+cur.slug);msg('Saved. Live in 1-2 minutes.')});
+$('#save').onclick=()=>run(async()=>{const out=pageOut(),fl=[{path:'p/'+cur.slug+'/index.html',text:out}];if((await readJson('homepage.json',{})).slug==cur.slug)fl.push({path:'index.html',text:out});await commit(fl,'Edit page '+cur.slug);msg('Saved.')});
 $('#del').onclick=()=>{if(!confirm('Move this page to Trash? You can restore it later.'))return;
  run(async()=>{const id=trashId(),idx=await trashIndex();idx.push({id,type:'page',slug:cur.slug,title:cur.doc.title||cur.slug,deletedAt:new Date().toISOString()});
   await commit([{path:'trash/pages/'+id+'/index.html',text:pageOut()},{path:'trash/index.json',text:JSON.stringify(idx,null,1)},{path:'p/'+cur.slug+'/index.html',del:true}],'Move page '+cur.slug+' to trash');
@@ -323,7 +344,7 @@ $('#psave').onclick=()=>run(async()=>{const d={title:$('#pt').value.trim(),date:
  const l=await readJson('posts/index.json',[]),e={slug:s,title:d.title,date:d.date,excerpt:d.excerpt,image:d.image,draft:d.draft},i=l.findIndex(x=>x.slug==s);
  if(i<0)l.push(e);else l[i]=e;l.sort((a,b)=>b.date.localeCompare(a.date));
  await commit([{path:'posts/'+s+'/post.json',text:JSON.stringify(d)},{path:'posts/'+s+'/index.html',text:postHtml(d)},{path:'posts/index.json',text:JSON.stringify(l,null,1)}],'Save post '+s);
- msg('Post saved. Live in 1-2 minutes.');tab('posts')});
+ msg('Post saved.');tab('posts')});
 $('#pdel').onclick=()=>{const s=$('#ps').value;if(!$('#ps').disabled||!confirm('Move this post to Trash? You can restore it later.'))return;
  run(async()=>{const post=JSON.parse(await readText('posts/'+s+'/post.json')),html=await readText('posts/'+s+'/index.html');
   const l=(await readJson('posts/index.json',[])).filter(x=>x.slug!=s),id=trashId(),idx=await trashIndex();
@@ -368,14 +389,14 @@ const prep=f=>/svg|gif/.test(f.type)?rd(f,f.name.split('.').pop().toLowerCase())
  c.getContext('2d').drawImage(im,0,0,c.width,c.height);res({b64:c.toDataURL(png?'image/png':'image/jpeg',.82).split(',')[1],ext:png?'png':'jpg'})};im.src=URL.createObjectURL(f)});
 $('#up').onchange=e=>{const fs=[...e.target.files];if(!fs.length)return;msg('Uploading...');
  run(async()=>{const o=[];for(const f of fs){const p=await prep(f);o.push({path:'img/'+(slug(f.name.replace(/\.[^.]+$/,''))||'photo')+'.'+p.ext,b64:p.b64})}
-  await commit(o,'Upload '+o.length+' photo(s)');e.target.value='';msg('Uploaded. Photos show on the site in 1-2 minutes.');loadMedia()})};
+  await commit(o,'Upload '+o.length+' photo(s)');e.target.value='';msg('Uploaded.');loadMedia()})};
 
 /* THEME */
 async function loadTheme(){const t={primary:'#2f6f5e',bg:'#ffffff',text:'#1b2130',font:'Clean sans',radius:12,...await readJson('theme.json',{})};
  $('#tc1').value=t.primary;$('#tc2').value=t.bg;$('#tc3').value=t.text;$('#tf').value=t.font;$('#tr').value=t.radius}
 $('#tsave').onclick=()=>run(async()=>{const t={primary:$('#tc1').value,bg:$('#tc2').value,text:$('#tc3').value,font:$('#tf').value,radius:+$('#tr').value||0};
  const css=':root{--primary:'+t.primary+';--bg:'+t.bg+';--text:'+t.text+';--font:'+FONTS[t.font]+';--radius:'+t.radius+'px}\nbody{margin:0;background:var(--bg);color:var(--text);font-family:var(--font);line-height:1.6}\na{color:var(--primary)}\n.post,.wrap{max-width:720px;margin:0 auto;padding:2rem 1rem}\n.post img{max-width:100%;border-radius:var(--radius)}\n.card{border:1px solid rgba(128,128,128,.3);border-radius:var(--radius);padding:1rem;margin:1rem 0}\n';
- await commit([{path:'theme.json',text:JSON.stringify(t)},{path:'theme.css',text:css}],'Update theme');msg('Theme saved. Live in 1-2 minutes.')});
+ await commit([{path:'theme.json',text:JSON.stringify(t)},{path:'theme.css',text:css}],'Update theme');msg('Theme saved.')});
 
 const b64ab=buf=>{let bin='';const bytes=new Uint8Array(buf);for(let i=0;i<bytes.length;i++)bin+=String.fromCharCode(bytes[i]);return btoa(bin)};
 const TEXTEXT=/\.(html?|css|js|json|svg|txt|md)$/i;
@@ -398,10 +419,10 @@ $('#zipfile').onchange=async e=>{const f=e.target.files[0];if(!f)return;
   files.forEach(ff=>{const row=document.createElement('div');row.className='row';
    const b=document.createElement('b');b.textContent='/'+ff.path;row.append(b);
    if(/\.css$/i.test(ff.path)){const btn=document.createElement('button');btn.textContent='Use as site stylesheet';
-    btn.onclick=()=>run(async()=>{await commit([{path:'theme.css',text:ff.text}],'Set theme.css from '+ff.path);msg('theme.css updated. Live in 1-2 minutes.')});row.append(btn)}
+    btn.onclick=()=>run(async()=>{await commit([{path:'theme.css',text:ff.text}],'Set theme.css from '+ff.path);msg('theme.css updated.')});row.append(btn)}
    if(/\.html?$/i.test(ff.path)){const btn=document.createElement('button');btn.textContent='Use as a page';
     btn.onclick=()=>{const s=slug(prompt('Page name for this file (example: promo):')||'');if(!s)return;
-     run(async()=>{await commit([{path:'p/'+s+'/index.html',text:ff.text}],'Add page '+s+' from zip');msg('Page /p/'+s+'/ created. Live in 1-2 minutes.')})};row.append(btn)}
+     run(async()=>{await commit([{path:'p/'+s+'/index.html',text:ff.text}],'Add page '+s+' from zip');msg('Page /p/'+s+'/ created.')})};row.append(btn)}
    list.append(row)})
  }catch(err){$('#zipStatus').textContent='Error: '+err.message}
  e.target.value=''};
@@ -442,7 +463,7 @@ async function importZipAll(){
  files.filter(f=>!/\.html?$/i.test(f.name)&&!/^menu\.json$/i.test(f.name)).forEach(f=>{const o=f.text!==undefined?{text:f.text}:{b64:f.b64};out.push({...o,path:/^img\//i.test(f.name)?f.name:f.path})});
  msg('Importing '+out.length+' file(s)… please wait');
  await commit(out,'Import and activate theme zip');
- $('#zipStatus').textContent='Imported '+out.length+' file(s) and activated them. Live in 1-2 minutes.';
+ $('#zipStatus').textContent='Imported '+out.length+' file(s) and activated them.';
  msg('Theme imported and activated.');
 }
 
@@ -450,7 +471,7 @@ async function importZipAll(){
 $('#cdLoad').onclick=()=>run(async()=>{const p=$('#cdPath').value.trim();if(!p)throw new Error('Enter a file path first');
  $('#cdContent').value=await readText(p);msg('Loaded '+p)});
 $('#cdSave').onclick=()=>run(async()=>{const p=$('#cdPath').value.trim();if(!p)throw new Error('Enter a file path first');
- await commit([{path:p,text:$('#cdContent').value}],'Edit '+p+' via code editor');msg('Saved '+p+'. Live in 1-2 minutes.')});
+ await commit([{path:p,text:$('#cdContent').value}],'Edit '+p+' via code editor');msg('Saved '+p+'.')});
 
 /* USERS */
 const ROLE={admin:'Admin',maintain:'Admin',write:'Editor',triage:'Viewer',read:'Viewer'};
@@ -463,11 +484,11 @@ $('#uadd').onclick=()=>run(async()=>{const u=$('#un').value.trim();if(!u)throw n
 
 /* SETTINGS */
 async function loadSettings(){const s={name:'',tagline:'',logo:'',description:'',siteUrl:'',...await readJson('settings.json',{})};
- $('#stName').value=s.name;$('#stTag').value=s.tagline;$('#stLogo').value=s.logo;$('#stDesc').value=s.description;$('#stUrl').value=s.siteUrl}
+ $('#stName').value=s.name;$('#stTag').value=s.tagline;$('#stLogo').value=s.logo;$('#stDesc').value=s.description;$('#stUrl').value=s.siteUrl;$('#stFav').value=s.favicon||'';$('#stHead').value=s.headCode||'';$('#stFoot').value=s.footCode||'';$('#ejS').value=s.ejs||'';$('#ejT').value=s.ejt||'';$('#ejK').value=s.ejk||'';readText('_redirects').then(t=>$('#rdText').value=t).catch(()=>$('#rdText').value='')}
 $('#stLogoPick').onclick=()=>pick(p=>$('#stLogo').value=p);
-$('#stSave').onclick=()=>run(async()=>{const s={name:$('#stName').value.trim(),tagline:$('#stTag').value.trim(),logo:$('#stLogo').value.trim(),description:$('#stDesc').value.trim(),siteUrl:$('#stUrl').value.trim()};
+$('#stSave').onclick=()=>run(async()=>{const s={...(await readJson('settings.json',{})),name:$('#stName').value.trim(),tagline:$('#stTag').value.trim(),logo:$('#stLogo').value.trim(),description:$('#stDesc').value.trim(),siteUrl:$('#stUrl').value.trim(),favicon:$('#stFav').value.trim(),headCode:$('#stHead').value,footCode:$('#stFoot').value,ejs:$('#ejS').value.trim(),ejt:$('#ejT').value.trim(),ejk:$('#ejK').value.trim()};
  siteUrl=s.siteUrl.replace(/\/+$/,'');
- await commit([{path:'settings.json',text:JSON.stringify(s,null,1)}],'Update settings');msg('Settings saved. Live in 1-2 minutes.')});
+ await commit([{path:'settings.json',text:JSON.stringify(s,null,1)},...(await collectPages())],'Update settings');msg('Settings saved and applied to all pages.')});
 
 /* ===== ADD-ON: bulk delete, dates, reset, theme name, plugins ===== */
 const fmtDT=iso=>{const d=new Date(iso);return d.toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'})+', '+d.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'})};
@@ -487,7 +508,7 @@ async function loadPages2(){const tb=$('#pgTable');tb.innerHTML='<tr><td colspan
   tr.querySelector('.pgchk').dataset.slug=x.name;tr.querySelector('b').textContent='/p/'+x.name+'/';
   tr.children[2].textContent=dt[i][0]?fmtDT(dt[i][0]):'–';tr.children[3].textContent=dt[i][1]?fmtDT(dt[i][1]):'–';
   const v=document.createElement('a');v.href='/p/'+x.name+'/';v.target='_blank';v.textContent='View';v.style.marginRight='.6rem';
-  const e=document.createElement('button');e.textContent='Edit';e.onclick=()=>openPage(x.name);const hb=document.createElement('button');hb.textContent=home==x.name?'🏠 Homepage':'Set as Home';hb.disabled=home==x.name;hb.style.marginRight='.4rem';hb.onclick=()=>run(async()=>{await setHome(x.name);msg('Homepage set. Live in 1-2 minutes.');loadPages2()});tr.children[4].append(v,hb,e);tb.append(tr)})}
+  const e=document.createElement('button');e.textContent='Edit';e.onclick=()=>openPage(x.name);const hb=document.createElement('button');hb.textContent=home==x.name?'🏠 Homepage':'Set as Home';hb.disabled=home==x.name;hb.style.marginRight='.4rem';hb.onclick=()=>run(async()=>{await setHome(x.name);msg('Homepage set.');loadPages2()});const bb=document.createElement('button');bb.textContent='🧱 Builder';bb.style.marginRight='.4rem';bb.onclick=()=>openBuilder(x.name);tr.children[4].append(v,hb,bb,e);tb.append(tr)})}
 LOAD.pages=loadPages2;
 $('#pgBulkDel').onclick=()=>{const sel=[...document.querySelectorAll('.pgchk:checked')].map(c=>c.dataset.slug);
  if(!sel.length)return msg('Select at least one page.');
@@ -505,7 +526,7 @@ async function resetWebsite(){
  run(async()=>{const tr=await(await api('/git/trees/'+cfg.branch+'?recursive=1')).json();
   const files=tr.tree.filter(x=>x.type=='blob'&&/^(p|posts|trash)\//.test(x.path)&&!/^(posts|trash)\/index\.json$/.test(x.path)&&x.path!='p/home/index.html').map(x=>({path:x.path,del:true}));
   files.push({path:'posts/index.json',text:'[]'},{path:'trash/index.json',text:'[]'},{path:'theme.json',text:JSON.stringify(DEFTHEME)},{path:'theme.css',text:themeCss(DEFTHEME)},{path:'p/home/index.html',text:WELCOME},{path:'index.html',text:WELCOME},{path:'menu.json',text:'[]'},{path:'menu.js',text:MENU_JS},{path:'homepage.json',text:JSON.stringify({slug:'home'})});
-  await commit(files,'Reset website');msg('Website reset. Live in 1-2 minutes.');tab('dash')})}
+  await commit(files,'Reset website');msg('Website reset.');tab('dash')})}
 $('#resetSite').onclick=resetWebsite;
 document.querySelector('.qa').insertAdjacentHTML('beforeend','<button class="d" id="dashReset" style="grid-column:1/-1;border-color:#e0393e">⚠️ Reset Website</button>');
 $('#dashReset').onclick=resetWebsite;
@@ -513,7 +534,7 @@ $('#dashReset').onclick=resetWebsite;
 /* Theme name (like WordPress) */
 const oldTheme=loadTheme;LOAD.theme=async()=>{await oldTheme();$('#tName').value=(await readJson('theme.json',{})).name||''};
 $('#tsave').onclick=()=>run(async()=>{const t={name:$('#tName').value.trim()||'My Theme',primary:$('#tc1').value,bg:$('#tc2').value,text:$('#tc3').value,font:$('#tf').value,radius:+$('#tr').value||0};
- await commit([{path:'theme.json',text:JSON.stringify(t)},{path:'theme.css',text:themeCss(t)}],'Update theme');msg('Theme "'+t.name+'" activated. Live in 1-2 minutes.')});
+ await commit([{path:'theme.json',text:JSON.stringify(t)},{path:'theme.css',text:themeCss(t)}],'Update theme');msg('Theme "'+t.name+'" activated.')});
 const oldDash=loadDash;LOAD.dash=async()=>{await oldDash();$('#siTheme').textContent=(await readJson('theme.json',{})).name||'Default Theme'};
 let zipName='';$('#zipfile').addEventListener('change',e=>{const f=e.target.files[0];if(f)zipName=f.name.replace(/\.zip$/i,'')});
 const oldImp=importZipAll;importZipAll=async function(){await oldImp();const t=await readJson('theme.json',{});t.name=zipName||t.name||'Imported Theme';
@@ -586,12 +607,12 @@ const mnAdd=id=>{[...$(id).querySelectorAll('input:checked')].forEach(c=>{flat.p
 $('#mnAddP').onclick=()=>mnAdd('#mnPages');$('#mnAddPo').onclick=()=>mnAdd('#mnPosts');
 $('#mnAddC').onclick=()=>{const u=$('#mnCu').value.trim(),l=$('#mnCl').value.trim()||u;if(!u)return msg('Enter a URL.');flat.push({id:++mnUid,label:l,url:u,depth:0});$('#mnCu').value='';$('#mnCl').value='';drawMenu()};
 $('#hpSave').onclick=()=>run(async()=>{const s=$('#hpSel').value;if(!s)throw new Error('Create a page first');
- await setHome(s);msg('Homepage set to /p/'+s+'/. Live in 1-2 minutes.');loadMenu()});
+ await setHome(s);msg('Homepage set to /p/'+s+'/.');loadMenu()});
 $('#mnSave').onclick=()=>run(async()=>{const items=toTree(),files=[{path:'menu.json',text:JSON.stringify(items,null,1)},{path:'menu.js',text:MENU_JS}];
  for(const n of (await ls('p')).filter(x=>x.type=='dir').map(x=>x.name)){try{files.push({path:'p/'+n+'/index.html',text:await readText('p/'+n+'/index.html')})}catch(e){}}
  for(const po of await readJson('posts/index.json',[])){try{files.push({path:'posts/'+po.slug+'/index.html',text:await readText('posts/'+po.slug+'/index.html')})}catch(e){}}
  try{files.push({path:'index.html',text:await readText('index.html')})}catch(e){}
- await commit(files,'Update menu');flat=toFlat(items,0);drawMenu();msg('Menu saved on all pages. Live in 1-2 minutes.')});
+ await commit(files,'Update menu');flat=toFlat(items,0);drawMenu();msg('Menu saved on all pages.')});
 
 /* Media library (WordPress style) */
 async function loadMedia2(){const l=await photos(),g=$('#mgrid');g.innerHTML='';if(!l.length){g.textContent='No photos yet.';return}
@@ -612,6 +633,89 @@ $('#uadd').onclick=()=>run(async()=>{let u=$('#un').value.trim(),mail=$('#ue').v
  const url=location.href.split('#')[0].split('?')[0],body='Hello,\n\nYou have been invited to manage the website '+cfg.owner+'/'+cfg.repo+'.\n\n1. GitHub has emailed you an invitation - open it and click Accept.\n2. Create an access token: https://github.com/settings/personal-access-tokens/new (select repository '+cfg.repo+', permission Contents: Read and write).\n3. Open the admin panel: '+url+'\n4. Log in with - GitHub username: '+cfg.owner+' | Repository: '+cfg.repo+' | Branch: '+cfg.branch+' | Token: the token you created.\n\nThanks';
  $('#uinfo').innerHTML='';if(mail){const a=document.createElement('a');a.href='mailto:'+encodeURIComponent(mail).replace('%40','@')+'?subject='+encodeURIComponent('You are invited to the website admin')+'&body='+encodeURIComponent(body);a.textContent='✉️ Open email with login instructions for '+mail;$('#uinfo').append(a)}
  $('#un').value='';$('#ue').value='';msg('Invite sent to '+u+'. They must accept it on GitHub.');loadUsers()});
+
+/* ===== ADD-ON 3: publish tracker, builder link, history, SEO tools, invites ===== */
+const HEAD_RE=/<!--kb-head-->[\s\S]*?<!--\/kb-head-->/,FOOT_RE=/<!--kb-foot-->[\s\S]*?<!--\/kb-foot-->/;
+function bakeHead(h,st){const hb=(st.favicon?'<link rel="icon" href="'+esc(st.favicon)+'">':'')+(st.headCode||''),fb=st.footCode||'',hs=hb?'<!--kb-head-->'+hb+'<!--/kb-head-->':'',fs=fb?'<!--kb-foot-->'+fb+'<!--/kb-foot-->':'';
+ if(HEAD_RE.test(h))h=h.replace(HEAD_RE,()=>hs);else if(hs)h=h.replace(/<\/head>/i,()=>hs+'</head>');
+ if(FOOT_RE.test(h))h=h.replace(FOOT_RE,()=>fs);else if(fs)h=h.replace(/<\/body>/i,()=>fs+'</body>');return h}
+const liveUrlFor=p=>p=='index.html'?'/':/^(p|posts)\/[^\/]+\/index\.html$/.test(p)?'/'+p.replace(/index\.html$/,''):null;
+async function liveFetch(u){try{const r=await fetch(u+(u.includes('?')?'&':'?')+'_='+Date.now(),{cache:'no-store'});return r.ok?await r.text():null}catch(e){return null}}
+let pubTimer=null;
+function pubBar(st,text,url){const b=$('#pubbar');b.classList.remove('hide');b.dataset.s=st;$('#pubTxt').textContent=text;$('#pubSpin').style.display=st=='run'?'inline-block':'none';const a=$('#pubView');if(url){a.href=url;a.classList.remove('hide')}else a.classList.add('hide')}
+$('#pubX').onclick=()=>{$('#pubbar').classList.add('hide');clearInterval(pubTimer)};
+function watchPublish(sha,files,before,probeUrl){clearInterval(pubTimer);const t0=Date.now(),v=files.map(f=>f.del?null:liveUrlFor(f.path)).find(Boolean),base=(siteUrl||location.origin).replace(/\/+$/,''),viewUrl=base+(v||'/');
+ pubBar('run','Publishing your changes…',null);let nc=0;
+ const done=t=>{clearInterval(pubTimer);pubBar('ok','✅ Published — live now ('+Math.round((Date.now()-t0)/1000)+'s)',viewUrl)};
+ const tick=async()=>{const age=Date.now()-t0;
+  try{const[cr,st]=await Promise.all([api('/commits/'+sha+'/check-runs').then(r=>r.json()),api('/commits/'+sha+'/status').then(r=>r.json())]),runs=cr.check_runs||[];
+   if(runs.length||st.total_count){nc=0;
+    if(runs.some(r=>r.status=='completed'&&['failure','cancelled','timed_out'].includes(r.conclusion))||['failure','error'].includes(st.state)){clearInterval(pubTimer);return pubBar('err','❌ Publishing failed — check your hosting dashboard for the build error.',null)}
+    const pend=runs.filter(r=>r.status!='completed').length+(st.state=='pending'?1:0);
+    if(!pend&&age>5000)return done();
+    return pubBar('run','Publishing… building your site',null)}}catch(e){}
+  nc++;
+  if(nc>=3&&probeUrl&&before!=null){const now=await liveFetch(probeUrl);if(now!=null&&now!==before)return done()}
+  if(age>180000){clearInterval(pubTimer);pubBar('ok','Saved. Could not confirm live status automatically — open the page to check.',viewUrl)}};
+ pubTimer=setInterval(tick,4000);setTimeout(tick,1500)}
+async function collectPages(){const f=[];
+ for(const n of (await ls('p')).filter(x=>x.type=='dir').map(x=>x.name)){try{f.push({path:'p/'+n+'/index.html',text:await readText('p/'+n+'/index.html')})}catch(e){}}
+ for(const po of await readJson('posts/index.json',[])){try{f.push({path:'posts/'+po.slug+'/index.html',text:await readText('posts/'+po.slug+'/index.html')})}catch(e){}}
+ try{f.push({path:'index.html',text:await readText('index.html')})}catch(e){}return f}
+
+/* Page Builder link, History, Duplicate, Rename */
+function openBuilder(s){if(!LOAD.p_builder)return msg('Install the Page Builder plugin first: Plugins tab → upload page-builder.js');window.kbOpenSlug=s;tab('p_builder')}
+$('#ebuilder').onclick=()=>openBuilder(cur.slug);
+$('#eview').onclick=()=>window.open((siteUrl||location.origin).replace(/\/+$/,'')+'/p/'+cur.slug+'/','_blank');
+$('#ehist').onclick=()=>run(async()=>{const box=$('#histList'),w=$('#hist');w.classList.toggle('hide');if(w.classList.contains('hide'))return;box.textContent='Loading…';
+ const path='p/'+cur.slug+'/index.html',cs=await(await api('/commits?path='+encodeURIComponent(path)+'&per_page=20')).json(),raw=sha=>api('/contents/'+path+'?ref='+sha,{headers:{Accept:'application/vnd.github.raw+json'}}).then(r=>r.text());box.innerHTML='';
+ if(!cs.length)box.textContent='No history yet.';
+ cs.forEach((c,i)=>{const r=document.createElement('div');r.className='row';const b=document.createElement('b');b.textContent=fmtDT(c.commit.author.date)+' — '+c.commit.message.split('\n')[0]+(i==0?' (current)':'');r.append(b);
+  const pv=document.createElement('button');pv.textContent='Preview';pv.onclick=()=>run(async()=>{$('#frame').srcdoc=withBase(await raw(c.sha));$('#frame').scrollIntoView()});r.append(pv);
+  if(i){const rs=document.createElement('button');rs.className='p';rs.textContent='Restore';rs.onclick=()=>confirm('Restore this version?')&&run(async()=>{const t=await raw(c.sha);await commit([{path,text:t}],'Restore old version of page '+cur.slug);cur.doc=new DOMParser().parseFromString(t,'text/html');buildFields();msg('Version restored.')});r.append(rs)}
+  box.append(r)})});
+$('#edup').onclick=()=>{const n=slug(prompt('Name for the copy (example: about-2):')||'');if(!n)return;run(async()=>{await commit([{path:'p/'+n+'/index.html',text:pageOut()}],'Duplicate page '+cur.slug+' as '+n);msg('Copy created: /p/'+n+'/');tab('pages')})};
+$('#eren').onclick=()=>{const o=cur.slug;if(o=='home')return msg('The home page cannot be renamed.');const n=slug(prompt('New URL name for /p/'+o+'/ :',o)||'');if(!n||n==o)return;
+ run(async()=>{const fx=a=>a.map(i=>({...i,url:i.url=='/p/'+o+'/'?'/p/'+n+'/':i.url,...(i.children?{children:fx(i.children)}:{})})),hp=await readJson('homepage.json',{});
+  const files=[{path:'p/'+n+'/index.html',text:pageOut()},{path:'p/'+o+'/index.html',del:true},{path:'menu.json',text:JSON.stringify(fx(await readJson('menu.json',[])),null,1)}];
+  if(hp.slug==o)files.push({path:'homepage.json',text:JSON.stringify({slug:n})});
+  (await collectPages()).forEach(f=>{if(f.path!='p/'+o+'/index.html'&&!files.some(x=>x.path==f.path))files.push(f)});
+  await commit(files,'Rename page '+o+' to '+n);msg('Renamed to /p/'+n+'/. Menu links updated.');tab('pages')})};
+
+/* Dashboard shortcuts */
+$('#dashReset').insertAdjacentHTML('beforebegin','<button id="dashVisit" style="background:#e6f7ec">🌐 Visit Website</button><button id="dashBuilder" style="background:#eef1ff">🧱 Page Builder</button>');
+$('#dashVisit').onclick=()=>window.open((siteUrl||location.origin)+'/','_blank');
+$('#dashBuilder').onclick=()=>openBuilder('home');
+
+/* Settings tools */
+$('#stFavPick').onclick=()=>pick(p=>$('#stFav').value=p);
+$('#toSitemap').onclick=()=>run(async()=>{const st=await readJson('settings.json',{}),base=(st.siteUrl||'').replace(/\/+$/,'');if(!base)throw new Error('Set your Live site URL in Site settings first.');
+ const pg=(await ls('p')).filter(x=>x.type=='dir').map(x=>x.name).filter(n=>n!='home'),po=(await readJson('posts/index.json',[])).filter(x=>!x.draft),urls=['/',...pg.map(n=>'/p/'+n+'/'),...po.map(x=>'/posts/'+x.slug+'/')],today=new Date().toISOString().slice(0,10);
+ await commit([{path:'sitemap.xml',text:'<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'+urls.map(u=>' <url><loc>'+base+u+'</loc><lastmod>'+today+'</lastmod></url>').join('\n')+'\n</urlset>\n'},{path:'robots.txt',text:'User-agent: *\nAllow: /\n\nSitemap: '+base+'/sitemap.xml\n'}],'Generate sitemap and robots.txt');msg('sitemap.xml and robots.txt created.')});
+$('#to404').onclick=()=>run(async()=>{await commit([{path:'404.html',text:'<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Page not found</title><link rel="stylesheet" href="/theme.css"></head><body><div class="wrap" style="text-align:center;padding-top:18vh"><h1 style="font-size:4rem;margin:0">404</h1><h2>Page not found</h2><p>The page you are looking for does not exist.</p><p><a href="/" style="font-weight:700">← Back to home</a></p></div></body></html>'}],'Create 404 page');msg('404 page created.')});
+$('#rdSave').onclick=()=>run(async()=>{await commit([{path:'_redirects',text:$('#rdText').value.trim()+'\n'}],'Update redirects');msg('Redirects saved.')});
+$('#toBackup').onclick=()=>run(async()=>{msg('Preparing backup… please wait');const tr=await(await api('/git/trees/'+cfg.branch+'?recursive=1')).json(),zip=new JSZip(),bl=tr.tree.filter(x=>x.type=='blob');let i=0,n=0;
+ const wk=async()=>{while(i<bl.length){const x=bl[i++];try{const b=await(await api('/git/blobs/'+x.sha)).json();zip.file(x.path,b.content.replace(/\n/g,''),{base64:true})}catch(e){}if(++n%25==0)msg('Backing up… '+n+'/'+bl.length)}};
+ await Promise.all([wk(),wk(),wk(),wk(),wk()]);const blob=await zip.generateAsync({type:'blob'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=cfg.repo+'-backup-'+new Date().toISOString().slice(0,10)+'.zip';a.click();msg('Backup downloaded ('+bl.length+' files).')});
+
+/* Users: invitation by email */
+async function sendInviteMail(to,name,login,role){const st=await readJson('settings.json',{}),url=location.href.split('#')[0].split('?')[0],subject='You are invited to manage the website '+(st.name||cfg.repo);
+ const body='Hello'+(name?' '+name:'')+',\n\nYou have been invited as '+({push:'Editor',pull:'Viewer',admin:'Admin'}[role]||role)+' for the website '+cfg.owner+'/'+cfg.repo+'.\n\n'+(login?'1. GitHub has sent an invitation to the email of your GitHub account (@'+login+'). Open it and click Accept.\n':'1. Create a free GitHub account at https://github.com/signup and send your GitHub username to the website owner, who will then add you.\n')+'2. Create your access token: https://github.com/settings/personal-access-tokens/new  (Repository: '+cfg.repo+', Permission: Contents = Read and write).\n3. Open the admin panel: '+url+'\n4. Log in with  GitHub username: '+cfg.owner+'  |  Repository: '+cfg.repo+'  |  Branch: '+cfg.branch+'  |  Token: the token from step 2.\n\nThank you.';
+ if(st.ejs&&st.ejt&&st.ejk){const r=await fetch('https://api.emailjs.com/api/v1.0/email/send',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({service_id:st.ejs,template_id:st.ejt,user_id:st.ejk,template_params:{to_email:to,to_name:name||to,subject,message:body,reply_to:to}})});
+  const t=await r.text();return r.ok?'✅ Invitation email sent to '+to+'.':'❌ Email could not be sent ('+t+'). Check your EmailJS settings.'}
+ return{mail:'mailto:'+to+'?subject='+encodeURIComponent(subject)+'&body='+encodeURIComponent(body)}}
+$('#uadd').onclick=()=>run(async()=>{const mail=$('#ue').value.trim(),name=$('#uname').value.trim(),role=$('#ur').value;let login=$('#un').value.trim().replace(/^@/,''),box=$('#uinfo');box.innerHTML='';
+ const say=(t,a)=>{const d=document.createElement('div');d.style.margin='.3rem 0';if(a){const l=document.createElement('a');l.href=a;l.textContent=t;d.append(l)}else d.textContent=t;box.append(d)};
+ if(!mail&&!login)throw new Error('Enter an email address or a GitHub username');
+ if(!login&&mail){try{const j=await(await fetch('https://api.github.com/search/users?q='+encodeURIComponent(mail+' in:email'),{headers:{Accept:'application/vnd.github+json'}})).json();if(j.items&&j.items.length)login=j.items[0].login}catch(e){}}
+ if(login){try{await api('/collaborators/'+encodeURIComponent(login),{method:'PUT',body:JSON.stringify({permission:role})});say('✅ GitHub access invitation sent to @'+login+' (GitHub emails it to that account).')}
+  catch(e){say('❌ GitHub invitation failed: '+(/^(401|403|404)/.test(e.message)?'your token needs "Administration: Read and write" permission (or the "repo" scope for a classic token), and the username must exist.':e.message))}}
+ else say('ℹ️ No GitHub account was found for this email (only public emails can be searched). Ask the person to create a free account at github.com/signup and type their GitHub username above, then send again.');
+ if(mail){const r=await sendInviteMail(mail,name,login,role);if(typeof r=='string')say(r);else{say('✉️ Automatic email is not set up yet (Settings → Invitation emails). Click here to open your email app with the invitation ready.',r.mail)}}
+ loadInvites()});
+async function loadInvites(){const b=$('#uinv');b.textContent='Loading…';try{const l=await(await api('/invitations')).json();b.innerHTML='';if(!l.length){b.innerHTML='<span class="mut">No pending invitations.</span>';return}
+ l.forEach(i=>{const r=document.createElement('div'),t=document.createElement('b'),x=document.createElement('button');r.className='row';t.textContent='@'+i.invitee.login+' — '+(ROLE[i.permissions]||i.permissions)+' (waiting to accept)';x.className='d';x.textContent='Cancel';x.onclick=()=>run(async()=>{await api('/invitations/'+i.id,{method:'DELETE'});loadInvites()});r.append(t,x);b.append(r)})}catch(e){b.innerHTML='<span class="mut">Could not load invitations.</span>'}}
+const _lu=loadUsers;LOAD.users=async()=>{await _lu();await loadInvites()};
 
 showApp();
 </script></body></html>
