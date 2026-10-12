@@ -4,26 +4,38 @@
   "url": "/"
  },
  {
-  "label": "About Us",
-  "url": "/p/about/",
+  "label": "About",
+  "url": "/p/about/"
+ },
+ {
+  "label": "Academics",
+  "url": "/p/academics/"
+ },
+ {
+  "label": "Branches",
+  "url": "/p/branches/"
+ },
+ {
+  "label": "Admissions",
+  "url": "/p/admissions/"
+ },
+ {
+  "label": "Student Life",
+  "url": "/p/student-life/",
   "children": [
    {
-    "label": "Academics",
-    "url": "/p/academics/"
+    "label": "Facilities",
+    "url": "/p/facilities/"
    },
    {
-    "label": "Admission Enquiry",
-    "url": "/p/admission-enquiry/"
+    "label": "Gallery",
+    "url": "/p/gallery/"
    }
   ]
  },
  {
-  "label": "TC Verification",
-  "url": "/p/tc-verification/"
- },
- {
-  "label": "Mandatory Public Disclosure",
-  "url": "/p/mandatory-public-disclosure/"
+  "label": "News & Events",
+  "url": "/p/news-events/"
  },
  {
   "label": "Contact",
