@@ -50,11 +50,41 @@ code{background:var(--bg);padding:.1rem .3rem;border-radius:4px}
 .mnbox{max-height:170px;overflow:auto;border:1px solid var(--bd);border-radius:8px;padding:.4rem;margin:.3rem 0 .6rem}.mnbox label{display:flex;gap:.4rem;align-items:center;font-weight:400;margin:.2rem 0}
 .mnrow{background:var(--card);border:1px solid var(--bd);border-radius:8px;padding:.5rem .6rem;margin:.35rem 0}.mnrow .h{display:flex;align-items:center;gap:.5rem}.mnrow .hnd{cursor:grab;touch-action:none;font-size:1.2rem;color:var(--mut);user-select:none}
 .mnrow.drag{outline:2px solid var(--pr);background:#eef1ff}.mnrow .bd{display:none;margin-top:.5rem}.mnrow.open .bd{display:block}@media(max-width:820px){.mnwrap{grid-template-columns:1fr!important}}
+#gsr{position:fixed;left:232px;top:96px;width:340px;max-height:60vh;overflow:auto;background:#fff;border:1px solid var(--bd);border-radius:10px;box-shadow:0 6px 24px rgba(0,0,0,.15);z-index:30;padding:.4rem}.gsi{padding:.5rem .7rem;cursor:pointer;border-radius:6px;font-size:14px}.gsi:hover{background:var(--sideactive)}
+@media(max-width:820px){#gsr{left:1rem;right:1rem;width:auto}}
+#side select,#side #gs{margin:0 1rem .6rem;width:calc(100% - 2rem);padding:.4rem;font-size:13px}
+.ctchip{border-radius:20px}.ctchip.on{background:var(--pr);color:#fff;border-color:var(--pr)}
 #pubbar{position:fixed;right:1rem;bottom:1rem;background:#fff;border:1px solid var(--bd);border-left:5px solid var(--pr);border-radius:10px;padding:.7rem 1rem;box-shadow:0 6px 24px rgba(0,0,0,.15);z-index:25;display:flex;gap:.7rem;align-items:center;max-width:430px}
 #pubbar[data-s=ok]{border-left-color:#1fae6b}#pubbar[data-s=err]{border-left-color:var(--err)}#pubbar a{white-space:nowrap;font-weight:700;color:var(--pr);text-decoration:none}
 .spin{width:16px;height:16px;border:3px solid var(--bd);border-top-color:var(--pr);border-radius:50%;animation:sp .8s linear infinite;flex:0 0 16px}@keyframes sp{to{transform:rotate(360deg)}}
 #mdl{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:15;display:none;padding:1rem;overflow:auto}
 .chk{background:repeating-conic-gradient(#eee 0 25%,#fff 0 50%) 0 0/20px 20px;border-radius:8px;text-align:center}
+<style>
+:root{--bg:#f1f4fa;--pr:#4361ee;--bd:#e4e8f1;--mut:#7a869a}
+body{font-family:'Inter','Segoe UI',system-ui,sans-serif;background:var(--bg)}
+#side{background:linear-gradient(180deg,#16233f 0%,#0e1830 100%);border-right:0;color:#b8c2dc;padding-top:1.1rem}
+#side .brand{color:#fff;font-size:1.15rem;letter-spacing:.2px;padding-bottom:.9rem}
+#side button{color:#b8c2dc;border-radius:10px;margin:2px 10px;width:calc(100% - 20px);padding:.58rem .8rem;transition:background .15s}
+#side button:hover:not(.active){background:rgba(255,255,255,.08);color:#fff}
+#side button.active{background:linear-gradient(90deg,#4361ee,#6d83ff);color:#fff;border-radius:10px;box-shadow:0 6px 16px rgba(67,97,238,.35)}
+#side select,#side #gs{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);color:#fff;border-radius:10px}#side #gs::placeholder{color:#8f9bb8}#side select option{color:#111}
+main{padding-top:0;max-width:1180px}
+#topbar{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:.8rem;padding:.85rem 0;margin-bottom:.8rem;background:rgba(241,244,250,.92);backdrop-filter:blur(8px)}
+#topbar h1{margin:0;font-size:1.4rem;font-weight:700}#topbar .sp{flex:1}
+.tbtn{background:#fff;border:1px solid var(--bd);border-radius:10px;padding:.45rem .9rem;font-size:14px;font-weight:600;cursor:pointer;color:var(--tx);text-decoration:none}.tbtn:hover{border-color:var(--pr);color:var(--pr)}
+.chip{background:#e8ecff;color:#3045c8;border-radius:20px;padding:.3rem .8rem;font-size:12.5px;font-weight:600}
+#v-dash>h2{display:none}#v-dash>p.mut{display:none}
+.card{border-radius:16px;box-shadow:0 2px 10px rgba(30,40,80,.05);padding:1.3rem}.card h3{margin-top:0}
+button{border-radius:10px;font-weight:600;transition:all .15s}button:hover{border-color:var(--pr);color:var(--pr)}
+button.p{background:linear-gradient(135deg,#4361ee,#5b73ff);border:0;color:#fff;box-shadow:0 4px 12px rgba(67,97,238,.28)}button.p:hover{color:#fff;filter:brightness(1.07)}
+button.d:hover{border-color:var(--err);color:var(--err)}
+input:focus,textarea:focus,select:focus{outline:none;border-color:var(--pr);box-shadow:0 0 0 3px rgba(67,97,238,.15)}
+tr:hover td{background:#f8f9fe}th{text-transform:uppercase;letter-spacing:.04em;font-size:11.5px}
+.stat{transition:.2s;border-radius:16px}.stat:hover{transform:translateY(-2px);box-shadow:0 10px 24px rgba(30,40,80,.09)}
+.badge{display:inline-block;padding:.12rem .65rem;border-radius:20px;font-size:12px;font-weight:700}.badge.ok{background:#e0f6e9;color:#168247}.badge.dr{background:#fff1d6;color:#a76a00}
+.prog{height:8px;background:#e6e9f5;border-radius:8px;overflow:hidden;margin:.4rem 0 .9rem}.prog i{display:block;height:100%;background:linear-gradient(90deg,#4361ee,#22c58b);border-radius:8px}
+.chk2{display:flex;align-items:center;gap:.6rem;padding:.4rem 0;border-bottom:1px solid var(--bd);font-size:14px}.chk2:last-child{border:0}.chk2 .o{width:20px;height:20px;border-radius:50%;border:2px solid #cdd3e4;flex:0 0 20px;display:flex;align-items:center;justify-content:center;font-size:12px;color:#fff}.chk2.done .o{background:#22c58b;border-color:#22c58b}.chk2.done span{color:var(--mut);text-decoration:line-through}.chk2 a{margin-left:auto;color:var(--pr);font-weight:600;cursor:pointer;font-size:13px}
+#pubbar{border-radius:14px;padding:.8rem 1.1rem;font-weight:600;font-size:14px}
 </style></head><body>
 
 <section id="login" class="card" style="max-width:420px;margin:3rem auto">
@@ -69,20 +99,25 @@ code{background:var(--bg);padding:.1rem .3rem;border-radius:4px}
 <div id="shell" class="hide">
 <nav id="side">
   <div class="brand">📘 CMS Admin</div>
+  <select id="siteSw" title="Website switcher"></select>
+  <input id="gs" placeholder="🔍 Search everything…" autocomplete="off">
   <button data-t="dash" class="active">🏠 Dashboard</button>
   <button data-t="pages">📄 Pages</button>
   <button data-t="menu">🍔 Menu</button>
   <button data-t="posts">📝 Posts</button>
+  <button data-t="coll">📚 Content</button>
   <button data-t="media">🖼️ Media</button>
   <button data-t="theme">🎨 Theme</button>
   <button data-t="code">💻 Code</button>
   <button data-t="trash">🗑️ Trash</button>
+  <button data-t="act">📜 Activity</button>
   <button data-t="plugins">🧩 Plugins</button>
   <button data-t="users">👥 Users</button>
   <button data-t="settings">⚙️ Settings</button>
   <button id="out">🚪 Log out</button>
 </nav>
 <main>
+<div id="topbar"><h1 id="ttl">Dashboard</h1><span class="sp"></span><a class="tbtn" id="tbSite">🌐 View site</a><span class="chip" id="tbRepo"></span></div>
 
 <section id="v-dash"><h2>Dashboard</h2><p class="mut" style="margin-top:-.6rem">Here's an overview of your website.</p>
 <div class="stats" style="margin-bottom:1rem">
@@ -117,7 +152,7 @@ code{background:var(--bg);padding:.1rem .3rem;border-radius:4px}
 </div>
 </section>
 
-<section id="v-pages" class="hide"><div class="card"><div class="row"><b>Pages</b><button class="d" id="pgBulkDel">Delete Selected</button><button class="p" id="pgNewBtn">Add New</button></div>
+<section id="v-pages" class="hide"><div class="card"><div class="row"><b>Pages</b><input id="pgSearch" placeholder="🔍 Search pages…" style="width:200px"><button class="d" id="pgBulkDel">Delete Selected</button><button class="p" id="pgNewBtn">Add New</button></div>
 <table><thead><tr><th style="width:30px"><input type="checkbox" id="pgSelAll"></th><th>Page</th><th>Last updated</th><th></th></tr></thead><tbody id="pgTable"></tbody></table></div>
 <div id="pgNew" class="card hide"><h3>Add a page</h3><label>Page name (example: about)</label><input id="nslug">
 <label>Paste the page HTML</label><textarea id="nhtml" style="min-height:220px" placeholder="&lt;!doctype html&gt;..."></textarea>
@@ -126,7 +161,7 @@ code{background:var(--bg);padding:.1rem .3rem;border-radius:4px}
 <iframe id="nframe" title="Preview" class="hide"></iframe></div></section>
 
 <section id="v-edit" class="hide"><div class="card"><div class="row"><b id="etitle"></b><button class="p" id="ebuilder">🧱 Edit with Page Builder</button><button id="prev">Preview</button><button id="eview">🌐 View live</button><button id="ehist">🕘 History</button><button id="edup">Duplicate</button><button id="eren">Rename URL</button><button class="d" id="del">Delete</button></div>
-<div id="fields"></div><p><button class="p" id="save">Save changes</button> <button data-t="pages">Back</button></p><div id="hist" class="hide"><h3>Version history</h3><div id="histList"></div></div><iframe id="frame" title="Preview"></iframe></div></section>
+<div id="fields"></div><p><button class="p" id="save">Save changes</button> <button data-t="pages">Back</button></p><div id="hist" class="hide"><h3>Version history</h3><div id="histList"></div><div id="histDiff" class="hide"></div></div><iframe id="frame" title="Preview"></iframe></div></section>
 
 <section id="v-menu" class="hide">
 <div class="card"><h3>Homepage</h3><p class="mut">Choose which page opens first when someone visits your website (the main address).</p>
@@ -141,19 +176,29 @@ code{background:var(--bg);padding:.1rem .3rem;border-radius:4px}
 <div id="mnList"></div><p><button class="p" id="mnSave">Save Menu</button></p></div></div>
 </section>
 
-<section id="v-posts" class="hide"><div class="card"><div class="row"><b>Posts</b><button class="p" id="pnew">Add New</button></div>
+<section id="v-act" class="hide"><div class="card"><div class="row"><b>📜 Activity log</b><input id="actQ" placeholder="🔍 Filter…" style="width:220px"><span class="mut">Every change to your website, with who made it and when.</span></div><div id="actList"></div><p><button id="actMore">Load more</button></p></div></section>
+
+<section id="v-coll" class="hide"><div class="card"><div class="row"><b>📚 Content types</b><span class="mut">Faculty, results, notices, gallery, downloads… add once, show anywhere on the site</span></div>
+<div class="row" id="ctList"></div><div class="row"><button class="p" id="ctNew">+ New content type</button><select id="ctPreset" style="width:auto"><option value="">+ Add a school preset…</option></select></div></div>
+<div id="ctWork" class="hide"><div class="card"><div class="row"><b id="ctTitle"></b><button class="p" id="ctAdd">+ Add item</button><button id="ctSchema">Edit fields</button><button id="ctCopy">📋 Copy embed code</button><button class="d" id="ctDel">Delete type</button></div>
+<p class="mut" id="ctHint"></p><div id="ctItems"></div></div><div class="card hide" id="ctForm"></div></div></section>
+
+<section id="v-posts" class="hide"><div class="card"><div class="row"><b>Posts</b><input id="poSearch" placeholder="🔍 Search posts…" style="width:200px"><button id="blogGen">📰 Create / update Blog page</button><button class="p" id="pnew">Add New</button></div>
 <table><thead><tr><th>Title</th><th>Date</th><th>Status</th><th></th></tr></thead><tbody id="poTable"></tbody></table></div></section>
 
 <section id="v-pedit" class="hide"><div class="card"><h3>Post</h3>
 <label>Title</label><input id="pt"><label>Address name (letters, numbers, dashes)</label><input id="ps">
 <label>Date</label><input id="pd" type="date"><label>Short summary</label><input id="px">
 <label>Cover photo</label><input id="pi"><button id="pimg">Choose photo</button>
+<label>Category (News, Notice, Circular, Event…)</label><input id="pcat"><label>Tags (comma separated)</label><input id="ptag"><label>Author</label><input id="pau">
 <label>Content (blank line = new paragraph, or paste HTML)</label><textarea id="pc" style="min-height:220px"></textarea>
 <label><input type="checkbox" id="pdr"> Draft (hidden from the blog list)</label>
 <p><button class="p" id="psave">Save post</button> <button class="d" id="pdel">Delete</button> <button data-t="posts">Back</button></p></div></section>
 
 <section id="v-media" class="hide"><div class="card"><h3>Media library</h3><p class="mut">Photos are resized to 1600px. Click a photo to see it large, copy its link or delete it.</p>
-<input id="up" type="file" accept="image/*" multiple><div id="mgrid" class="grid" style="margin-top:1rem"></div></div></section>
+<div class="row"><input id="mdSearch" placeholder="🔍 Search photos by name or alt text…" style="flex:1 1 220px;width:auto"><button id="mdSelAll">Select all</button><button class="d" id="mdBulk">Delete selected</button></div>
+<label>Upload photos</label><input id="up" type="file" accept="image/*" multiple><div id="mgrid" class="grid" style="margin-top:1rem"></div></div>
+<div class="card"><h3>Documents &amp; files</h3><p class="mut">PDF, Word, Excel, PowerPoint, ZIP, video. Copy the link and use it on any page or in Content types.</p><input id="upDoc" type="file" accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.zip,.txt,.mp4" multiple><div id="docList" style="margin-top:.8rem"></div></div></section>
 
 <section id="v-theme" class="hide">
 <div class="card"><h3>Quick theme</h3><p class="mut">Used through CSS variables (--primary, --bg, --text, --font, --radius) in theme.css.</p>
@@ -198,6 +243,14 @@ code{background:var(--bg);padding:.1rem .3rem;border-radius:4px}
 <label>Live site URL (example: https://my-cms.pages.dev or your custom domain)</label><input id="stUrl" placeholder="https://...">
 <p class="mut">Used to make the Preview button show real fonts, styles and photos.</p>
 <label>Default SEO description</label><textarea id="stDesc"></textarea>
+<h4 style="margin:1.2rem 0 0">Contact details &amp; social links</h4><p class="mut">Used for Google "School" schema markup and available for your header/footer.</p>
+<label>Phone</label><input id="stPhone"><label>Email</label><input id="stEmail"><label>Address</label><input id="stAddr"><label>Facebook URL</label><input id="stFb"><label>Instagram URL</label><input id="stIg"><label>YouTube URL</label><input id="stYt"><label>X / Twitter URL</label><input id="stTw">
+<h4 style="margin:1.2rem 0 0">Maintenance mode</h4><label style="font-weight:400"><input type="checkbox" id="stMaint"> Show an "Under maintenance" page to visitors (you still see the site while logged in to this admin in the same browser)</label><label>Message</label><input id="stMaintMsg" placeholder="We will be back soon.">
+<h4 style="margin:1.2rem 0 0">Site behaviour</h4>
+<label style="font-weight:400"><input type="checkbox" id="stSticky"> Sticky header (stays on top while scrolling)</label>
+<label>Website language</label><select id="stLang"><option value="">Default</option><option value="en">English</option><option value="hi">हिन्दी (Hindi)</option><option value="mr">मराठी</option><option value="gu">ગુજરાતી</option></select>
+<label style="font-weight:400"><input type="checkbox" id="stCookie"> Show cookie consent banner</label><label>Cookie banner text</label><input id="stCookieMsg" placeholder="We use cookies to improve your experience."><label>Privacy policy page URL</label><input id="stPrivacy" placeholder="/p/privacy-policy/">
+<label>Deploy hook URL (optional — Cloudflare Pages / Netlify build hook, triggers a build on every publish)</label><input id="stHook" placeholder="https://api.cloudflare.com/client/v4/pages/webhooks/deploy_hooks/…">
 <h4 style="margin:1.2rem 0 0">Favicon</h4><label>Favicon image (shown in browser tab)</label><input id="stFav"><button id="stFavPick">Choose photo</button>
 <h4 style="margin:1.2rem 0 0">Tracking &amp; custom code</h4><p class="mut">Pasted into every page automatically (Google Analytics, Meta Pixel, Search Console tag, chat widget…).</p>
 <label>Code for &lt;head&gt;</label><textarea id="stHead" style="font-family:ui-monospace,monospace" placeholder="&lt;script async src=&quot;https://www.googletagmanager.com/gtag/js?id=G-XXXX&quot;&gt;&lt;/script&gt;"></textarea>
@@ -205,7 +258,7 @@ code{background:var(--bg);padding:.1rem .3rem;border-radius:4px}
 <h4 style="margin:1.2rem 0 0">Invitation emails (EmailJS)</h4><p class="mut">To email invitations to any address: sign up free at emailjs.com → Email Services: add your Gmail → Email Templates: create one with To Email <code>{{to_email}}</code>, Subject <code>{{subject}}</code>, Content <code>{{message}}</code> → paste the Service ID, Template ID and Public Key (Account → General) below.</p>
 <label>EmailJS Service ID</label><input id="ejS"><label>EmailJS Template ID</label><input id="ejT"><label>EmailJS Public Key</label><input id="ejK">
 <p><button class="p" id="stSave">Save settings</button></p></div>
-<div class="card"><h3>Tools</h3><div class="row"><button id="toSitemap">🗺️ Create sitemap.xml + robots.txt</button><button id="to404">🚧 Create 404 page</button><button id="toBackup">💾 Download backup (.zip)</button></div>
+<div class="card"><h3>Tools</h3><div class="row"><button id="toSitemap">🗺️ Create sitemap.xml + robots.txt</button><button id="to404">🚧 Create 404 page</button><button id="toBackup">💾 Download backup (.zip)</button><button id="toLinks">🔗 Check broken links</button></div><div id="toLinksOut" class="mut" style="margin-top:.6rem"></div>
 <p class="mut">Sitemap helps Google find your pages (needs the Live site URL above). Backup downloads every file of your site.</p>
 <label>Redirects (one per line: /old-url /new-url 301)</label><textarea id="rdText" style="font-family:ui-monospace,monospace;min-height:110px" placeholder="/old-page /p/new-page/ 301"></textarea><p class="mut">Works on Cloudflare Pages and Netlify.</p><button id="rdSave">Save redirects</button></div>
 <div class="card" style="border-color:var(--err)"><h3 style="color:var(--err)">Danger Zone</h3>
@@ -216,25 +269,27 @@ code{background:var(--bg);padding:.1rem .3rem;border-radius:4px}
 <div id="mdl"><div class="card" style="max-width:860px;margin:1.5rem auto"><div class="row"><b id="mdlName"></b><button id="mdlClose">Close</button></div>
 <div class="chk"><img id="mdlImg" alt="" style="max-width:100%;max-height:60vh;object-fit:contain"></div>
 <div class="info-row"><span>Size</span><span id="mdlSize"></span></div><div class="info-row"><span>Dimensions</span><span id="mdlDim"></span></div>
+<label>Alt text</label><input id="mdAlt"><label>Caption</label><input id="mdCap"><label>Title</label><input id="mdTit"><div class="row"><button class="p" id="mdMetaSave">Save details</button><button id="mdReplace">Replace file</button><input type="file" id="mdRepFile" class="hide"></div>
 <label>File path</label><input id="mdlUrl" readonly>
 <div class="row" style="margin-top:.7rem"><button class="p" id="mdlCopy">Copy path</button><button id="mdlCopyFull">Copy full URL</button><a id="mdlOpen" target="_blank">Open in new tab</a><button class="d" id="mdlDel" style="margin-left:auto">Delete permanently</button></div></div></div>
 <div id="pick"><div class="card"><div class="row"><b>Choose a photo</b><button id="pclose">Close</button></div><div id="pgrid" class="grid"></div></div></div>
 <div id="msg" role="status"></div>
+<div id="gsr" class="hide"></div>
 <div id="pubbar" class="hide"><span id="pubSpin" class="spin"></span><span id="pubTxt"></span><a id="pubView" class="hide" target="_blank">👁️ View live</a><button id="pubX">✕</button></div>
 
 <script>
 const $=s=>document.querySelector(s),IMG=/\.(jpe?g|png|webp|gif|svg)$/i,slug=s=>s.toLowerCase().replace(/[^a-z0-9-]+/g,'-').replace(/^-|-$/g,'');
 const esc=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
 const FONTS={'Clean sans':'system-ui,sans-serif','Serif':'Georgia,serif','Rounded':'"Trebuchet MS",sans-serif','Mono':'ui-monospace,monospace'};
-let cfg=JSON.parse(localStorage.getItem('cmsCfg')||'null'),cur=null,pickCb=null,siteUrl='';
-const msg=t=>{const m=$('#msg');m.textContent=t;m.style.display='block';clearTimeout(msg.t);msg.t=setTimeout(()=>m.style.display='none',4500)};
+let cfg=JSON.parse(localStorage.getItem('cmsCfg')||'null'),cur=null,pickCb=null,siteUrl='',deployHook='';
+const msg=t=>{if(Date.now()<(msg.mute||0)&&!/^Error/i.test(t)&&/saved|moved|created|set to|updated|restored|deleted|renamed|published|activated|imported|uploaded|reset|duplicate|copy|applied|applied|rolled/i.test(t))return;const m=$('#msg');m.textContent=t;m.style.display='block';clearTimeout(msg.t);msg.t=setTimeout(()=>m.style.display='none',4500)};
 const api=(p,o={})=>fetch('https://api.github.com/repos/'+cfg.owner+'/'+cfg.repo+p,{...o,cache:'no-store',headers:{Authorization:'Bearer '+cfg.token,Accept:'application/vnd.github+json','Content-Type':'application/json',...(o.headers||{})}}).then(async r=>{if(!r.ok){const e=new Error(r.status+' '+((await r.json().catch(()=>({}))).message||''));e.status=r.status;throw e}return r});
 const run=async f=>{try{await f();return true}catch(e){msg('Error: '+e.message);return false}};
 const ls=async d=>{try{return await(await api('/contents/'+d+'?ref='+cfg.branch)).json()}catch(e){if(e.status==404)return[];throw e}};
 const readText=async p=>(await api('/contents/'+p+'?ref='+cfg.branch,{headers:{Accept:'application/vnd.github.raw+json'}})).text();
 const readJson=async(p,d)=>{try{return JSON.parse(await readText(p))}catch(e){return d}};
 function injectMenu(h){if(h.includes('menu.js')||h.includes('data-no-menu'))return h;const t='<script src="/menu.js" defer></'+'script>';return /<\/body>/i.test(h)?h.replace(/<\/body>/i,t+'</body>'):h+t}
-const PAGE_RE=/^(index\.html|p\/[^\/]+\/index\.html|posts\/[^\/]+\/index\.html)$/,NAV_RE=/(<nav\b[^>]*\bid=["']site-menu["'][^>]*>)[\s\S]*?<\/nav>/i;
+const PAGE_RE=/^(index\.html|blog\/index\.html|p\/[^\/]+\/index\.html|posts\/[^\/]+\/index\.html)$/,NAV_RE=/(<nav\b[^>]*\bid=["']site-menu["'][^>]*>)[\s\S]*?<\/nav>/i;
 const MENU_CSS='<style>#site-menu li{position:relative}#site-menu .sub{display:none;position:absolute;left:0;top:100%;min-width:200px;background:#fff;box-shadow:0 8px 24px rgba(0,0,0,.14);border-radius:10px;padding:.5rem .7rem;z-index:50;flex-direction:column;gap:.35rem;list-style:none;margin:0}#site-menu li:hover>.sub,#site-menu li:focus-within>.sub{display:flex}#site-menu .sub .sub{left:100%;top:0}#site-menu .has-sub>a:after{content:" \\25BE";font-size:.75em}@media(max-width:900px){#site-menu .sub{display:flex;position:static;box-shadow:none;padding:0 0 0 1rem}}</style>';
 const ACTIVE_JS='<script>document.querySelectorAll("#site-menu a").forEach(function(a){if(a.pathname.replace(/\\/$/,"")==location.pathname.replace(/\\/$/,""))a.className+=" active"})<\/script>';
 function menuMarkup(items,at){const e=esc,L=(arr,d)=>'<ul'+(d?' class="sub"':(at.ul?' class="'+e(at.ul)+'"':''))+'>'+arr.map(i=>{const k=(i.children||[]).length;return '<li class="'+(at.li?e(at.li)+' ':'')+(k?'has-sub':'')+'"><a'+(at.a?' class="'+e(at.a)+'"':'')+' href="'+e(i.url)+'">'+e(i.label)+'</a>'+(k?L(i.children,d+1):'')+'</li>'}).join('')+'</ul>';return (items.length?L(items,0):'')+MENU_CSS+ACTIVE_JS}
@@ -244,7 +299,7 @@ async function commit(files,message){
  const pf=files.find(f=>!f.del&&liveUrlFor(f.path)),probeUrl=pf?(siteUrl||location.origin).replace(/\/+$/,'')+liveUrlFor(pf.path):null,before=probeUrl?await liveFetch(probeUrl):null;
  if(files.some(f=>f.text&&PAGE_RE.test(f.path))){const mf=files.find(f=>f.path=='menu.json'&&f.text);let items=[];try{items=mf?JSON.parse(mf.text):await readJson('menu.json',[])}catch(e){}
   let st={};try{const sf=files.find(f=>f.path=='settings.json'&&f.text);st=sf?JSON.parse(sf.text):await readJson('settings.json',{})}catch(e){}
-  files.forEach(f=>{if(f.text&&PAGE_RE.test(f.path))f.text=bakeHead(bakeMenu(f.text,items),st)})}
+  files.forEach(f=>{if(f.text&&PAGE_RE.test(f.path))f.text=injectColl(bakeHead(bakeMenu(f.text,items),st,f.path))})}
  const head=(await(await api('/git/ref/heads/'+cfg.branch)).json()).object.sha,base=(await(await api('/git/commits/'+head)).json()).tree.sha,tree=[];
  for(const f of files){if(f.del){tree.push({path:f.path,mode:'100644',type:'blob',sha:null});continue}
   const b=await(await api('/git/blobs',{method:'POST',body:JSON.stringify(f.b64?{content:f.b64,encoding:'base64'}:{content:f.text,encoding:'utf-8'})})).json();
@@ -256,15 +311,16 @@ const trashId=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
 const trashIndex=async()=>await readJson('trash/index.json',[]);
 
 /* NAV */
-const VIEWS=['dash','pages','edit','posts','pedit','media','theme','code','trash','plugins','users','settings'];
+const VIEWS=['dash','pages','edit','posts','pedit','media','theme','code','trash','plugins','users','settings','coll','act'];
 const LOAD={dash:loadDash,pages:loadPages,posts:loadPosts,media:loadMedia,theme:loadTheme,trash:loadTrash,plugins:loadPlugins,users:loadUsers,settings:loadSettings};
-function tab(n,opt){VIEWS.forEach(x=>$('#v-'+x).classList.toggle('hide',x!=n));
+const TITLES={dash:'Dashboard',pages:'Pages',edit:'Edit page',menu:'Menus',posts:'Posts',pedit:'Edit post',coll:'Content',media:'Media Library',theme:'Themes',code:'Code Editor',trash:'Trash',act:'Activity log',plugins:'Plugins',users:'Users',settings:'Settings',p_builder:'Page Builder'};
+function tab(n,opt){$('#ttl').textContent=TITLES[n]||n;VIEWS.forEach(x=>$('#v-'+x).classList.toggle('hide',x!=n));
  document.querySelectorAll('#side button[data-t]').forEach(b=>b.classList.toggle('active',b.dataset.t==n));
  if(n=='pages'){$('#pgNew').classList.toggle('hide',opt!='new')}
  if(n=='posts'&&opt=='new')return editPost();
  if(LOAD[n])run(LOAD[n])}
 document.addEventListener('click',e=>{const b=e.target.closest('[data-t]');if(b)tab(b.dataset.t,b.dataset.go)});
-function showApp(){$('#login').classList.toggle('hide',!!cfg);$('#shell').classList.toggle('hide',!cfg);if(cfg){tab('dash');readJson('settings.json',{}).then(s=>siteUrl=(s.siteUrl||'').replace(/\/+$/,''))}}
+function showApp(){$('#login').classList.toggle('hide',!!cfg);$('#shell').classList.toggle('hide',!cfg);if(cfg){saveSite(cfg);drawSwitch();$('#tbRepo').textContent='🏫 '+cfg.repo;tab('dash');readJson('settings.json',{}).then(s=>{siteUrl=(s.siteUrl||'').replace(/\/+$/,'');deployHook=s.deployHook||''})}}
 $('#go').onclick=async()=>{cfg={owner:$('#o').value.trim(),repo:$('#r').value.trim(),branch:$('#b').value.trim()||'main',token:$('#t').value.trim()};
  try{await api('');localStorage.setItem('cmsCfg',JSON.stringify(cfg));showApp()}catch(e){cfg=null;msg('Login failed: '+e.message)}};
 $('#out').onclick=()=>{localStorage.removeItem('cmsCfg');cfg=null;showApp()};
@@ -331,17 +387,17 @@ $('#del').onclick=()=>{if(!confirm('Move this page to Trash? You can restore it 
 async function loadPosts(){const l=await readJson('posts/index.json',[]),tb=$('#poTable');tb.innerHTML='';
  if(!l.length)tb.innerHTML='<tr><td colspan=4 class="mut">No posts yet.</td></tr>';
  l.forEach(p=>{const tr=document.createElement('tr');tr.innerHTML='<td><b></b></td><td></td><td></td><td style="text-align:right"></td>';
-  tr.children[0].firstChild.textContent=p.title;tr.children[1].textContent=p.date;tr.children[2].textContent=p.draft?'Draft':'Published';
+  tr.children[0].firstChild.textContent=p.title;tr.children[1].textContent=p.date;tr.children[2].innerHTML='<span class="badge '+(p.draft?'dr':'ok')+'">'+(p.draft?'Draft':'Published')+'</span>'+(p.category?' <small class="mut">'+esc(p.category)+'</small>':'');
   const e=document.createElement('button');e.textContent='Edit';e.onclick=()=>editPost(p.slug);tr.children[3].append(e);tb.append(tr)})}
 function editPost(s){run(async()=>{let d={title:'',date:new Date().toISOString().slice(0,10),excerpt:'',image:'',content:'',draft:true};
  if(s)d=JSON.parse(await readText('posts/'+s+'/post.json'));
- $('#pt').value=d.title;$('#ps').value=s||'';$('#ps').disabled=!!s;$('#pd').value=d.date;$('#px').value=d.excerpt;$('#pi').value=d.image;$('#pc').value=d.content;$('#pdr').checked=d.draft;tab('pedit')})}
+ $('#pt').value=d.title;$('#ps').value=s||'';$('#ps').disabled=!!s;$('#pd').value=d.date;$('#px').value=d.excerpt;$('#pi').value=d.image;$('#pc').value=d.content;$('#pdr').checked=d.draft;$('#pcat').value=d.category||'';$('#ptag').value=d.tags||'';$('#pau').value=d.author||'';tab('pedit')})}
 $('#pnew').onclick=()=>editPost();$('#pimg').onclick=()=>pick(p=>$('#pi').value=p);
 const body=t=>t.trim().startsWith('<')?t:t.split(/\n\s*\n/).filter(x=>x.trim()).map(x=>'<p>'+esc(x).replace(/\n/g,'<br>')+'</p>').join('\n');
-const postHtml=d=>'<!DOCTYPE html>\n<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>'+esc(d.title)+'</title><meta name="description" content="'+esc(d.excerpt)+'">'+(d.draft?'<meta name="robots" content="noindex">':'')+'<link rel="stylesheet" href="/theme.css"></head><body><article class="post"><p><a href="/blog/">Back to blog</a></p><h1>'+esc(d.title)+'</h1><p><small>'+esc(d.date)+'</small></p>'+(d.image?'<img src="'+esc(d.image)+'" alt="">':'')+'\n'+body(d.content)+'</article></body></html>';
-$('#psave').onclick=()=>run(async()=>{const d={title:$('#pt').value.trim(),date:$('#pd').value,excerpt:$('#px').value.trim(),image:$('#pi').value.trim(),content:$('#pc').value,draft:$('#pdr').checked};
+const postHtml=d=>'<!DOCTYPE html>\n<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>'+esc(d.title)+'</title><meta name="description" content="'+esc(d.excerpt)+'">'+(d.draft?'<meta name="robots" content="noindex">':'')+'<link rel="stylesheet" href="/theme.css"></head><body><article class="post"><p><a href="/blog/">Back to blog</a></p><h1>'+esc(d.title)+'</h1><p><small>'+esc(d.date)+(d.author?' · '+esc(d.author):'')+(d.category?' · '+esc(d.category):'')+'</small></p>'+(d.image?'<img src="'+esc(d.image)+'" alt="">':'')+'\n'+body(d.content)+'</article><div class="wrap" id="rel"></div><script>('+RELATED_FN+')()<\/script></body></html>';
+$('#psave').onclick=()=>run(async()=>{const d={title:$('#pt').value.trim(),date:$('#pd').value,excerpt:$('#px').value.trim(),image:$('#pi').value.trim(),content:$('#pc').value,draft:$('#pdr').checked,category:$('#pcat').value.trim(),tags:$('#ptag').value.trim(),author:$('#pau').value.trim()};
  const s=slug($('#ps').value.trim())||slug(d.title);if(!d.title||!s)throw new Error('Add a title first');
- const l=await readJson('posts/index.json',[]),e={slug:s,title:d.title,date:d.date,excerpt:d.excerpt,image:d.image,draft:d.draft},i=l.findIndex(x=>x.slug==s);
+ const l=await readJson('posts/index.json',[]),e={slug:s,title:d.title,date:d.date,excerpt:d.excerpt,image:d.image,draft:d.draft,category:d.category,tags:d.tags,author:d.author},i=l.findIndex(x=>x.slug==s);
  if(i<0)l.push(e);else l[i]=e;l.sort((a,b)=>b.date.localeCompare(a.date));
  await commit([{path:'posts/'+s+'/post.json',text:JSON.stringify(d)},{path:'posts/'+s+'/index.html',text:postHtml(d)},{path:'posts/index.json',text:JSON.stringify(l,null,1)}],'Save post '+s);
  msg('Post saved.');tab('posts')});
@@ -484,10 +540,10 @@ $('#uadd').onclick=()=>run(async()=>{const u=$('#un').value.trim();if(!u)throw n
 
 /* SETTINGS */
 async function loadSettings(){const s={name:'',tagline:'',logo:'',description:'',siteUrl:'',...await readJson('settings.json',{})};
- $('#stName').value=s.name;$('#stTag').value=s.tagline;$('#stLogo').value=s.logo;$('#stDesc').value=s.description;$('#stUrl').value=s.siteUrl;$('#stFav').value=s.favicon||'';$('#stHead').value=s.headCode||'';$('#stFoot').value=s.footCode||'';$('#ejS').value=s.ejs||'';$('#ejT').value=s.ejt||'';$('#ejK').value=s.ejk||'';readText('_redirects').then(t=>$('#rdText').value=t).catch(()=>$('#rdText').value='')}
+ $('#stName').value=s.name;$('#stTag').value=s.tagline;$('#stLogo').value=s.logo;$('#stDesc').value=s.description;$('#stUrl').value=s.siteUrl;$('#stFav').value=s.favicon||'';$('#stHead').value=s.headCode||'';$('#stFoot').value=s.footCode||'';$('#ejS').value=s.ejs||'';$('#ejT').value=s.ejt||'';$('#ejK').value=s.ejk||'';$('#stPhone').value=s.phone||'';$('#stEmail').value=s.email||'';$('#stAddr').value=s.address||'';$('#stFb').value=s.fb||'';$('#stIg').value=s.ig||'';$('#stYt').value=s.yt||'';$('#stTw').value=s.tw||'';$('#stMaint').checked=!!s.maint;$('#stMaintMsg').value=s.maintMsg||'';$('#stSticky').checked=!!s.sticky;$('#stLang').value=s.lang||'';$('#stCookie').checked=!!s.cookie;$('#stCookieMsg').value=s.cookieMsg||'';$('#stPrivacy').value=s.privacyUrl||'';$('#stHook').value=s.deployHook||'';readText('_redirects').then(t=>$('#rdText').value=t).catch(()=>$('#rdText').value='')}
 $('#stLogoPick').onclick=()=>pick(p=>$('#stLogo').value=p);
-$('#stSave').onclick=()=>run(async()=>{const s={...(await readJson('settings.json',{})),name:$('#stName').value.trim(),tagline:$('#stTag').value.trim(),logo:$('#stLogo').value.trim(),description:$('#stDesc').value.trim(),siteUrl:$('#stUrl').value.trim(),favicon:$('#stFav').value.trim(),headCode:$('#stHead').value,footCode:$('#stFoot').value,ejs:$('#ejS').value.trim(),ejt:$('#ejT').value.trim(),ejk:$('#ejK').value.trim()};
- siteUrl=s.siteUrl.replace(/\/+$/,'');
+$('#stSave').onclick=()=>run(async()=>{const s={...(await readJson('settings.json',{})),name:$('#stName').value.trim(),tagline:$('#stTag').value.trim(),logo:$('#stLogo').value.trim(),description:$('#stDesc').value.trim(),siteUrl:$('#stUrl').value.trim(),favicon:$('#stFav').value.trim(),headCode:$('#stHead').value,footCode:$('#stFoot').value,ejs:$('#ejS').value.trim(),ejt:$('#ejT').value.trim(),ejk:$('#ejK').value.trim(),phone:$('#stPhone').value.trim(),email:$('#stEmail').value.trim(),address:$('#stAddr').value.trim(),fb:$('#stFb').value.trim(),ig:$('#stIg').value.trim(),yt:$('#stYt').value.trim(),tw:$('#stTw').value.trim(),maint:$('#stMaint').checked,maintMsg:$('#stMaintMsg').value.trim(),sticky:$('#stSticky').checked,lang:$('#stLang').value,cookie:$('#stCookie').checked,cookieMsg:$('#stCookieMsg').value.trim(),privacyUrl:$('#stPrivacy').value.trim(),deployHook:$('#stHook').value.trim()};
+ siteUrl=s.siteUrl.replace(/\/+$/,'');deployHook=s.deployHook||'';
  await commit([{path:'settings.json',text:JSON.stringify(s,null,1)},...(await collectPages())],'Update settings');msg('Settings saved and applied to all pages.')});
 
 /* ===== ADD-ON: bulk delete, dates, reset, theme name, plugins ===== */
@@ -636,28 +692,37 @@ $('#uadd').onclick=()=>run(async()=>{let u=$('#un').value.trim(),mail=$('#ue').v
 
 /* ===== ADD-ON 3: publish tracker, builder link, history, SEO tools, invites ===== */
 const HEAD_RE=/<!--kb-head-->[\s\S]*?<!--\/kb-head-->/,FOOT_RE=/<!--kb-foot-->[\s\S]*?<!--\/kb-foot-->/;
-function bakeHead(h,st){const hb=(st.favicon?'<link rel="icon" href="'+esc(st.favicon)+'">':'')+(st.headCode||''),fb=st.footCode||'',hs=hb?'<!--kb-head-->'+hb+'<!--/kb-head-->':'',fs=fb?'<!--kb-foot-->'+fb+'<!--/kb-foot-->':'';
+function bakeHead(h,st,path){const u=path?liveUrlFor(path):null,base=(st.siteUrl||'').replace(/\/+$/,''),home=path=='index.html'||path=='p/home/index.html';let hb='';
+ if(st.favicon)hb+='<link rel="icon" href="'+esc(st.favicon)+'">';
+ if(base&&u&&!/noindex/i.test(h.replace(HEAD_RE,'')))hb+='<link rel="canonical" href="'+esc(base+(home?'/':u))+'">';
+ if(home&&st.name&&base){const o={'@context':'https://schema.org','@type':'EducationalOrganization',name:st.name,url:base},sm=[st.fb,st.ig,st.yt,st.tw].filter(Boolean);
+  if(st.logo)o.logo=/^https?:/.test(st.logo)?st.logo:base+st.logo;if(st.phone)o.telephone=st.phone;if(st.email)o.email=st.email;if(st.address)o.address=st.address;if(sm.length)o.sameAs=sm;
+  hb+='<script type="application/ld+json">'+JSON.stringify(o).replace(/</g,'\\u003c')+'<\/script>'}
+ if(st.maint)hb+='<script>('+MAINT_FN+')('+JSON.stringify(st.maintMsg||'We will be back soon.').replace(/</g,'\\u003c')+')<\/script>';
+ if(st.sticky)hb+='<style>[data-global=header]{position:sticky;top:0;z-index:100;background:#fff;box-shadow:0 2px 12px rgba(0,0,0,.06)}</style>';
+ hb+=st.headCode||'';
+ if(st.lang)h=h.replace(/<html\b([^>]*)>/i,(m,a)=>'<html'+a.replace(/\slang="[^"]*"/i,'')+' lang="'+esc(st.lang)+'">');
+ const fb=(st.footCode||'')+(st.cookie?'<script>('+COOKIE_FN+')('+JSON.stringify(st.cookieMsg||'We use cookies to improve your experience.').replace(/</g,'\\u003c')+','+JSON.stringify(st.privacyUrl||'')+')<\/script>':''),hs=hb?'<!--kb-head-->'+hb+'<!--/kb-head-->':'',fs=fb?'<!--kb-foot-->'+fb+'<!--/kb-foot-->':'';
  if(HEAD_RE.test(h))h=h.replace(HEAD_RE,()=>hs);else if(hs)h=h.replace(/<\/head>/i,()=>hs+'</head>');
  if(FOOT_RE.test(h))h=h.replace(FOOT_RE,()=>fs);else if(fs)h=h.replace(/<\/body>/i,()=>fs+'</body>');return h}
+function injectColl(h){if(!/data-kb-list/.test(h)||h.includes('collections.js'))return h;const t='<script src="/collections.js" defer></'+'script>';return /<\/body>/i.test(h)?h.replace(/<\/body>/i,()=>t+'</body>'):h+t}
 const liveUrlFor=p=>p=='index.html'?'/':/^(p|posts)\/[^\/]+\/index\.html$/.test(p)?'/'+p.replace(/index\.html$/,''):null;
 async function liveFetch(u){try{const r=await fetch(u+(u.includes('?')?'&':'?')+'_='+Date.now(),{cache:'no-store'});return r.ok?await r.text():null}catch(e){return null}}
 let pubTimer=null;
 function pubBar(st,text,url){const b=$('#pubbar');b.classList.remove('hide');b.dataset.s=st;$('#pubTxt').textContent=text;$('#pubSpin').style.display=st=='run'?'inline-block':'none';const a=$('#pubView');if(url){a.href=url;a.classList.remove('hide')}else a.classList.add('hide')}
 $('#pubX').onclick=()=>{$('#pubbar').classList.add('hide');clearInterval(pubTimer)};
-function watchPublish(sha,files,before,probeUrl){clearInterval(pubTimer);const t0=Date.now(),v=files.map(f=>f.del?null:liveUrlFor(f.path)).find(Boolean),base=(siteUrl||location.origin).replace(/\/+$/,''),viewUrl=base+(v||'/');
- pubBar('run','Publishing your changes…',null);let nc=0;
- const done=t=>{clearInterval(pubTimer);pubBar('ok','✅ Published — live now ('+Math.round((Date.now()-t0)/1000)+'s)',viewUrl)};
+function watchPublish(sha,files,before,probeUrl){clearInterval(pubTimer);msg.mute=Date.now()+3500;if(deployHook)fetch(deployHook,{method:'POST',mode:'no-cors'}).catch(()=>{});
+ const t0=Date.now(),v=files.map(f=>f.del?null:liveUrlFor(f.path)).find(Boolean),base=(siteUrl||location.origin).replace(/\/+$/,''),viewUrl=base+(v||'/');
+ pubBar('ok','✅ Published — your page will go live shortly',viewUrl);let nc=0,hide=setTimeout(()=>{if($('#pubbar').dataset.s=='ok')$('#pubbar').classList.add('hide')},14000);
+ const live=()=>{clearInterval(pubTimer);pubBar('ok','✅ Published — your page is live now',viewUrl);clearTimeout(hide);hide=setTimeout(()=>$('#pubbar').classList.add('hide'),9000)};
  const tick=async()=>{const age=Date.now()-t0;
   try{const[cr,st]=await Promise.all([api('/commits/'+sha+'/check-runs').then(r=>r.json()),api('/commits/'+sha+'/status').then(r=>r.json())]),runs=cr.check_runs||[];
    if(runs.length||st.total_count){nc=0;
-    if(runs.some(r=>r.status=='completed'&&['failure','cancelled','timed_out'].includes(r.conclusion))||['failure','error'].includes(st.state)){clearInterval(pubTimer);return pubBar('err','❌ Publishing failed — check your hosting dashboard for the build error.',null)}
-    const pend=runs.filter(r=>r.status!='completed').length+(st.state=='pending'?1:0);
-    if(!pend&&age>5000)return done();
-    return pubBar('run','Publishing… building your site',null)}}catch(e){}
-  nc++;
-  if(nc>=3&&probeUrl&&before!=null){const now=await liveFetch(probeUrl);if(now!=null&&now!==before)return done()}
-  if(age>180000){clearInterval(pubTimer);pubBar('ok','Saved. Could not confirm live status automatically — open the page to check.',viewUrl)}};
- pubTimer=setInterval(tick,4000);setTimeout(tick,1500)}
+    if(runs.some(r=>r.status=='completed'&&['failure','cancelled','timed_out'].includes(r.conclusion))||['failure','error'].includes(st.state)){clearInterval(pubTimer);clearTimeout(hide);return pubBar('err','❌ Publishing failed — check your hosting dashboard for the build error.',null)}
+    if(!runs.filter(r=>r.status!='completed').length&&st.state!='pending'&&age>5000)return live();return}}catch(e){}
+  nc++;if(nc>=3&&probeUrl&&before!=null){const now=await liveFetch(probeUrl);if(now!=null&&now!==before)return live()}
+  if(age>180000)clearInterval(pubTimer)};
+ pubTimer=setInterval(tick,5000);setTimeout(tick,2000)}
 async function collectPages(){const f=[];
  for(const n of (await ls('p')).filter(x=>x.type=='dir').map(x=>x.name)){try{f.push({path:'p/'+n+'/index.html',text:await readText('p/'+n+'/index.html')})}catch(e){}}
  for(const po of await readJson('posts/index.json',[])){try{f.push({path:'posts/'+po.slug+'/index.html',text:await readText('posts/'+po.slug+'/index.html')})}catch(e){}}
@@ -671,7 +736,7 @@ $('#ehist').onclick=()=>run(async()=>{const box=$('#histList'),w=$('#hist');w.cl
  const path='p/'+cur.slug+'/index.html',cs=await(await api('/commits?path='+encodeURIComponent(path)+'&per_page=20')).json(),raw=sha=>api('/contents/'+path+'?ref='+sha,{headers:{Accept:'application/vnd.github.raw+json'}}).then(r=>r.text());box.innerHTML='';
  if(!cs.length)box.textContent='No history yet.';
  cs.forEach((c,i)=>{const r=document.createElement('div');r.className='row';const b=document.createElement('b');b.textContent=fmtDT(c.commit.author.date)+' — '+c.commit.message.split('\n')[0]+(i==0?' (current)':'');r.append(b);
-  const pv=document.createElement('button');pv.textContent='Preview';pv.onclick=()=>run(async()=>{$('#frame').srcdoc=withBase(await raw(c.sha));$('#frame').scrollIntoView()});r.append(pv);
+  const pv=document.createElement('button');pv.textContent='Preview';pv.onclick=()=>run(async()=>{$('#frame').srcdoc=withBase(await raw(c.sha));$('#frame').scrollIntoView()});r.append(pv);if(i){const cp=document.createElement('button');cp.textContent='Compare';cp.onclick=()=>run(async()=>{showDiff(await raw(c.sha),await raw(cs[0].sha))});r.append(cp)}
   if(i){const rs=document.createElement('button');rs.className='p';rs.textContent='Restore';rs.onclick=()=>confirm('Restore this version?')&&run(async()=>{const t=await raw(c.sha);await commit([{path,text:t}],'Restore old version of page '+cur.slug);cur.doc=new DOMParser().parseFromString(t,'text/html');buildFields();msg('Version restored.')});r.append(rs)}
   box.append(r)})});
 $('#edup').onclick=()=>{const n=slug(prompt('Name for the copy (example: about-2):')||'');if(!n)return;run(async()=>{await commit([{path:'p/'+n+'/index.html',text:pageOut()}],'Duplicate page '+cur.slug+' as '+n);msg('Copy created: /p/'+n+'/');tab('pages')})};
@@ -716,6 +781,157 @@ $('#uadd').onclick=()=>run(async()=>{const mail=$('#ue').value.trim(),name=$('#u
 async function loadInvites(){const b=$('#uinv');b.textContent='Loading…';try{const l=await(await api('/invitations')).json();b.innerHTML='';if(!l.length){b.innerHTML='<span class="mut">No pending invitations.</span>';return}
  l.forEach(i=>{const r=document.createElement('div'),t=document.createElement('b'),x=document.createElement('button');r.className='row';t.textContent='@'+i.invitee.login+' — '+(ROLE[i.permissions]||i.permissions)+' (waiting to accept)';x.className='d';x.textContent='Cancel';x.onclick=()=>run(async()=>{await api('/invitations/'+i.id,{method:'DELETE'});loadInvites()});r.append(t,x);b.append(r)})}catch(e){b.innerHTML='<span class="mut">Could not load invitations.</span>'}}
 const _lu=loadUsers;LOAD.users=async()=>{await _lu();await loadInvites()};
+
+/* ===== ADD-ON 4: multi-website, search, rollback, content types, blog, media+, SEO tools ===== */
+const MAINT_FN=function(m){if(!localStorage.getItem('cmsCfg')){document.documentElement.innerHTML='<body style="font-family:sans-serif;text-align:center;padding:20vh 1rem"><h1>Under maintenance</h1><p id="m"></p></body>';document.getElementById('m').textContent=m}};
+const RELATED_FN=function(){fetch('/posts/index.json').then(function(r){return r.json()}).then(function(P){var cur=location.pathname.split('/').filter(Boolean).pop(),me=P.filter(function(p){return p.slug==cur})[0];if(!me)return;var r=P.filter(function(p){return !p.draft&&p.slug!=cur&&p.category&&p.category==me.category}).slice(0,3);if(!r.length)return;document.getElementById('rel').innerHTML='<h3>Related posts</h3>'+r.map(function(p){return '<p><a href="/posts/'+p.slug+'/">'+p.title.replace(/</g,'&lt;')+'</a></p>'}).join('')})};
+const BLOG_FN=function(){fetch('/posts/index.json').then(function(r){return r.json()}).then(function(P){P=P.filter(function(p){return !p.draft});var cats=[],cur='',q=document.getElementById('q'),L=document.getElementById('list'),C=document.getElementById('cats');P.forEach(function(p){if(p.category&&cats.indexOf(p.category)<0)cats.push(p.category)});
+ function e(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+ function draw(){var s=q.value.toLowerCase();L.innerHTML=P.filter(function(p){return(!cur||p.category==cur)&&(p.title+' '+(p.excerpt||'')+' '+(p.tags||'')).toLowerCase().indexOf(s)>-1}).map(function(p){return '<a class="cardx" href="/posts/'+p.slug+'/" style="display:block;text-decoration:none;color:inherit">'+(p.image?'<img src="'+e(p.image)+'" alt="" style="width:100%;border-radius:12px;aspect-ratio:16/10;object-fit:cover">':'')+'<small>'+e(p.date)+(p.category?' · '+e(p.category):'')+'</small><h3>'+e(p.title)+'</h3><p>'+e(p.excerpt||'')+'</p></a>'}).join('')||'<p>No posts found.</p>'}
+ C.innerHTML=['All'].concat(cats).map(function(c){return '<button data-c="'+(c=='All'?'':e(c))+'" style="margin:0 .4rem .4rem 0;padding:.4rem .9rem;border-radius:20px;border:1px solid #ddd;background:#fff;cursor:pointer">'+e(c)+'</button>'}).join('');C.onclick=function(ev){var b=ev.target.closest('button');if(b){cur=b.getAttribute('data-c');draw()}};q.oninput=draw;draw()})};
+const COLL_JS='('+function(){var css='.kbl{display:grid;gap:20px}.kbl.cards{grid-template-columns:repeat(auto-fill,minmax(230px,1fr))}.kbl.gallery{grid-template-columns:repeat(auto-fill,minmax(200px,1fr))}.kbc{background:#fff;border-radius:16px;box-shadow:0 4px 18px rgba(0,0,0,.08);overflow:hidden}.kbc img{width:100%;aspect-ratio:4/3;object-fit:cover;display:block}.kbc>div{padding:14px 16px}.kbc h4{margin:0 0 4px}.kbc small{display:block;color:#6b6b80}.kbl.gallery img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:14px}.kbt{width:100%;border-collapse:collapse}.kbt th,.kbt td{text-align:left;padding:10px;border-bottom:1px solid #eee}.kbt img{width:44px;height:44px;object-fit:cover;border-radius:50%}.kbu{list-style:none;padding:0;margin:0}.kbu li{padding:10px 0;border-bottom:1px solid #eee;display:flex;gap:10px;justify-content:space-between;flex-wrap:wrap}';
+ var st=document.createElement('style');st.textContent=css;document.head.appendChild(st);
+ function e(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+ document.querySelectorAll('[data-kb-list]').forEach(function(el){fetch('/data/'+el.getAttribute('data-kb-list')+'.json?'+Date.now()).then(function(r){return r.json()}).then(function(d){
+  var F=d.fields||[],it=d.items||[],lim=+el.getAttribute('data-limit')||0,lay=el.getAttribute('data-layout')||d.layout||'cards';if(lim)it=it.slice(0,lim);
+  var tf=F.filter(function(f){return f.type=='text'})[0]||F[0],im=F.filter(function(f){return f.type=='image'})[0];
+  function val(i,f){var v=i[f.key];if(v==null||v==='')return '';if(f.type=='image')return '<img src="'+e(v)+'" alt="">';if(f.type=='file')return '<a href="'+e(v)+'" target="_blank" rel="noopener">'+e(f.label)+' ↓</a>';if(f.type=='url')return '<a href="'+e(v)+'" target="_blank" rel="noopener">'+e(f.label)+'</a>';return e(v)}
+  var h='';
+  if(lay=='table')h='<div style="overflow-x:auto"><table class="kbt"><tr>'+F.map(function(f){return '<th>'+e(f.label)+'</th>'}).join('')+'</tr>'+it.map(function(i){return '<tr>'+F.map(function(f){return '<td>'+val(i,f)+'</td>'}).join('')+'</tr>'}).join('')+'</table></div>';
+  else if(lay=='list')h='<ul class="kbu">'+it.map(function(i){return '<li><span><b>'+e(i[tf.key])+'</b>'+F.filter(function(f){return f!==tf&&['image','file','textarea','url'].indexOf(f.type)<0&&i[f.key]}).map(function(f){return ' <small>'+e(i[f.key])+'</small>'}).join('')+'</span><span>'+F.filter(function(f){return f.type=='file'||f.type=='url'}).map(function(f){return val(i,f)}).join(' ')+'</span></li>'}).join('')+'</ul>';
+  else if(lay=='gallery')h='<div class="kbl gallery">'+it.map(function(i){return im&&i[im.key]?'<img src="'+e(i[im.key])+'" alt="'+e(i[tf.key])+'" loading="lazy">':''}).join('')+'</div>';
+  else h='<div class="kbl cards">'+it.map(function(i){return '<div class="kbc">'+(im&&i[im.key]?'<img src="'+e(i[im.key])+'" alt="" loading="lazy">':'')+'<div><h4>'+e(i[tf.key])+'</h4>'+F.filter(function(f){return f!==tf&&f!==im&&i[f.key]}).map(function(f){return f.type=='textarea'?'<p style="margin:6px 0 0;font-size:.92rem">'+e(i[f.key])+'</p>':(f.type=='file'||f.type=='url'?'<p style="margin:6px 0 0">'+val(i,f)+'</p>':'<small>'+e(i[f.key])+'</small>')}).join('')+'</div></div>'}).join('')+'</div>';
+  el.innerHTML=h||'<p>No items yet.</p>'}).catch(function(){})})}.toString()+')();';
+
+/* Website switcher */
+const SITES_KEY='cmsSites',getSites=()=>{try{return JSON.parse(localStorage.getItem(SITES_KEY)||'[]')}catch(e){return[]}};
+function saveSite(c){const l=getSites().filter(x=>!(x.owner==c.owner&&x.repo==c.repo&&x.branch==c.branch));l.push({owner:c.owner,repo:c.repo,branch:c.branch,token:c.token});localStorage.setItem(SITES_KEY,JSON.stringify(l))}
+function drawSwitch(){const sw=$('#siteSw');sw.innerHTML='';const l=getSites();l.forEach((c,i)=>sw.add(new Option('🏫 '+c.repo,i)));sw.add(new Option('➕ Add another website…','new'));const i=l.findIndex(x=>cfg&&x.owner==cfg.owner&&x.repo==cfg.repo&&x.branch==cfg.branch);sw.value=i>=0?i:'new'}
+$('#siteSw').onchange=e=>{if(e.target.value=='new'){localStorage.removeItem('cmsCfg');cfg=null;showApp();return}cfg=getSites()[+e.target.value];localStorage.setItem('cmsCfg',JSON.stringify(cfg));location.reload()};
+
+/* Global search */
+let gsIdx=[];
+async function buildIdx(){const[pg,po,ph,ds]=await Promise.all([ls('p'),readJson('posts/index.json',[]),photos(),ls('data')]);
+ gsIdx=[...pg.filter(x=>x.type=='dir').map(x=>({k:'📄 Page',t:'/p/'+x.name+'/',go:()=>openPage(x.name)})),...po.map(x=>({k:'📝 Post',t:x.title,go:()=>editPost(x.slug)})),...ph.map(x=>({k:'🖼️ Media',t:x.name,go:()=>tab('media')})),...ds.filter(x=>/\.json$/.test(x.name)).map(x=>({k:'📚 Content',t:x.name.replace('.json',''),go:()=>openColl(x.name.replace('.json',''))}))]}
+$('#gs').onfocus=()=>run(buildIdx);
+$('#gs').oninput=()=>{const q=$('#gs').value.trim().toLowerCase(),b=$('#gsr');if(!q){b.classList.add('hide');return}const r=gsIdx.filter(i=>i.t.toLowerCase().includes(q)).slice(0,12);b.innerHTML='';b.classList.remove('hide');if(!r.length)b.textContent='No results';r.forEach(i=>{const d=document.createElement('div');d.className='gsi';d.textContent=i.k+'   '+i.t;d.onclick=()=>{b.classList.add('hide');$('#gs').value='';i.go()};b.append(d)})};
+document.addEventListener('click',e=>{if(!e.target.closest('#gsr,#gs'))$('#gsr').classList.add('hide')});
+
+/* Publishing history + rollback */
+$('#v-dash').insertAdjacentHTML('beforeend','<div class="card"><h3 style="margin-top:0">Publishing history &amp; rollback</h3><p class="mut">Every save is a version of your whole website. If something goes wrong, roll back to an older version.</p><div id="deployList">Loading…</div></div>');
+async function loadDeploys(){const b=$('#deployList');try{const cs=await(await api('/commits?per_page=10')).json();b.innerHTML='';
+ cs.forEach((c,i)=>{const r=document.createElement('div');r.className='row';const t=document.createElement('b');t.textContent=fmtDT(c.commit.author.date)+' — '+c.commit.message.split('\n')[0]+(i==0?' (live)':'');r.append(t);
+  if(i){const x=document.createElement('button');x.textContent='↩ Roll back to this';x.onclick=()=>confirm('Roll the whole website back to this version? Newer changes will be undone (they stay in history).')&&run(async()=>{await rollbackTo(c.sha);msg('Rolled back. Publishing…');loadDeploys()});r.append(x)}b.append(r)})}catch(e){b.textContent='Could not load history.'}}
+async function rollbackTo(sha){const head=(await(await api('/git/ref/heads/'+cfg.branch)).json()).object.sha,old=await(await api('/git/commits/'+sha)).json(),
+ n=await(await api('/git/commits',{method:'POST',body:JSON.stringify({message:'Rollback to version '+sha.slice(0,7),tree:old.tree.sha,parents:[head]})})).json();
+ await api('/git/refs/heads/'+cfg.branch,{method:'PATCH',body:JSON.stringify({sha:n.sha})});watchPublish(n.sha,[],null,null)}
+const _ld3=LOAD.dash;LOAD.dash=async()=>{await _ld3();loadDeploys()};
+
+/* Content types */
+const PRESETS={faculty:{name:'Faculty & Staff',layout:'cards',fields:[['name','Name','text'],['role','Designation','text'],['qual','Qualification','text'],['photo','Photo','image'],['about','About','textarea']]},
+ toppers:{name:'Results & Toppers',layout:'cards',fields:[['name','Student name','text'],['cls','Class','text'],['marks','Marks / Percentage','text'],['year','Year','text'],['photo','Photo','image']]},
+ notices:{name:'Notices & Circulars',layout:'list',fields:[['title','Title','text'],['date','Date','date'],['cat','Category','text'],['details','Details','textarea'],['file','Document (PDF)','file']]},
+ gallery:{name:'Gallery',layout:'gallery',fields:[['title','Title','text'],['image','Image','image'],['cat','Category','text']]},
+ downloads:{name:'Certificates & Downloads',layout:'list',fields:[['title','Title','text'],['cat','Category','text'],['file','File (PDF)','file']]},
+ branches:{name:'Branches & Campuses',layout:'cards',fields:[['name','Branch name','text'],['address','Address','textarea'],['phone','Phone','text'],['map','Map link','url'],['photo','Photo','image']]},
+ testimonials:{name:'Testimonials',layout:'cards',fields:[['name','Name','text'],['role','Role','text'],['review','Review','textarea'],['photo','Photo','image']]}};
+let coll=null,collSlug='';
+const ctP=$('#ctPreset');Object.keys(PRESETS).forEach(k=>ctP.add(new Option(PRESETS[k].name,k)));
+async function loadColl(){const ds=(await ls('data')).filter(x=>/\.json$/.test(x.name)),box=$('#ctList');box.innerHTML='';
+ for(const f of ds){const sl=f.name.replace('.json',''),d=await readJson('data/'+f.name,{name:sl}),b=document.createElement('button');b.className='ctchip'+(sl==collSlug?' on':'');b.textContent='📚 '+(d.name||sl)+' ('+((d.items||[]).length)+')';b.onclick=()=>openColl(sl);box.append(b)}
+ if(!ds.length)box.innerHTML='<span class="mut">No content types yet. Add a school preset below or create your own.</span>';
+ if(collSlug&&coll)drawColl();else $('#ctWork').classList.add('hide')}
+LOAD.coll=loadColl;
+async function openColl(sl){collSlug=sl;coll=await readJson('data/'+sl+'.json',null);tab('coll');}
+const collSave=async msgT=>{await commit([{path:'data/'+collSlug+'.json',text:JSON.stringify(coll,null,1)},{path:'collections.js',text:COLL_JS}],msgT||'Update content '+collSlug)};
+$('#ctPreset').onchange=e=>{const k=e.target.value;if(!k)return;e.target.value='';run(async()=>{const P=PRESETS[k];collSlug=k;coll={name:P.name,slug:k,layout:P.layout,fields:P.fields.map(([key,label,type])=>({key,label,type})),items:[]};await collSave('Add content type '+P.name);msg(P.name+' created.');loadColl()})};
+$('#ctNew').onclick=()=>{const n=prompt('Name of the new content type (example: Events):');if(!n)return;const sl=slug(n);if(!sl)return;collSlug=sl;coll={name:n,slug:sl,layout:'cards',fields:[{key:'title',label:'Title',type:'text'},{key:'image',label:'Image',type:'image'},{key:'details',label:'Details',type:'textarea'}],items:[]};run(async()=>{await collSave('Add content type '+n);loadColl()})};
+function drawColl(){$('#ctWork').classList.remove('hide');$('#ctForm').classList.add('hide');$('#ctTitle').textContent=coll.name;
+ $('#ctHint').textContent='Show it on any page: add a "Content list" block in the Page Builder, or paste  <div data-kb-list="'+coll.slug+'" data-layout="'+coll.layout+'"></div>  into the page HTML. Layouts: cards, table, list, gallery.';
+ const b=$('#ctItems');b.innerHTML='';const tf=coll.fields.find(f=>f.type=='text')||coll.fields[0],im=coll.fields.find(f=>f.type=='image');
+ if(!coll.items.length)b.innerHTML='<p class="mut">No items yet. Click “+ Add item”.</p>';
+ coll.items.forEach((it,i)=>{const r=document.createElement('div');r.className='row';if(im&&it[im.key]){const g=document.createElement('img');g.src=it[im.key];g.style.cssText='width:40px;height:40px;object-fit:cover;border-radius:8px';g.onerror=()=>g.remove();r.append(g)}
+  const t=document.createElement('b');t.textContent=it[tf.key]||'(untitled)';r.append(t);
+  const mk=(x,f,c)=>{const q=document.createElement('button');q.textContent=x;if(c)q.className=c;q.onclick=f;r.append(q)};
+  mk('↑',()=>{if(i){[coll.items[i-1],coll.items[i]]=[coll.items[i],coll.items[i-1]];run(async()=>{await collSave();drawColl()})}});mk('↓',()=>{if(i<coll.items.length-1){[coll.items[i+1],coll.items[i]]=[coll.items[i],coll.items[i+1]];run(async()=>{await collSave();drawColl()})}});
+  mk('Edit',()=>itemForm(it));mk('Delete',()=>confirm('Delete this item?')&&run(async()=>{coll.items.splice(i,1);await collSave();drawColl()}),'d');b.append(r)})}
+function uploadTo(inp,kind){const fi=document.createElement('input');fi.type='file';if(kind=='image')fi.accept='image/*';fi.onchange=()=>run(async()=>{const f=fi.files[0];if(!f)return;const nm=slug(f.name.replace(/\.[^.]+$/,''))||'file',tg=Date.now().toString(36);let path,b64;
+ if(kind=='image'){const q=await prep(f);path='img/'+nm+'-'+tg+'.'+q.ext;b64=q.b64}else{b64=(await rd(f)).b64;path='files/'+nm+'-'+tg+'.'+f.name.split('.').pop().toLowerCase()}
+ msg('Uploading…');await commit([{path,b64}],'Upload '+f.name);inp.value='/'+path;msg('Uploaded.')});fi.click()}
+function itemForm(it){const box=$('#ctForm'),isNew=!it,vals=it||{id:Date.now()};box.classList.remove('hide');box.innerHTML='<h3>'+(isNew?'Add item':'Edit item')+'</h3>';const ins={};
+ coll.fields.forEach(f=>{const l=document.createElement('label');l.textContent=f.label;const i=document.createElement(f.type=='textarea'?'textarea':'input');if(f.type=='date')i.type='date';if(f.type=='number')i.type='number';i.value=vals[f.key]||'';ins[f.key]=i;box.append(l,i);
+  if(f.type=='image'||f.type=='file'){const w=document.createElement('div');w.className='row';if(f.type=='image'){const c=document.createElement('button');c.textContent='Choose from Media';c.onclick=()=>pick(p=>i.value=p);w.append(c)}const u=document.createElement('button');u.textContent='⬆ Upload '+(f.type=='image'?'photo':'file');u.onclick=()=>uploadTo(i,f.type);w.append(u);box.append(w)}});
+ const p=document.createElement('p'),sv=document.createElement('button');sv.className='p';sv.textContent='Save item';sv.onclick=()=>run(async()=>{coll.fields.forEach(f=>vals[f.key]=ins[f.key].value.trim());if(isNew)coll.items.push(vals);await collSave();drawColl();msg('Saved.')});
+ const cn=document.createElement('button');cn.textContent='Cancel';cn.onclick=()=>box.classList.add('hide');p.append(sv,' ',cn);box.append(p);box.scrollIntoView()}
+$('#ctAdd').onclick=()=>itemForm(null);
+$('#ctCopy').onclick=()=>{const t='<div data-kb-list="'+coll.slug+'" data-layout="'+coll.layout+'"></div>';navigator.clipboard?navigator.clipboard.writeText(t).then(()=>msg('Copied. Paste it into a page.')):msg(t)};
+$('#ctDel').onclick=()=>confirm('Delete the whole content type "'+coll.name+'" and all its items?')&&run(async()=>{await commit([{path:'data/'+collSlug+'.json',del:true}],'Delete content type '+collSlug);coll=null;collSlug='';loadColl()});
+$('#ctSchema').onclick=()=>{const box=$('#ctForm');box.classList.remove('hide');box.innerHTML='<h3>Fields of “'+esc(coll.name)+'”</h3>';const fs=coll.fields.map(f=>({...f}));let lay=coll.layout;
+ const draw=()=>{[...box.querySelectorAll('.fr')].forEach(x=>x.remove());fs.forEach((f,i)=>{const r=document.createElement('div');r.className='row fr';const l=document.createElement('input'),t=document.createElement('select'),x=document.createElement('button');l.value=f.label;l.style.cssText='flex:1 1 160px;width:auto';l.oninput=()=>{f.label=l.value;f.key=f.key||slug(l.value).replace(/-/g,'_')||'f'+i};['text','textarea','image','file','url','date','number'].forEach(o=>t.add(new Option(o,o)));t.value=f.type;t.style.width='auto';t.onchange=()=>f.type=t.value;x.textContent='✕';x.className='d';x.onclick=()=>{fs.splice(i,1);draw()};r.append(l,t,x);box.insertBefore(r,box.querySelector('.fa'))})};
+ const fa=document.createElement('div');fa.className='row fa';const ad=document.createElement('button');ad.textContent='+ Add field';ad.onclick=()=>{fs.push({key:'f'+Date.now().toString(36),label:'New field',type:'text'});draw()};
+ const ls2=document.createElement('select');['cards','table','list','gallery'].forEach(o=>ls2.add(new Option('Default layout: '+o,o)));ls2.value=lay;ls2.style.width='auto';ls2.onchange=()=>lay=ls2.value;
+ const sv=document.createElement('button');sv.className='p';sv.textContent='Save fields';sv.onclick=()=>run(async()=>{fs.forEach((f,i)=>{if(!f.key)f.key='f'+i});coll.fields=fs;coll.layout=lay;await collSave();drawColl();msg('Fields saved.')});
+ fa.append(ad,ls2,sv);box.append(fa);draw()};
+
+/* Blog page generator */
+$('#blogGen').onclick=()=>run(async()=>{const html='<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Blog &amp; News</title><link rel="stylesheet" href="/theme.css"></head><body><nav id="site-menu" data-styled></nav><div class="wrap"><h1>Blog &amp; News</h1><input id="q" placeholder="Search posts…" style="padding:.7rem;width:100%;max-width:420px;border:1px solid #ddd;border-radius:10px"><div id="cats" style="margin:1rem 0"></div><div id="list" class="cards3"></div></div><script>('+BLOG_FN+')()<\/script></body></html>';
+ await commit([{path:'blog/index.html',text:html}],'Create blog page');msg('Blog page created at /blog/ with search and category filters.')});
+
+/* Media+ : search, bulk, details, replace, documents, duplicates */
+let mdSel=new Set(),mdMeta={};
+async function loadMedia3(){mdMeta=await readJson('media.json',{});const l=await photos(),q=($('#mdSearch').value||'').toLowerCase(),g=$('#mgrid');g.innerHTML='';mdSel.clear();
+ const seen={},dup=new Set();l.forEach(x=>{if(seen[x.sha])dup.add(x.sha);seen[x.sha]=1});
+ const shown=l.filter(x=>x.name.toLowerCase().includes(q)||((mdMeta[x.name]||{}).alt||'').toLowerCase().includes(q));if(!shown.length)g.textContent='No photos found.';
+ shown.forEach(x=>{const f=document.createElement('figure'),im=document.createElement('img'),c=document.createElement('figcaption'),k=document.createElement('input');k.type='checkbox';k.dataset.n=x.name;k.style.cssText='position:absolute;top:6px;left:6px;width:18px;height:18px';k.onclick=e=>{e.stopPropagation();k.checked?mdSel.add(x.name):mdSel.delete(x.name)};
+  f.style.position='relative';im.loading='lazy';thumb(im,x.name);c.textContent=x.name+(dup.has(x.sha)?' ⚠️ duplicate':'');f.append(im,c,k);f.onclick=()=>openMedia(x);g.append(f)});loadDocs()}
+LOAD.media=loadMedia3;
+$('#mdSearch').oninput=()=>run(loadMedia3);
+$('#mdSelAll').onclick=()=>document.querySelectorAll('#mgrid input[type=checkbox]').forEach(k=>{k.checked=true;mdSel.add(k.dataset.n)});
+$('#mdBulk').onclick=()=>{if(!mdSel.size)return msg('Select photos first (tick the boxes).');if(!confirm('Delete '+mdSel.size+' photo(s) permanently?'))return;run(async()=>{await commit([...mdSel].map(n=>({path:'img/'+n,del:true})),'Delete '+mdSel.size+' photos');msg('Deleted.');loadMedia3()})};
+const _om=openMedia;openMedia=function(x){_om(x);const m=mdMeta[x.name]||{};$('#mdAlt').value=m.alt||'';$('#mdCap').value=m.caption||'';$('#mdTit').value=m.title||'';
+ $('#mdMetaSave').onclick=()=>run(async()=>{mdMeta[x.name]={alt:$('#mdAlt').value.trim(),caption:$('#mdCap').value.trim(),title:$('#mdTit').value.trim()};await commit([{path:'media.json',text:JSON.stringify(mdMeta,null,1)}],'Update media details');msg('Details saved.')});
+ $('#mdReplace').onclick=()=>$('#mdRepFile').click();
+ $('#mdRepFile').onchange=e=>{const f=e.target.files[0];if(!f)return;if(f.name.split('.').pop().toLowerCase()!=x.name.split('.').pop().toLowerCase())return msg('Use a file with the same type (.'+x.name.split('.').pop()+').');run(async()=>{const r=await rd(f);await commit([{path:'img/'+x.name,b64:r.b64}],'Replace '+x.name);delete blobCache[x.name];$('#mdl').style.display='none';msg('File replaced.');loadMedia3()});e.target.value=''}};
+async function loadDocs(){const l=(await ls('files')).filter(x=>x.type=='file'),b=$('#docList');b.innerHTML='';if(!l.length){b.innerHTML='<p class="mut">No documents yet.</p>';return}
+ l.forEach(x=>{const r=document.createElement('div');r.className='row';const t=document.createElement('b');t.textContent='📄 '+x.name+'  ('+((x.size||0)/1024).toFixed(0)+' KB)';const c=document.createElement('button');c.textContent='Copy link';c.onclick=()=>navigator.clipboard?navigator.clipboard.writeText('/files/'+x.name).then(()=>msg('Copied /files/'+x.name)):msg('/files/'+x.name);
+  const d=document.createElement('button');d.className='d';d.textContent='Delete';d.onclick=()=>confirm('Delete '+x.name+'?')&&run(async()=>{await commit([{path:'files/'+x.name,del:true}],'Delete file '+x.name);loadDocs()});r.append(t,c,d);b.append(r)})}
+$('#upDoc').onchange=e=>{const fs=[...e.target.files];if(!fs.length)return;msg('Uploading…');run(async()=>{const o=[];for(const f of fs){const r=await rd(f);o.push({path:'files/'+(slug(f.name.replace(/\.[^.]+$/,''))||'file')+'.'+f.name.split('.').pop().toLowerCase(),b64:r.b64})}await commit(o,'Upload '+o.length+' document(s)');e.target.value='';msg('Uploaded.');loadDocs()})};
+
+/* Broken link checker */
+$('#toLinks').onclick=()=>run(async()=>{msg('Checking links…');const tr=await(await api('/git/trees/'+cfg.branch+'?recursive=1')).json(),paths=new Set(tr.tree.filter(x=>x.type=='blob').map(x=>x.path));
+ const ok=u=>{u=u.split('#')[0].split('?')[0];if(!u||u=='/')return true;const q=u.replace(/^\//,'').replace(/\/$/,'');return paths.has(q)||paths.has(q+'/index.html')};
+ const bad=[];for(const f of await collectPages()){const re=/(?:href|src)=["'](\/[^"'#?\s]*)[^"']*["']/g;let m;while((m=re.exec(f.text)))if(!/^\/\//.test(m[1])&&!ok(m[1]))bad.push(f.path+'  →  '+m[1])}
+ $('#toLinksOut').innerHTML=bad.length?'<b>'+bad.length+' broken link(s):</b><br>'+bad.slice(0,40).map(esc).join('<br>'):'✅ No broken internal links found.';msg('Link check finished.')});
+
+/* ===== ADD-ON 5: UI + setup checklist + activity + diff + cookie ===== */
+const COOKIE_FN=function(msg,link){if(localStorage.getItem('kbCookie'))return;var b=document.createElement('div');b.style.cssText='position:fixed;left:16px;right:16px;bottom:16px;max-width:560px;background:#12233d;color:#fff;padding:14px 18px;border-radius:14px;z-index:99999;font:14px/1.5 sans-serif;box-shadow:0 8px 30px rgba(0,0,0,.3);display:flex;gap:12px;align-items:center;flex-wrap:wrap';var t=document.createElement('span');t.textContent=msg+' ';if(link){var a=document.createElement('a');a.href=link;a.textContent='Privacy policy';a.style.color='#ffb4bb';t.appendChild(a)}var k=document.createElement('button');k.textContent='Accept';k.style.cssText='margin-left:auto;background:#e8333f;color:#fff;border:0;border-radius:20px;padding:8px 18px;cursor:pointer;font-weight:600';k.onclick=function(){localStorage.setItem('kbCookie','1');b.remove()};b.appendChild(t);b.appendChild(k);document.body.appendChild(b)};
+$('#tbSite').onclick=()=>window.open((siteUrl||location.origin).replace(/\/+$/,'')+'/','_blank');
+$('#pgSearch').oninput=e=>{const q=e.target.value.toLowerCase();document.querySelectorAll('#pgTable tr').forEach(r=>r.style.display=r.textContent.toLowerCase().includes(q)?'':'none')};
+$('#poSearch').oninput=e=>{const q=e.target.value.toLowerCase();document.querySelectorAll('#poTable tr').forEach(r=>r.style.display=r.textContent.toLowerCase().includes(q)?'':'none')};
+
+/* Setup checklist on dashboard */
+$('#v-dash .stats').insertAdjacentHTML('beforebegin','<div class="card" id="setupCard" style="display:none"><div class="row"><b>🚀 Get your website ready</b><span class="mut" id="setupPct"></span></div><div class="prog"><i id="setupBar" style="width:0"></i></div><div id="setupList"></div></div>');
+async function loadSetup(){const[st,mn,hp,pg,root,po]=await Promise.all([readJson('settings.json',{}),readJson('menu.json',[]),readJson('homepage.json',{}),ls('p'),ls(''),readJson('posts/index.json',[])]),names=new Set(root.map(x=>x.name));
+ const items=[['Set your live site URL',!!st.siteUrl,'settings'],['Add site name & logo / favicon',!!(st.name&&(st.favicon||st.logo)),'settings'],['Set a homepage',!!hp.slug,'menu'],['Create your menu',mn.length>0,'menu'],['Add contact details & social links',!!(st.phone||st.fb||st.ig),'settings'],['Publish your first post',po.length>0,'posts'],['Generate sitemap.xml',names.has('sitemap.xml'),'settings'],['Create a 404 page',names.has('404.html'),'settings'],['Add Google Analytics / tracking code',!!st.headCode,'settings']];
+ const done=items.filter(x=>x[1]).length,pct=Math.round(done/items.length*100),c=$('#setupCard');c.style.display=pct==100?'none':'block';$('#setupPct').textContent=pct+'% complete';$('#setupBar').style.width=pct+'%';
+ const l=$('#setupList');l.innerHTML='';items.forEach(([t,ok,go])=>{const r=document.createElement('div');r.className='chk2'+(ok?' done':'');r.innerHTML='<div class="o">'+(ok?'✓':'')+'</div><span></span>'+(ok?'':'<a>Do it →</a>');r.querySelector('span').textContent=t;const a=r.querySelector('a');if(a)a.onclick=()=>tab(go);l.append(r)})}
+const _ld4=LOAD.dash;LOAD.dash=async()=>{await _ld4();loadSetup().catch(()=>{})};
+
+/* Activity log */
+let actPage=1;
+async function loadAct(more){if(!more){actPage=1;$('#actList').innerHTML=''}const cs=await(await api('/commits?per_page=30&page='+actPage)).json();
+ cs.forEach(c=>{const m=c.commit.message.split('\n')[0],r=document.createElement('div');r.className='activity-row';const ic=/delete|trash/i.test(m)?'🗑️':/theme|settings/i.test(m)?'🎨':/post/i.test(m)?'📝':/page|builder/i.test(m)?'📄':/photo|upload|media/i.test(m)?'🖼️':/rollback|restore/i.test(m)?'↩️':/menu/i.test(m)?'🍔':'✏️';
+  r.innerHTML='<div class="ic" style="background:#eef1ff">'+ic+'</div><div><div></div><div class="mut"></div></div>';r.children[1].children[0].textContent=m;r.children[1].children[1].textContent=(c.commit.author.name||'')+' · '+fmtDT(c.commit.author.date);$('#actList').append(r)});
+ actPage++;$('#actMore').style.display=cs.length<30?'none':''}
+LOAD.act=()=>loadAct(false);$('#actMore').onclick=()=>run(()=>loadAct(true));
+$('#actQ').oninput=e=>{const q=e.target.value.toLowerCase();document.querySelectorAll('#actList .activity-row').forEach(r=>r.style.display=r.textContent.toLowerCase().includes(q)?'':'none')};
+
+/* Revision compare */
+function lineDiff(a,b){const A=a.split('\n'),B=b.split('\n');if(A.length*B.length>4e6)return[['~','Files are too large to compare line by line.']];const n=A.length,m=B.length,L=Array.from({length:n+1},()=>new Uint16Array(m+1));
+ for(let i=n-1;i>=0;i--)for(let j=m-1;j>=0;j--)L[i][j]=A[i]===B[j]?L[i+1][j+1]+1:Math.max(L[i+1][j],L[i][j+1]);
+ const o=[];let i=0,j=0;while(i<n&&j<m){if(A[i]===B[j]){o.push([' ',A[i]]);i++;j++}else if(L[i+1][j]>=L[i][j+1]){o.push(['-',A[i]]);i++}else{o.push(['+',B[j]]);j++}}while(i<n)o.push(['-',A[i++]]);while(j<m)o.push(['+',B[j++]]);return o}
+function showDiff(old,cur){const d=lineDiff(old,cur),box=$('#histDiff');box.classList.remove('hide');box.innerHTML='<p><b>Old version → current version</b> <span class="mut">(red = removed, green = added)</span></p><div id="dfBox" style="max-height:320px;overflow:auto;background:#fff;border:1px solid var(--bd);border-radius:8px;padding:.6rem;font:12px ui-monospace,monospace"></div>';const pre=$('#dfBox');
+ d.filter((x,k)=>x[0]!=' '||(d[k-1]&&d[k-1][0]!=' ')||(d[k+1]&&d[k+1][0]!=' ')).forEach(([t,l])=>{const s=document.createElement('div');s.style.cssText='white-space:pre-wrap;word-break:break-all;background:'+(t=='+'?'#e3f7e8':t=='-'?'#fde6e6':'transparent');s.textContent=t+' '+l;pre.append(s)});if(!pre.children.length)pre.textContent='No differences.';box.scrollIntoView()}
 
 showApp();
 </script></body></html>
