@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://my-cms.pages.dev/p/home-1/sitemap.xml
