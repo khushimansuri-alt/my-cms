@@ -1,0 +1,33 @@
+{
+ "name": "Faculty & Staff",
+ "slug": "faculty",
+ "layout": "cards",
+ "fields": [
+  {
+   "key": "name",
+   "label": "Name",
+   "type": "text"
+  },
+  {
+   "key": "role",
+   "label": "Designation",
+   "type": "text"
+  },
+  {
+   "key": "qual",
+   "label": "Qualification",
+   "type": "text"
+  },
+  {
+   "key": "photo",
+   "label": "Photo",
+   "type": "image"
+  },
+  {
+   "key": "about",
+   "label": "About",
+   "type": "textarea"
+  }
+ ],
+ "items": []
+}
